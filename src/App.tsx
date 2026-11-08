@@ -3,6 +3,8 @@ import Header from "./components/Header/Header.tsx";
 import Footer from "./components/Footer/Footer.tsx";
 import "./App.css";
 
+const BASE = import.meta.env.BASE_URL;
+
 const FEATURED_ITEMS = [
   {
     id: 1,
@@ -10,7 +12,7 @@ const FEATURED_ITEMS = [
     tag: "Хит продаж",
     doll: "Барби / Made to Move",
     price: "490 ₽",
-    image: "/Водолазка-боди для Барби.png",
+    image: `${BASE}Водолазка-боди для Барби.png`,
   },
   {
     id: 2,
@@ -18,7 +20,7 @@ const FEATURED_ITEMS = [
     tag: "Новинка",
     doll: "Барби Standard & Curvy",
     price: "550 ₽",
-    image: "/Выкройка боди-бюстье «Афродита» для Барби-2.png",
+    image: `${BASE}Выкройка боди-бюстье «Афродита» для Барби-2.png`,
   },
   {
     id: 3,
@@ -26,7 +28,7 @@ const FEATURED_ITEMS = [
     tag: "BJD",
     doll: "MiniFee (40-42 см)",
     price: "690 ₽",
-    image: "/Выкройка MiniFee_ кофточка и брюки клёш-2.png",
+    image: `${BASE}Выкройка MiniFee_ кофточка и брюки клёш-2.png`,
   },
   {
     id: 4,
@@ -34,7 +36,7 @@ const FEATURED_ITEMS = [
     tag: "Мужская коллекция",
     doll: "Ken Fashionistas / BMR1959",
     price: "490 ₽",
-    image: "/Элегантная выкройка водолазки-боди для Кена.png",
+    image: `${BASE}Элегантная выкройка водолазки-боди для Кена.png`,
   },
 ];
 
@@ -72,7 +74,7 @@ function App() {
         <section className="hero-banner-section">
           <div className="hero-banner-container">
             <img
-              src="/Снимок экрана — 2026-11-08 в 04.57.06.png"
+              src={`${BASE}Снимок экрана — 2026-11-08 в 04.57.06.png`}
               alt="GOOSE Fashion House — PDF-выкройки для одежды кукол"
               className="hero-banner-img"
             />
