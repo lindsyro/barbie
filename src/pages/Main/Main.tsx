@@ -1,6 +1,6 @@
 import React from "react";
 import type { MainProps } from "./types.ts";
-import { FEATURED_PATTERNS, ADVANTAGES, CATEGORIES_QUICK } from "./mainData.tsx";
+import { FEATURED_PATTERNS, CATEGORIES_QUICK } from "./mainData.tsx";
 import "./main.css";
 
 const BASE = import.meta.env.BASE_URL;
