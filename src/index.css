@@ -1,0 +1,64 @@
+:root {
+  /* ==========================================================================
+     Палитра бренда и обложек (3.2)
+     ========================================================================== */
+
+  /* Основные оттенки палитры */
+  --color-milk: #f5f0e8;         /* Молочный — Фон карточек, светлые области */
+  --color-ivory: #e8dfd1;        /* Слоновая кость — Фон и мягкие подложки */
+  --color-cappuccino: #c6ac93;   /* Капучино — Второстепенные оттенки и одежда */
+  --color-taupe: #998879;        /* Тауп — Нейтральные контрасты */
+  --color-chocolate: #59483e;    /* Шоколад — Тёмные элементы / текст */
+  --color-muted-gold: #a7895d;   /* Приглушённое золото — Линии, детали, печатный декор */
+  --color-gold-site: #a68142;    /* Золотой сайта (канон карточек кукол) — Утверждённый брендовый акцент */
+
+  /* Семантические переменные (по ролям) */
+  --bg-card: var(--color-milk);
+  --bg-soft: var(--color-ivory);
+  --color-secondary: var(--color-cappuccino);
+  --color-neutral-contrast: var(--color-taupe);
+  --text-primary: var(--color-chocolate);
+  --color-decor: var(--color-muted-gold);
+  --color-accent: var(--color-gold-site);
+
+  /* RGB-значения для использования с прозрачностью (rgba) */
+  --color-milk-rgb: 245, 240, 232;
+  --color-ivory-rgb: 232, 223, 209;
+  --color-cappuccino-rgb: 198, 172, 147;
+  --color-taupe-rgb: 153, 136, 121;
+  --color-chocolate-rgb: 89, 72, 62;
+  --color-muted-gold-rgb: 167, 137, 93;
+  --color-gold-site-rgb: 166, 129, 66;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-milk);
+  color: var(--text-primary);
+  font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  margin-top: 0;
+}
+
+a {
+  color: inherit;
+}

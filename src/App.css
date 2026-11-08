@@ -1,0 +1,209 @@
+/* App Layout */
+.app-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-milk);
+}
+
+.app-main {
+  flex: 1;
+}
+
+/* Toast */
+.app-toast {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: var(--color-chocolate);
+  color: var(--color-milk);
+  padding: 0.85rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(89, 72, 62, 0.25);
+  border-left: 4px solid var(--color-gold-site);
+  font-size: 0.9rem;
+  font-weight: 500;
+  z-index: 1000;
+  animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Hero Banner */
+.hero-banner-section {
+  width: 100%;
+  background: var(--bg-soft);
+  border-bottom: 1px solid var(--color-ivory);
+}
+
+.hero-banner-container {
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+.hero-banner-img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Catalog Preview Section */
+.catalog-preview-section {
+  padding: 4.5rem 1.25rem 5.5rem;
+}
+
+.catalog-container {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.section-subtitle {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--color-gold-site);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.section-title {
+  font-size: 2.25rem;
+  font-weight: 600;
+  color: var(--color-chocolate);
+  margin-bottom: 0.75rem;
+}
+
+.section-decor-line {
+  width: 50px;
+  height: 2px;
+  background: var(--color-gold-site);
+  margin: 0 auto;
+}
+
+/* Pattern Cards Grid */
+.pattern-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 2rem;
+}
+
+.pattern-card {
+  background: #ffffff;
+  border: 1px solid var(--color-ivory);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.pattern-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px rgba(89, 72, 62, 0.1);
+}
+
+.pattern-card__image-box {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  background: var(--bg-soft);
+  overflow: hidden;
+}
+
+.pattern-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.pattern-card:hover .pattern-card__img {
+  transform: scale(1.04);
+}
+
+.pattern-card__tag {
+  position: absolute;
+  top: 0.85rem;
+  left: 0.85rem;
+  background: rgba(245, 240, 232, 0.92);
+  backdrop-filter: blur(4px);
+  color: var(--color-chocolate);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  border: 1px solid var(--color-ivory);
+}
+
+.pattern-card__body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.pattern-card__doll {
+  font-size: 0.75rem;
+  color: var(--color-taupe);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.35rem;
+}
+
+.pattern-card__title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--color-chocolate);
+  margin-bottom: 1rem;
+  line-height: 1.35;
+  flex: 1;
+}
+
+.pattern-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-ivory);
+}
+
+.pattern-card__price {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--color-chocolate);
+}
+
+.pattern-card__btn {
+  background: var(--color-gold-site);
+  color: #ffffff;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.pattern-card__btn:hover {
+  background: #8f6d33;
+}

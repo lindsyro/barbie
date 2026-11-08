@@ -1,0 +1,422 @@
+/* ==========================================================================
+   Menu — базовые стили
+   ========================================================================== */
+
+.menu { display: block; user-select: none; }
+.menu__list { list-style: none; margin: 0; padding: 0; }
+
+/* ==========================================================================
+   1. Горизонтальная навигация (десктоп)
+   ========================================================================== */
+
+.menu--horizontal .menu__list {
+  display: flex;
+  align-items: center;
+  gap: 1.75rem;
+}
+
+.menu--horizontal .menu__item { position: relative; }
+
+.menu__link-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  cursor: pointer;
+}
+
+.menu__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-primary);
+  text-decoration: none;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  padding: 0.5rem 0.125rem;
+  position: relative;
+  transition: color 0.2s ease;
+}
+
+.menu__link::after {
+  content: "";
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 0%; height: 2px;
+  background-color: var(--color-accent);
+  transition: width 0.25s ease;
+}
+
+.menu__link:hover,
+.menu__item--active > .menu__link-wrapper > .menu__link,
+.menu__item--open > .menu__link-wrapper > .menu__link {
+  color: var(--color-accent);
+}
+
+.menu__link:hover::after,
+.menu__item--active > .menu__link-wrapper > .menu__link::after,
+.menu__item--open > .menu__link-wrapper > .menu__link::after {
+  width: 100%;
+}
+
+/* Бейджи */
+.menu__badge {
+  display: inline-block;
+  padding: 0.1rem 0.45rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 9999px;
+  background-color: var(--color-accent);
+  color: #fff;
+  line-height: 1.2;
+}
+
+/* Кнопка-стрелка */
+.menu__toggle {
+  background: none; border: none;
+  cursor: pointer;
+  color: var(--color-taupe);
+  padding: 0.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+.menu__item:hover .menu__toggle,
+.menu__item--open .menu__toggle {
+  color: var(--color-accent);
+}
+
+.menu__toggle-chevron {
+  display: inline-flex;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.menu__toggle-chevron--open { transform: rotate(180deg); }
+
+.menu__chevron, .menu__chevron-right {
+  display: block;
+}
+
+/* ==========================================================================
+   2. Выпадающая панель (десктоп)
+   ========================================================================== */
+
+.menu--horizontal .menu__panel {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--color-ivory);
+  border-radius: 12px;
+  box-shadow: 0 16px 45px rgba(89, 72, 62, 0.16);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(10px);
+  transition:
+    opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    visibility 0.22s;
+  z-index: 100;
+  overflow: hidden;
+}
+
+.menu--horizontal .menu__panel--visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+/* ==========================================================================
+   3. Mega-панель: одна колонка по умолчанию, две — при клике на категорию
+   ========================================================================== */
+
+.mega {
+  display: flex;
+  width: auto;
+  background: var(--bg-card);
+}
+
+/* Левая колонка — список категорий */
+.mega__left {
+  width: 260px;
+  min-width: 260px;
+  padding: 0.5rem 0;
+  border-right: none; /* Изначально нет никакого разделителя! */
+}
+
+/* Разделитель между колонками появляется ТОЛЬКО когда открыто подменю */
+.mega--has-active-sub .mega__left {
+  border-right: 1px solid var(--color-ivory);
+}
+
+.mega__categories {
+  list-style: none;
+  margin: 0; padding: 0;
+}
+
+.mega__cat-item {
+  position: relative;
+}
+
+.mega__cat-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.7rem 1rem;
+  background: none; border: none;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  text-align: left;
+  border-left: 3px solid transparent;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.mega__cat-btn:hover {
+  background-color: var(--bg-soft);
+  color: var(--color-accent);
+}
+
+.mega__cat-item--active .mega__cat-btn {
+  background-color: var(--bg-soft);
+  border-left-color: var(--color-gold-site);
+  color: var(--color-gold-site);
+  font-weight: 600;
+}
+
+.mega__cat-item--active .mega__chevron-right {
+  color: var(--color-gold-site);
+  transform: translateX(2px);
+}
+
+.mega__chevron-right {
+  display: block;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.mega__cat-label {
+  flex: 1;
+}
+
+/* Правая колонка — появляется сбоку ТОЛЬКО при выборе категории */
+.mega__right {
+  width: 340px;
+  min-width: 300px;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  animation: megaSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes megaSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.mega__right-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: var(--bg-soft);
+  border-bottom: 1px solid var(--color-ivory);
+}
+
+.mega__right-title {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-chocolate);
+  letter-spacing: 0.02em;
+}
+
+.mega__right-count {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--color-gold-site);
+  background: rgba(166, 129, 66, 0.12);
+  padding: 0.15rem 0.5rem;
+  border-radius: 10px;
+}
+
+.mega__sub-list {
+  list-style: none;
+  margin: 0; padding: 0.4rem 0;
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.mega__sub-item {
+  position: relative;
+}
+
+.mega__sub-link {
+  display: flex;
+  flex-direction: column;
+  padding: 0.55rem 1rem;
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: background-color 0.15s ease;
+}
+
+.mega__sub-link:hover {
+  background-color: var(--bg-soft);
+}
+
+.mega__sub-link:hover .mega__sub-label {
+  color: var(--color-gold-site);
+}
+
+.mega__sub-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.35;
+  transition: color 0.15s ease;
+}
+
+.mega__sub-desc {
+  font-size: 0.725rem;
+  color: var(--color-taupe);
+  margin-top: 0.15rem;
+  line-height: 1.35;
+}
+
+/* Кастомный скроллбар */
+.mega__sub-list::-webkit-scrollbar { width: 5px; }
+.mega__sub-list::-webkit-scrollbar-track { background: var(--bg-card); }
+.mega__sub-list::-webkit-scrollbar-thumb { background: var(--color-cappuccino); border-radius: 4px; }
+.mega__sub-list::-webkit-scrollbar-thumb:hover { background: var(--color-gold-site); }
+
+/* ==========================================================================
+   4. Мобильный Drawer
+   ========================================================================== */
+
+.menu-drawer-wrapper {
+  position: fixed; inset: 0;
+  z-index: 999;
+  visibility: hidden; pointer-events: none;
+  transition: visibility 0.3s ease;
+}
+.menu-drawer-wrapper--open { visibility: visible; pointer-events: auto; }
+
+.menu-drawer__backdrop {
+  position: absolute; inset: 0;
+  background: rgba(89, 72, 62, 0.5);
+  backdrop-filter: blur(3px);
+  opacity: 0; transition: opacity 0.3s ease;
+}
+.menu-drawer-wrapper--open .menu-drawer__backdrop { opacity: 1; }
+
+.menu-drawer__content {
+  position: absolute; top: 0; left: 0; bottom: 0;
+  width: min(88vw, 380px);
+  background: var(--bg-card);
+  box-shadow: 4px 0 24px rgba(89, 72, 62, 0.18);
+  display: flex; flex-direction: column;
+  transform: translateX(-100%);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow-y: auto;
+}
+.menu-drawer-wrapper--open .menu-drawer__content { transform: translateX(0); }
+
+.menu-drawer__header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--color-ivory);
+}
+
+.menu-drawer__title {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.25rem; font-weight: 700;
+  color: var(--text-primary); letter-spacing: 0.05em;
+}
+
+.menu-drawer__close-btn {
+  background: none; border: none; padding: 0.4rem;
+  cursor: pointer; color: var(--color-chocolate);
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 6px; transition: background-color 0.2s ease;
+}
+.menu-drawer__close-btn:hover { background-color: var(--bg-soft); }
+
+.menu-drawer__body { padding: 1.25rem; flex: 1; overflow-y: auto; }
+
+.menu-drawer__footer {
+  padding: 1.25rem;
+  border-top: 1px solid var(--color-ivory);
+  background: var(--bg-soft);
+}
+.menu-drawer__phone { font-size: 0.9375rem; font-weight: 600; color: var(--text-primary); margin: 0 0 0.25rem 0; }
+.menu-drawer__note { font-size: 0.8125rem; color: var(--color-taupe); margin: 0; }
+
+/* Drawer навигация */
+.menu--drawer .menu__list {
+  display: flex; flex-direction: column; gap: 0.25rem;
+}
+.menu--drawer .menu__link-wrapper {
+  display: flex; align-items: center; justify-content: space-between; width: 100%;
+}
+.menu--drawer .menu__link {
+  width: 100%; padding: 0.65rem 0.5rem; font-size: 1rem;
+}
+.menu--drawer .menu__panel {
+  display: none;
+  padding-left: 0.5rem;
+  margin: 0.25rem 0 0.5rem 0.5rem;
+  border-left: 2px solid var(--color-ivory);
+}
+.menu--drawer .menu__panel--visible { display: block; }
+
+/* Мобильные категории-аккордеон */
+.mobile-cats {
+  list-style: none; margin: 0; padding: 0;
+}
+
+.mobile-cats__btn {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%;
+  padding: 0.6rem 0.4rem;
+  background: none; border: none;
+  font-family: inherit; font-size: 0.95rem; font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer; text-align: left;
+  transition: color 0.15s ease;
+}
+.mobile-cats__btn--open { color: var(--color-gold-site); font-weight: 600; }
+
+.mobile-cats__toggle {
+  font-size: 1.2rem; font-weight: 600;
+  color: var(--color-gold-site); line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+.mobile-cats__sub {
+  list-style: none; margin: 0; padding: 0 0 0.25rem 0.75rem;
+  border-left: 2px solid var(--color-muted-gold);
+}
+
+.mobile-cats__sub-link {
+  display: block;
+  padding: 0.45rem 0.5rem;
+  text-decoration: none;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  transition: color 0.15s ease;
+}
+.mobile-cats__sub-link:hover { color: var(--color-gold-site); }
