@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Menu from "../Menu/Menu.tsx";
 import { DEFAULT_MENU_ITEMS } from "../Menu/menuData.ts";
 import type { MenuItem } from "../Menu/types.ts";
-import "./Header.css";
+import "./header.css";
 
 export interface HeaderProps {
   cartCount?: number;
