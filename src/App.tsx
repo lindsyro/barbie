@@ -1,46 +1,11 @@
 import { useState } from "react";
 import Header from "./components/Header/Header.tsx";
 import Footer from "./components/Footer/Footer.tsx";
+import Main from "./pages/Main/Main.tsx";
 import "./App.css";
 
-const BASE = import.meta.env.BASE_URL;
-
-const FEATURED_ITEMS = [
-  {
-    id: 1,
-    title: "Водолазка-боди для Барби",
-    tag: "Хит продаж",
-    doll: "Барби / Made to Move",
-    price: "490 ₽",
-    image: `${BASE}1.png`,
-  },
-  {
-    id: 2,
-    title: "Боди-бюстье «Афродита»",
-    tag: "Новинка",
-    doll: "Барби Standard & Curvy",
-    price: "550 ₽",
-    image: `${BASE}2.png`,
-  },
-  {
-    id: 3,
-    title: "Выкройка MiniFee: кофточка и брюки клёш",
-    tag: "BJD",
-    doll: "MiniFee (40-42 см)",
-    price: "690 ₽",
-    image: `${BASE}3.png`,
-  },
-  {
-    id: 4,
-    title: "Элегантная водолазка-боди для Кена",
-    tag: "Мужская коллекция",
-    doll: "Ken Fashionistas / BMR1959",
-    price: "490 ₽",
-    image: `${BASE}4.png`,
-  },
-];
-
 function App() {
+  const [currentPage, setCurrentPage] = useState<string>("main");
   const [cartCount, setCartCount] = useState(2);
   const [wishlistCount] = useState(3);
   const [notification, setNotification] = useState<string | null>(null);
@@ -55,67 +20,53 @@ function App() {
     showNotification(`Выкройка «${title}» добавлена в корзину`);
   };
 
+  const handleSelectCategory = (categoryId: string) => {
+    showNotification(`Фильтр по категории: ${categoryId}`);
+  };
+
   return (
     <div className="app-layout">
       {/* Шапка сайта */}
       <Header
         cartCount={cartCount}
         wishlistCount={wishlistCount}
-        onCartClick={() => showNotification("Корзина: у вас " + cartCount + " товара(ов)")}
-        onWishlistClick={() => showNotification("Избранное: у вас " + wishlistCount + " позиции(й)")}
+        onCartClick={() => showNotification(`Корзина: у вас ${cartCount} товара(ов)`)}
+        onWishlistClick={() => showNotification(`Избранное: у вас ${wishlistCount} позиции(й)`)}
         onSearchSubmit={(q) => showNotification(`Поиск выкройки: "${q}"`)}
+        onAuthClick={() => showNotification("Вход / Регистрация")}
       />
 
       {/* Всплывающее уведомление */}
       {notification && <div className="app-toast">{notification}</div>}
 
-      {/* Главный баннер */}
+      {/* Основной контент страниц */}
       <main className="app-main">
-        <section className="hero-banner-section">
-          <div className="hero-banner-container">
-            <img
-              src={`${BASE}banner.png`}
-              alt="GOOSE Fashion House — PDF-выкройки для одежды кукол"
-              className="hero-banner-img"
-            />
+        {currentPage === "main" && (
+          <Main
+            onAddToCart={handleAddToCart}
+            onSelectCategory={handleSelectCategory}
+          />
+        )}
+        {currentPage !== "main" && (
+          <div style={{ padding: "4rem 2rem", textAlign: "center" }}>
+            <h2>Страница находится в разработке</h2>
+            <button
+              type="button"
+              onClick={() => setCurrentPage("main")}
+              style={{
+                marginTop: "1rem",
+                padding: "0.5rem 1.25rem",
+                background: "var(--color-gold-site)",
+                color: "#fff",
+                border: "none",
+                borderRadius: "6px",
+                cursor: "pointer",
+              }}
+            >
+              Вернуться на главную
+            </button>
           </div>
-        </section>
-
-        {/* Каталог популярных выкроек */}
-        <section className="catalog-preview-section" id="catalog">
-          <div className="catalog-container">
-            <div className="section-header">
-              <span className="section-subtitle">Каталог коллекций</span>
-              <h2 className="section-title">Популярные PDF-выкройки</h2>
-              <div className="section-decor-line" />
-            </div>
-
-            <div className="pattern-cards-grid">
-              {FEATURED_ITEMS.map((item) => (
-                <article key={item.id} className="pattern-card">
-                  <div className="pattern-card__image-box">
-                    <img src={item.image} alt={item.title} className="pattern-card__img" />
-                    <span className="pattern-card__tag">{item.tag}</span>
-                  </div>
-                  <div className="pattern-card__body">
-                    <span className="pattern-card__doll">{item.doll}</span>
-                    <h3 className="pattern-card__title">{item.title}</h3>
-                    <div className="pattern-card__footer">
-                      <span className="pattern-card__price">{item.price}</span>
-                      <button
-                        type="button"
-                        className="pattern-card__btn"
-                        onClick={() => handleAddToCart(item.title)}
-                      >
-                        В корзину
-                      </button>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
+        )}
       </main>
 
       {/* Подвал сайта */}

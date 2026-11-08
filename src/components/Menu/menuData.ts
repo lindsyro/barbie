@@ -1,7 +1,6 @@
 import type { MenuItem } from "./types.ts";
 
 export const DEFAULT_MENU_ITEMS: MenuItem[] = [
-  { id: "main", label: "Главная", href: "#" },
   {
     id: "catalog",
     label: "Каталог выкроек",
@@ -144,8 +143,18 @@ export const DEFAULT_MENU_ITEMS: MenuItem[] = [
   },
   {
     id: "tutorials",
-    label: "Видеокурсы",
+    label: "Видеоуроки",
     href: "#tutorials",
+  },
+  {
+    id: "courses",
+    label: "Курсы",
+    href: "#courses",
+  },
+  {
+    id: "free",
+    label: "Бесплатно",
+    href: "#free",
     badge: "Free",
   },
   {
