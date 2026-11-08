@@ -12,7 +12,7 @@ const FEATURED_ITEMS = [
     tag: "Хит продаж",
     doll: "Барби / Made to Move",
     price: "490 ₽",
-    image: `${BASE}Водолазка-боди для Барби.png`,
+    image: `${BASE}1.png`,
   },
   {
     id: 2,
@@ -20,7 +20,7 @@ const FEATURED_ITEMS = [
     tag: "Новинка",
     doll: "Барби Standard & Curvy",
     price: "550 ₽",
-    image: `${BASE}Выкройка боди-бюстье «Афродита» для Барби-2.png`,
+    image: `${BASE}2.png`,
   },
   {
     id: 3,
@@ -28,7 +28,7 @@ const FEATURED_ITEMS = [
     tag: "BJD",
     doll: "MiniFee (40-42 см)",
     price: "690 ₽",
-    image: `${BASE}Выкройка MiniFee_ кофточка и брюки клёш-2.png`,
+    image: `${BASE}3.png`,
   },
   {
     id: 4,
@@ -36,7 +36,7 @@ const FEATURED_ITEMS = [
     tag: "Мужская коллекция",
     doll: "Ken Fashionistas / BMR1959",
     price: "490 ₽",
-    image: `${BASE}Элегантная выкройка водолазки-боди для Кена.png`,
+    image: `${BASE}4.png`,
   },
 ];
 
