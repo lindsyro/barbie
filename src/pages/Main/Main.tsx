@@ -20,7 +20,7 @@ export const Main: React.FC<MainProps> = ({ onAddToCart, onSelectCategory }) => 
       </section>
 
       {/* 2. Полоса преимуществ */}
-      <section className="main-advantages" aria-label="Преимущества выкроек GOOSE">
+      {/* <section className="main-advantages" aria-label="Преимущества выкроек GOOSE">
         <div className="main-container">
           <div className="main-advantages__grid">
             {ADVANTAGES.map((adv) => (
@@ -34,7 +34,7 @@ export const Main: React.FC<MainProps> = ({ onAddToCart, onSelectCategory }) => 
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* 3. Каталог популярных выкроек */}
       <section className="main-catalog" id="catalog" aria-label="Популярные PDF-выкройки">

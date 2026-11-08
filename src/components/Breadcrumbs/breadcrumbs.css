@@ -1,0 +1,32 @@
+/* ==========================================================================
+   Breadcrumbs Component Styles
+   ========================================================================== */
+
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--color-taupe);
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.breadcrumbs__link {
+  color: var(--color-taupe);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.breadcrumbs__link:hover {
+  color: var(--color-gold-site);
+}
+
+.breadcrumbs__sep {
+  opacity: 0.5;
+}
+
+.breadcrumbs__current {
+  color: var(--color-chocolate);
+  font-weight: 500;
+}

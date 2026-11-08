@@ -128,7 +128,7 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
 
             {/* Логотип */}
-            <a href="/" className="header__logo-link" aria-label="GOOSE Fashion House — Главная">
+            <a href="#main" className="header__logo-link" aria-label="GOOSE Fashion House — Главная">
               <img
                 src={`${BASE}logo.png`}
                 alt="GOOSE FASHION HOUSE"

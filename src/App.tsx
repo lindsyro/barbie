@@ -1,14 +1,59 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "./components/Header/Header.tsx";
 import Footer from "./components/Footer/Footer.tsx";
-import Main from "./pages/Main/Main.tsx";
+import {
+  Main,
+  Catalog,
+  Tutorials,
+  Courses,
+  Free,
+  Useful,
+  About,
+} from "./pages/index.ts";
 import "./App.css";
+
+const KNOWN_PAGES: Record<string, string> = {
+  main: "main",
+  catalog: "catalog",
+  barbie: "catalog",
+  barbie2: "catalog",
+  ken: "catalog",
+  children: "catalog",
+  tutorials: "tutorials",
+  courses: "courses",
+  free: "free",
+  useful: "useful",
+  about: "about",
+};
 
 function App() {
   const [currentPage, setCurrentPage] = useState<string>("main");
   const [cartCount, setCartCount] = useState(2);
   const [wishlistCount] = useState(3);
   const [notification, setNotification] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const rawHash = window.location.hash.replace("#", "").trim();
+      if (!rawHash) {
+        setCurrentPage("main");
+        return;
+      }
+      const pageKey = KNOWN_PAGES[rawHash] || (rawHash.startsWith("barbie") || rawHash.startsWith("ken") || rawHash.startsWith("girls") ? "catalog" : rawHash);
+      setCurrentPage(pageKey);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    handleHashChange();
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
+
+  const navigateTo = (page: string) => {
+    window.location.hash = page;
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const showNotification = (msg: string) => {
     setNotification(msg);
@@ -21,7 +66,33 @@ function App() {
   };
 
   const handleSelectCategory = (categoryId: string) => {
-    showNotification(`Фильтр по категории: ${categoryId}`);
+    showNotification(`Выбрана категория: ${categoryId}`);
+    navigateTo("catalog");
+  };
+
+  const renderCurrentPage = () => {
+    switch (currentPage) {
+      case "catalog":
+        return <Catalog onBackToMain={() => navigateTo("main")} />;
+      case "tutorials":
+        return <Tutorials onBackToMain={() => navigateTo("main")} />;
+      case "courses":
+        return <Courses onBackToMain={() => navigateTo("main")} />;
+      case "free":
+        return <Free onBackToMain={() => navigateTo("main")} />;
+      case "useful":
+        return <Useful onBackToMain={() => navigateTo("main")} />;
+      case "about":
+        return <About onBackToMain={() => navigateTo("main")} />;
+      case "main":
+      default:
+        return (
+          <Main
+            onAddToCart={handleAddToCart}
+            onSelectCategory={handleSelectCategory}
+          />
+        );
+    }
   };
 
   return (
@@ -40,34 +111,7 @@ function App() {
       {notification && <div className="app-toast">{notification}</div>}
 
       {/* Основной контент страниц */}
-      <main className="app-main">
-        {currentPage === "main" && (
-          <Main
-            onAddToCart={handleAddToCart}
-            onSelectCategory={handleSelectCategory}
-          />
-        )}
-        {currentPage !== "main" && (
-          <div style={{ padding: "4rem 2rem", textAlign: "center" }}>
-            <h2>Страница находится в разработке</h2>
-            <button
-              type="button"
-              onClick={() => setCurrentPage("main")}
-              style={{
-                marginTop: "1rem",
-                padding: "0.5rem 1.25rem",
-                background: "var(--color-gold-site)",
-                color: "#fff",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-              }}
-            >
-              Вернуться на главную
-            </button>
-          </div>
-        )}
-      </main>
+      <main className="app-main">{renderCurrentPage()}</main>
 
       {/* Подвал сайта */}
       <Footer
