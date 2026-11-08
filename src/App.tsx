@@ -74,7 +74,7 @@ function App() {
         <section className="hero-banner-section">
           <div className="hero-banner-container">
             <img
-              src={`${BASE}Снимок экрана — 2026-11-08 в 04.57.06.png`}
+              src={`${BASE}banner.png`}
               alt="GOOSE Fashion House — PDF-выкройки для одежды кукол"
               className="hero-banner-img"
             />
