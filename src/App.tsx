@@ -10,21 +10,68 @@ import {
   Free,
   Useful,
   About,
+  Account,
+  ChooseDoll,
+  Measurements,
+  ShoppingTerms,
+  Reviews,
+  Girls16,
+  Girls14,
+  Guys,
+  Kids,
 } from "./pages/index.ts";
 import "./App.css";
 
 const KNOWN_PAGES: Record<string, string> = {
   main: "main",
   catalog: "catalog",
-  barbie: "catalog",
-  barbie2: "catalog",
-  ken: "catalog",
-  children: "catalog",
+  "all-patterns": "catalog",
+  // 1/6
+  "girls-1-6": "girls-1-6",
+  barbie: "girls-1-6",
+  "barbie-standard": "girls-1-6",
+  "barbie-curvy": "girls-1-6",
+  "barbie-petite": "girls-1-6",
+  "barbie-tall": "girls-1-6",
+  "barbie-90s": "girls-1-6",
+  "poppy-parker": "girls-1-6",
+  blythe: "girls-1-6",
+  // 1/4
+  "girls-1-4": "girls-1-4",
+  barbie2: "girls-1-4",
+  "girls-1": "girls-1-4",
+  "girls-2": "girls-1-4",
+  "girls-3": "girls-1-4",
+  // Guys
+  guys: "guys",
+  ken: "guys",
+  "ken-standard": "guys",
+  "ken-broad": "guys",
+  "adonis-2-0": "guys",
+  "it-homme": "guys",
+  "minifee-boy": "guys",
+  "guys-outerwear": "guys",
+  // Kids
+  kids: "kids",
+  children: "kids",
+  chelsea: "kids",
+  "lati-yellow": "kids",
+  "middie-obitsu": "kids",
+  // Other pages
   tutorials: "tutorials",
   courses: "courses",
   free: "free",
   useful: "useful",
   about: "about",
+  account: "account",
+  profile: "account",
+  "choose-doll": "choose-doll",
+  dolls: "choose-doll",
+  measurements: "measurements",
+  "a4-print": "measurements",
+  "shopping-terms": "shopping-terms",
+  faq: "shopping-terms",
+  reviews: "reviews",
 };
 
 function App() {
@@ -86,6 +133,24 @@ function App() {
         return <Useful onBackToMain={() => navigateTo("main")} />;
       case "about":
         return <About onBackToMain={() => navigateTo("main")} />;
+      case "account":
+        return <Account onBackToMain={() => navigateTo("main")} />;
+      case "choose-doll":
+        return <ChooseDoll onBackToMain={() => navigateTo("main")} />;
+      case "measurements":
+        return <Measurements onBackToMain={() => navigateTo("main")} />;
+      case "shopping-terms":
+        return <ShoppingTerms onBackToMain={() => navigateTo("main")} />;
+      case "reviews":
+        return <Reviews onBackToMain={() => navigateTo("main")} />;
+      case "girls-1-6":
+        return <Girls16 onBackToMain={() => navigateTo("main")} />;
+      case "girls-1-4":
+        return <Girls14 onBackToMain={() => navigateTo("main")} />;
+      case "guys":
+        return <Guys onBackToMain={() => navigateTo("main")} />;
+      case "kids":
+        return <Kids onBackToMain={() => navigateTo("main")} />;
       case "main":
       default:
         return (

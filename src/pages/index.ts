@@ -19,3 +19,30 @@ export type { UsefulProps } from "./Useful/Useful.tsx";
 
 export { About } from "./About/About.tsx";
 export type { AboutProps } from "./About/About.tsx";
+
+export { Account } from "./Account/Account.tsx";
+export type { AccountProps } from "./Account/Account.tsx";
+
+export { ChooseDoll } from "./ChooseDoll/ChooseDoll.tsx";
+export type { ChooseDollProps } from "./ChooseDoll/ChooseDoll.tsx";
+
+export { Measurements } from "./Measurements/Measurements.tsx";
+export type { MeasurementsProps } from "./Measurements/Measurements.tsx";
+
+export { ShoppingTerms } from "./ShoppingTerms/ShoppingTerms.tsx";
+export type { ShoppingTermsProps } from "./ShoppingTerms/ShoppingTerms.tsx";
+
+export { Reviews } from "./Reviews/Reviews.tsx";
+export type { ReviewsProps } from "./Reviews/Reviews.tsx";
+
+export { Girls16 } from "./Girls16/Girls16.tsx";
+export type { Girls16Props } from "./Girls16/Girls16.tsx";
+
+export { Girls14 } from "./Girls14/Girls14.tsx";
+export type { Girls14Props } from "./Girls14/Girls14.tsx";
+
+export { Guys } from "./Guys/Guys.tsx";
+export type { GuysProps } from "./Guys/Guys.tsx";
+
+export { Kids } from "./Kids/Kids.tsx";
+export type { KidsProps } from "./Kids/Kids.tsx";

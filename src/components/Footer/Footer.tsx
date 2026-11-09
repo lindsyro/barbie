@@ -129,22 +129,22 @@ export const Footer: React.FC<FooterProps> = ({
             <h4 className="footer__col-title">Покупателям</h4>
             <ul className="footer__list">
               <li>
-                <a href="#measurements" className="footer__link">
+                <a href="#choose-doll" className="footer__link">
                   Выбрать куклу
                 </a>
               </li>
               <li>
-                <a href="#a4-print" className="footer__link">
+                <a href="#measurements" className="footer__link">
                   Мерки кукол
                 </a>
               </li>
               <li>
-                <a href="#tutorials" className="footer__link">
+                <a href="#account" className="footer__link">
                   Личный кабинет
                 </a>
               </li>
               <li>
-                <a href="#faq" className="footer__link">
+                <a href="#shopping-terms" className="footer__link">
                   Условия покупки
                 </a>
               </li>
