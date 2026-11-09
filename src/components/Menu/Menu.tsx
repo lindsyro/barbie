@@ -15,6 +15,19 @@ export const Menu: React.FC<MenuProps> = ({
   const [activeL1Id, setActiveL1Id] = useState<string | null>(null);
   const [activeL2Id, setActiveL2Id] = useState<string | null>(null);
   const [expandedMobileIds, setExpandedMobileIds] = useState<string[]>([]);
+  const [browserHash, setBrowserHash] = useState<string>(
+    () => (typeof window !== "undefined" ? window.location.hash : "")
+  );
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      setBrowserHash(window.location.hash);
+    };
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
+
+  const currentTarget = activeHref ?? browserHash;
 
   useEffect(() => {
     if (variant !== "horizontal") return;
@@ -33,6 +46,60 @@ export const Menu: React.FC<MenuProps> = ({
   }, [variant]);
 
   const getItemId = (item: MenuItem) => item.id || item.href || item.label;
+
+  const isItemActive = (item: MenuItem, targetHref?: string): boolean => {
+    if (!targetHref) return false;
+    const cleanTarget = targetHref.replace("#", "").trim();
+    if (!cleanTarget || cleanTarget === "main") return false;
+
+    const cleanItemHref = (item.href || "").replace("#", "").trim();
+    const itemId = item.id || "";
+
+    if (cleanItemHref && cleanItemHref === cleanTarget) return true;
+    if (itemId && itemId === cleanTarget) return true;
+
+    // Если это каталог ("catalog"), то все страницы каталога и выкроек активируют пункт "Каталог выкроек"
+    if (itemId === "catalog") {
+      const catalogRoutes = [
+        "catalog",
+        "all-patterns",
+        "girls-1-6",
+        "barbie",
+        "barbie-standard",
+        "barbie-curvy",
+        "barbie-petite",
+        "barbie-tall",
+        "barbie-90s",
+        "poppy-parker",
+        "blythe",
+        "girls-1-4",
+        "barbie2",
+        "girls-1",
+        "girls-2",
+        "girls-3",
+        "guys",
+        "ken",
+        "ken-standard",
+        "ken-broad",
+        "adonis-2-0",
+        "it-homme",
+        "minifee-boy",
+        "guys-outerwear",
+        "kids",
+        "children",
+        "chelsea",
+        "lati-yellow",
+        "middie-obitsu",
+      ];
+      if (catalogRoutes.includes(cleanTarget)) return true;
+    }
+
+    if (item.children && item.children.length > 0) {
+      return item.children.some((child) => isItemActive(child, targetHref));
+    }
+
+    return false;
+  };
 
   const toggleMobileId = (id: string, e: React.MouseEvent) => {
     e.preventDefault();
@@ -179,7 +246,7 @@ export const Menu: React.FC<MenuProps> = ({
           const hasChildren = Boolean(item.children?.length);
           const isL1Open = activeL1Id === itemId;
           const isL1MobileOpen = expandedMobileIds.includes(itemId);
-          const isActive = activeHref === item.href;
+          const isActive = isItemActive(item, currentTarget);
 
           return (
             <li

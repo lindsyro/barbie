@@ -12,6 +12,7 @@ export interface HeaderProps {
   onAuthClick?: () => void;
   onSearchSubmit?: (query: string) => void;
   menuItems?: MenuItem[];
+  activeHref?: string;
   className?: string;
 }
 
@@ -25,6 +26,7 @@ export const Header: React.FC<HeaderProps> = ({
   onAuthClick,
   onSearchSubmit,
   menuItems = DEFAULT_MENU_ITEMS,
+  activeHref,
   className = "",
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -231,7 +233,7 @@ export const Header: React.FC<HeaderProps> = ({
         {/* 3. Меню навигации под блоком логотипа */}
         <div className="header__nav-row">
           <div className="header__container header__nav-row-inner">
-            <Menu variant="horizontal" items={menuItems} />
+            <Menu variant="horizontal" items={menuItems} activeHref={activeHref} />
           </div>
         </div>
       </header>
@@ -242,6 +244,7 @@ export const Header: React.FC<HeaderProps> = ({
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
         items={menuItems}
+        activeHref={activeHref}
       />
     </>
   );

@@ -168,6 +168,7 @@ function App() {
       <Header
         cartCount={cartCount}
         wishlistCount={wishlistCount}
+        activeHref={`#${currentPage}`}
         onCartClick={() => showNotification(`Корзина: у вас ${cartCount} товара(ов)`)}
         onWishlistClick={() => showNotification(`Избранное: у вас ${wishlistCount} позиции(й)`)}
         onSearchSubmit={(q) => showNotification(`Поиск выкройки: "${q}"`)}
