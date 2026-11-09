@@ -1,0 +1,239 @@
+/* ==========================================================================
+   Auth Modals (Login & Register) Styles
+   ========================================================================== */
+
+.auth-modal {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Заголовок модального окна */
+.auth-modal__header {
+  text-align: center;
+  margin-bottom: 1.75rem;
+}
+
+.auth-modal__badge {
+  display: inline-block;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--color-gold-site);
+  background-color: rgba(166, 129, 66, 0.12);
+  padding: 0.25rem 0.65rem;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.auth-modal__title {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: var(--color-chocolate);
+  margin: 0 0 0.4rem 0;
+  line-height: 1.2;
+}
+
+.auth-modal__subtitle {
+  font-size: 0.84rem;
+  color: var(--color-taupe);
+  margin: 0;
+  line-height: 1.45;
+}
+
+/* Форма */
+.auth-modal__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.auth-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  text-align: left;
+}
+
+.auth-modal__label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-chocolate);
+  letter-spacing: 0.02em;
+}
+
+.auth-modal__input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.auth-modal__input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-family: inherit;
+  font-size: 0.9rem;
+  border: 1px solid var(--color-cappuccino);
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: var(--text-primary);
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.auth-modal__input::placeholder {
+  color: var(--color-taupe);
+  opacity: 0.75;
+}
+
+.auth-modal__input:focus {
+  border-color: var(--color-gold-site);
+  box-shadow: 0 0 0 3px rgba(166, 129, 66, 0.18);
+}
+
+.auth-modal__input--error {
+  border-color: #c94a4a;
+}
+
+.auth-modal__input--error:focus {
+  box-shadow: 0 0 0 3px rgba(201, 74, 74, 0.18);
+}
+
+/* Кнопка показа/скрытия пароля */
+.auth-modal__password-toggle {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  color: var(--color-taupe);
+  padding: 0.25rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+.auth-modal__password-toggle:hover {
+  color: var(--color-chocolate);
+}
+
+.auth-modal__error-msg {
+  font-size: 0.75rem;
+  color: #c94a4a;
+  margin-top: 0.2rem;
+}
+
+/* Опции (запомнить меня / забыли пароль) */
+.auth-modal__row-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.auth-modal__checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-chocolate);
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.8125rem;
+  line-height: 1.35;
+}
+
+.auth-modal__checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-gold-site);
+  cursor: pointer;
+}
+
+.auth-modal__forgot-link {
+  color: var(--color-gold-site);
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.2s ease;
+}
+
+.auth-modal__forgot-link:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+/* Кнопка отправки формы */
+.auth-modal__submit-btn {
+  width: 100%;
+  padding: 0.85rem 1.5rem;
+  background-color: var(--color-gold-site);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.auth-modal__submit-btn:hover {
+  background-color: #8f6d33;
+  box-shadow: 0 4px 15px rgba(166, 129, 66, 0.3);
+}
+
+.auth-modal__submit-btn:active {
+  transform: scale(0.99);
+}
+
+.auth-modal__submit-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* Подвал модалки со сменой режима */
+.auth-modal__footer {
+  text-align: center;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--color-ivory);
+  font-size: 0.85rem;
+  color: var(--color-chocolate);
+}
+
+.auth-modal__switch-btn {
+  background: none;
+  border: none;
+  color: var(--color-gold-site);
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0 0.25rem;
+  text-decoration: underline;
+  transition: opacity 0.2s ease;
+}
+
+.auth-modal__switch-btn:hover {
+  opacity: 0.8;
+}
+
+/* Текст согласия в регистрации */
+.auth-modal__terms-text {
+  font-size: 0.775rem;
+  color: var(--color-taupe);
+  line-height: 1.45;
+}
+
+.auth-modal__terms-link {
+  color: var(--color-gold-site);
+  text-decoration: underline;
+}

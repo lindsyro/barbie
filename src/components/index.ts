@@ -13,3 +13,12 @@ export type { BreadcrumbsProps, BreadcrumbItem } from "./Breadcrumbs/Breadcrumbs
 
 export { PagePlaceholder } from "./PagePlaceholder/PagePlaceholder.tsx";
 export type { PagePlaceholderProps } from "./PagePlaceholder/PagePlaceholder.tsx";
+
+export { Modal } from "./Modal/Modal.tsx";
+export type { ModalProps } from "./Modal/Modal.tsx";
+
+export { LoginModal } from "./Auth/LoginModal.tsx";
+export type { LoginModalProps } from "./Auth/LoginModal.tsx";
+
+export { RegisterModal } from "./Auth/RegisterModal.tsx";
+export type { RegisterModalProps } from "./Auth/RegisterModal.tsx";

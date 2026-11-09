@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Header from "./components/Header/Header.tsx";
 import Footer from "./components/Footer/Footer.tsx";
+import { LoginModal, RegisterModal } from "./components/index.ts";
 import {
   Main,
   Catalog,
@@ -31,6 +32,7 @@ function App() {
   const [cartCount, setCartCount] = useState(2);
   const [wishlistCount] = useState(3);
   const [notification, setNotification] = useState<string | null>(null);
+  const [authModal, setAuthModal] = useState<"login" | "register" | null>(null);
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -104,7 +106,7 @@ function App() {
         onCartClick={() => showNotification(`Корзина: у вас ${cartCount} товара(ов)`)}
         onWishlistClick={() => showNotification(`Избранное: у вас ${wishlistCount} позиции(й)`)}
         onSearchSubmit={(q) => showNotification(`Поиск выкройки: "${q}"`)}
-        onAuthClick={() => showNotification("Вход / Регистрация")}
+        onAuthClick={() => setAuthModal("login")}
       />
 
       {/* Всплывающее уведомление */}
@@ -112,6 +114,28 @@ function App() {
 
       {/* Основной контент страниц */}
       <main className="app-main">{renderCurrentPage()}</main>
+
+      {/* Модальные окна авторизации */}
+      <LoginModal
+        isOpen={authModal === "login"}
+        onClose={() => setAuthModal(null)}
+        onSwitchToRegister={() => setAuthModal("register")}
+        onForgotPassword={() =>
+          showNotification("Ссылка для сброса пароля отправлена на почту")
+        }
+        onLoginSuccess={(email) =>
+          showNotification(`Добро пожаловать в личный кабинет, ${email}!`)
+        }
+      />
+
+      <RegisterModal
+        isOpen={authModal === "register"}
+        onClose={() => setAuthModal(null)}
+        onSwitchToLogin={() => setAuthModal("login")}
+        onRegisterSuccess={(email) =>
+          showNotification(`Регистрация успешна! Добро пожаловать, ${email}!`)
+        }
+      />
 
       {/* Подвал сайта */}
       <Footer
