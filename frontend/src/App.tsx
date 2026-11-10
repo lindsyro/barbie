@@ -80,6 +80,15 @@ function App() {
   const [wishlistCount] = useState(3);
   const [notification, setNotification] = useState<string | null>(null);
   const [authModal, setAuthModal] = useState<"login" | "register" | null>(null);
+  const [currentUser, setCurrentUser] = useState<{ email: string; name?: string } | null>(() => {
+    try {
+      const saved = localStorage.getItem("goose_user");
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [pendingAction, setPendingAction] = useState<"cart" | "wishlist" | null>(null);
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -119,6 +128,87 @@ function App() {
     navigateTo("catalog");
   };
 
+  const handleCartClick = () => {
+    if (!currentUser) {
+      setPendingAction("cart");
+      showNotification("Пожалуйста, войдите в аккаунт для перехода в корзину");
+      setAuthModal("login");
+      return;
+    }
+    showNotification(`Корзина: у вас ${cartCount} товара(ов)`);
+  };
+
+  const handleWishlistClick = () => {
+    if (!currentUser) {
+      setPendingAction("wishlist");
+      showNotification("Пожалуйста, войдите в аккаунт для просмотра избранного");
+      setAuthModal("login");
+      return;
+    }
+    showNotification(`Избранное: у вас ${wishlistCount} позиции(й)`);
+  };
+
+  const handleAuthClick = () => {
+    if (currentUser) {
+      navigateTo("account");
+    } else {
+      setAuthModal("login");
+    }
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    try {
+      localStorage.removeItem("goose_user");
+    } catch {
+      // ignore
+    }
+    showNotification("Вы успешно вышли из аккаунта");
+    navigateTo("main");
+  };
+
+  const handleLoginSuccess = (email: string) => {
+    const user = { email, name: email.split("@")[0] };
+    setCurrentUser(user);
+    try {
+      localStorage.setItem("goose_user", JSON.stringify(user));
+    } catch {
+      // ignore
+    }
+
+    if (pendingAction === "cart") {
+      showNotification(`Добро пожаловать, ${user.name}! Корзина: у вас ${cartCount} товара(ов)`);
+      setPendingAction(null);
+    } else if (pendingAction === "wishlist") {
+      showNotification(`Добро пожаловать, ${user.name}! Избранное: у вас ${wishlistCount} позиции(й)`);
+      setPendingAction(null);
+    } else {
+      showNotification(`Добро пожаловать в личный кабинет, ${user.name}!`);
+      navigateTo("account");
+    }
+  };
+
+  const handleRegisterSuccess = (email: string) => {
+    const user = { email, name: email.split("@")[0] };
+    setCurrentUser(user);
+    try {
+      localStorage.setItem("goose_user", JSON.stringify(user));
+    } catch {
+      // ignore
+    }
+
+    if (pendingAction === "cart") {
+      showNotification(`Регистрация успешна! Корзина: у вас ${cartCount} товара(ов)`);
+      setPendingAction(null);
+    } else if (pendingAction === "wishlist") {
+      showNotification(`Регистрация успешна! Избранное: у вас ${wishlistCount} позиции(й)`);
+      setPendingAction(null);
+    } else {
+      showNotification(`Регистрация успешна! Добро пожаловать, ${user.name}!`);
+      navigateTo("account");
+    }
+  };
+
   const renderCurrentPage = () => {
     switch (currentPage) {
       case "catalog":
@@ -134,7 +224,14 @@ function App() {
       case "about":
         return <About onBackToMain={() => navigateTo("main")} />;
       case "account":
-        return <Account onBackToMain={() => navigateTo("main")} />;
+        return (
+          <Account
+            user={currentUser}
+            onBackToMain={() => navigateTo("main")}
+            onLogout={handleLogout}
+            onOpenLogin={() => setAuthModal("login")}
+          />
+        );
       case "choose-doll":
         return <ChooseDoll onBackToMain={() => navigateTo("main")} />;
       case "measurements":
@@ -169,10 +266,12 @@ function App() {
         cartCount={cartCount}
         wishlistCount={wishlistCount}
         activeHref={`#${currentPage}`}
-        onCartClick={() => showNotification(`Корзина: у вас ${cartCount} товара(ов)`)}
-        onWishlistClick={() => showNotification(`Избранное: у вас ${wishlistCount} позиции(й)`)}
+        isLoggedIn={Boolean(currentUser)}
+        userName={currentUser?.name || currentUser?.email}
+        onCartClick={handleCartClick}
+        onWishlistClick={handleWishlistClick}
         onSearchSubmit={(q) => showNotification(`Поиск выкройки: "${q}"`)}
-        onAuthClick={() => setAuthModal("login")}
+        onAuthClick={handleAuthClick}
       />
 
       {/* Всплывающее уведомление */}
@@ -184,23 +283,25 @@ function App() {
       {/* Модальные окна авторизации */}
       <LoginModal
         isOpen={authModal === "login"}
-        onClose={() => setAuthModal(null)}
+        onClose={() => {
+          setAuthModal(null);
+          setPendingAction(null);
+        }}
         onSwitchToRegister={() => setAuthModal("register")}
         onForgotPassword={() =>
           showNotification("Ссылка для сброса пароля отправлена на почту")
         }
-        onLoginSuccess={(email) =>
-          showNotification(`Добро пожаловать в личный кабинет, ${email}!`)
-        }
+        onLoginSuccess={handleLoginSuccess}
       />
 
       <RegisterModal
         isOpen={authModal === "register"}
-        onClose={() => setAuthModal(null)}
+        onClose={() => {
+          setAuthModal(null);
+          setPendingAction(null);
+        }}
         onSwitchToLogin={() => setAuthModal("login")}
-        onRegisterSuccess={(email) =>
-          showNotification(`Регистрация успешна! Добро пожаловать, ${email}!`)
-        }
+        onRegisterSuccess={handleRegisterSuccess}
       />
 
       {/* Подвал сайта */}

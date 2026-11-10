@@ -14,6 +14,8 @@ export interface HeaderProps {
   menuItems?: MenuItem[];
   activeHref?: string;
   className?: string;
+  isLoggedIn?: boolean;
+  userName?: string;
 }
 
 const BASE = import.meta.env.BASE_URL;
@@ -28,6 +30,8 @@ export const Header: React.FC<HeaderProps> = ({
   menuItems = DEFAULT_MENU_ITEMS,
   activeHref,
   className = "",
+  isLoggedIn = false,
+  userName = "",
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -140,12 +144,12 @@ export const Header: React.FC<HeaderProps> = ({
 
             {/* Правая панель: Вход/Регистрация, Поиск, Избранное, Корзина */}
             <div className="header__actions">
-              {/* Вход / Регистрация */}
+              {/* Вход / Регистрация или Профиль */}
               <button
                 type="button"
                 className="header__auth-btn"
                 onClick={onAuthClick}
-                aria-label="Вход или регистрация"
+                aria-label={isLoggedIn ? `Личный кабинет: ${userName || "Профиль"}` : "Вход или регистрация"}
               >
                 <svg
                   className="header__auth-icon"
@@ -156,7 +160,9 @@ export const Header: React.FC<HeaderProps> = ({
                 >
                   <path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5z" />
                 </svg>
-                <span className="header__auth-text">Вход/Регистрация</span>
+                <span className="header__auth-text">
+                  {isLoggedIn ? (userName || "Кабинет") : "Вход/Регистрация"}
+                </span>
               </button>
 
               {/* Поиск */}
