@@ -76,7 +76,11 @@ const KNOWN_PAGES: Record<string, string> = {
 
 function App() {
   const [currentPage, setCurrentPage] = useState<string>("main");
-  const [cartCount, setCartCount] = useState(2);
+  const [cartItems, setCartItems] = useState<string[]>([
+    "Водолазка-боди для Барби",
+    "Боди-бюстье «Афродита»",
+  ]);
+  const cartCount = cartItems.length;
   const [wishlistCount] = useState(3);
   const [notification, setNotification] = useState<string | null>(null);
   const [authModal, setAuthModal] = useState<"login" | "register" | null>(null);
@@ -119,7 +123,11 @@ function App() {
   };
 
   const handleAddToCart = (title: string) => {
-    setCartCount((prev) => prev + 1);
+    if (cartItems.includes(title)) {
+      showNotification(`Выкройка «${title}» уже в вашей корзине`);
+      return;
+    }
+    setCartItems((prev) => [...prev, title]);
     showNotification(`Выкройка «${title}» добавлена в корзину`);
   };
 
@@ -135,7 +143,7 @@ function App() {
       setAuthModal("login");
       return;
     }
-    showNotification(`Корзина: у вас ${cartCount} товара(ов)`);
+    showNotification(`Корзина: в заказе ${cartCount} выкройки(ек)`);
   };
 
   const handleWishlistClick = () => {
@@ -177,7 +185,7 @@ function App() {
     }
 
     if (pendingAction === "cart") {
-      showNotification(`Добро пожаловать, ${user.name}! Корзина: у вас ${cartCount} товара(ов)`);
+      showNotification(`Добро пожаловать, ${user.name}! В корзине ${cartCount} выкройки(ек)`);
       setPendingAction(null);
     } else if (pendingAction === "wishlist") {
       showNotification(`Добро пожаловать, ${user.name}! Избранное: у вас ${wishlistCount} позиции(й)`);
@@ -198,7 +206,7 @@ function App() {
     }
 
     if (pendingAction === "cart") {
-      showNotification(`Регистрация успешна! Корзина: у вас ${cartCount} товара(ов)`);
+      showNotification(`Регистрация успешна! В корзине ${cartCount} выкройки(ек)`);
       setPendingAction(null);
     } else if (pendingAction === "wishlist") {
       showNotification(`Регистрация успешна! Избранное: у вас ${wishlistCount} позиции(й)`);
