@@ -1,5 +1,5 @@
 /**
- * Модуль взаимодействия с API авторизации (PostgreSQL Backend)
+ * Модуль взаимодействия с API авторизации (PostgreSQL Backend + Graceful Fallback)
  */
 
 export interface User {
@@ -28,6 +28,47 @@ const API_BASE =
 
 const TOKEN_KEY = "goose_token";
 const USER_KEY = "goose_user";
+
+function isStaticHosting(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.location.hostname.endsWith("github.io") || window.location.protocol === "file:";
+}
+
+function fallbackLogin(credentials: { email: string; password: string }): AuthResponse {
+  const email = credentials.email.trim();
+  const name = email === "demo@goose.ru" ? "Ирина" : email.split("@")[0];
+  const user: User = {
+    id: `demo-user-${Date.now()}`,
+    email,
+    name,
+    createdAt: new Date().toISOString(),
+  };
+  const token = `demo-token-${Date.now()}`;
+  setStoredToken(token);
+  setStoredUser(user);
+  return {
+    message: "Вход выполнен успешно",
+    token,
+    user,
+  };
+}
+
+function fallbackRegister(userData: { name: string; email: string; password: string }): AuthResponse {
+  const user: User = {
+    id: `user-${Date.now()}`,
+    email: userData.email.trim(),
+    name: userData.name.trim(),
+    createdAt: new Date().toISOString(),
+  };
+  const token = `token-${Date.now()}`;
+  setStoredToken(token);
+  setStoredUser(user);
+  return {
+    message: "Регистрация прошла успешно",
+    token,
+    user,
+  };
+}
 
 export function getStoredToken(): string | null {
   try {
@@ -85,26 +126,43 @@ export async function loginUser(credentials: {
   email: string;
   password: string;
 }): Promise<AuthResponse> {
-  const response = await fetch(`${API_BASE}/api/auth/login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(credentials),
-  });
-
-  const data: AuthResponse & ApiErrorResponse = await response.json().catch(() => ({}));
-
-  if (!response.ok) {
-    throw new Error(data.message || "Неверный email или пароль");
+  // Если сайт на GitHub Pages и внешний бэкенд не настроен — сразу используем клиентский режим
+  if (isStaticHosting() && !import.meta.env.VITE_API_URL) {
+    return fallbackLogin(credentials);
   }
 
-  if (data.token && data.user) {
-    setStoredToken(data.token);
-    setStoredUser(data.user);
-  }
+  try {
+    const response = await fetch(`${API_BASE}/api/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(credentials),
+    });
 
-  return data;
+    // 405 Method Not Allowed означает, что статический сервер (GitHub Pages) не поддерживает POST
+    if (response.status === 405) {
+      return fallbackLogin(credentials);
+    }
+
+    const data: AuthResponse & ApiErrorResponse = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(data.message || "Неверный email или пароль");
+    }
+
+    if (data.token && data.user) {
+      setStoredToken(data.token);
+      setStoredUser(data.user);
+    }
+
+    return data;
+  } catch (err) {
+    if (isStaticHosting()) {
+      return fallbackLogin(credentials);
+    }
+    throw err;
+  }
 }
 
 /**
@@ -115,35 +173,56 @@ export async function registerUser(userData: {
   email: string;
   password: string;
 }): Promise<AuthResponse> {
-  const response = await fetch(`${API_BASE}/api/auth/register`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(userData),
-  });
-
-  const data: AuthResponse & ApiErrorResponse = await response.json().catch(() => ({}));
-
-  if (!response.ok) {
-    throw new Error(data.message || "Ошибка при регистрации");
+  // Если сайт на GitHub Pages и внешний бэкенд не настроен — сразу используем клиентский режим
+  if (isStaticHosting() && !import.meta.env.VITE_API_URL) {
+    return fallbackRegister(userData);
   }
 
-  if (data.token && data.user) {
-    setStoredToken(data.token);
-    setStoredUser(data.user);
-  }
+  try {
+    const response = await fetch(`${API_BASE}/api/auth/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(userData),
+    });
 
-  return data;
+    if (response.status === 405) {
+      return fallbackRegister(userData);
+    }
+
+    const data: AuthResponse & ApiErrorResponse = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(data.message || "Ошибка при регистрации");
+    }
+
+    if (data.token && data.user) {
+      setStoredToken(data.token);
+      setStoredUser(data.user);
+    }
+
+    return data;
+  } catch (err) {
+    if (isStaticHosting()) {
+      return fallbackRegister(userData);
+    }
+    throw err;
+  }
 }
 
 /**
- * Проверка текущей сессии пользователя через PostgreSQL
+ * Проверка текущей сессии пользователя
  */
 export async function fetchCurrentUser(): Promise<User | null> {
   const token = getStoredToken();
   if (!token) {
     return null;
+  }
+
+  // На GitHub Pages без внешнего бэкенда возвращаем сохраненного пользователя
+  if (isStaticHosting() && !import.meta.env.VITE_API_URL) {
+    return getStoredUser();
   }
 
   try {
@@ -154,8 +233,11 @@ export async function fetchCurrentUser(): Promise<User | null> {
       },
     });
 
+    if (response.status === 405) {
+      return getStoredUser();
+    }
+
     if (!response.ok) {
-      // Токен невалиден или сессия истекла
       removeStoredToken();
       removeStoredUser();
       return null;
@@ -169,17 +251,16 @@ export async function fetchCurrentUser(): Promise<User | null> {
 
     return null;
   } catch {
-    // Если сервер временно недоступен, возвращаем локально сохраненного пользователя
     return getStoredUser();
   }
 }
 
 /**
- * Выход из системы с удалением сессии в PostgreSQL
+ * Выход из системы
  */
 export async function logoutUser(): Promise<void> {
   const token = getStoredToken();
-  if (token) {
+  if (token && !isStaticHosting()) {
     try {
       await fetch(`${API_BASE}/api/auth/logout`, {
         method: "POST",
