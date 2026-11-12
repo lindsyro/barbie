@@ -25,6 +25,9 @@ import {
   Girls14,
   Guys,
   Kids,
+  Cart,
+  type CartItemType,
+  FEATURED_PATTERNS,
 } from "./pages/index.ts";
 import "./App.css";
 
@@ -78,15 +81,39 @@ const KNOWN_PAGES: Record<string, string> = {
   "shopping-terms": "shopping-terms",
   faq: "shopping-terms",
   reviews: "reviews",
+  cart: "cart",
+  basket: "cart",
 };
+
+const BASE = import.meta.env.BASE_URL;
+
+const INITIAL_CART: CartItemType[] = [
+  {
+    id: 1,
+    title: "Водолазка-боди для Барби",
+    doll: "Барби / Made to Move",
+    price: 490,
+    priceFormatted: "490 ₽",
+    image: `${BASE}1.png`,
+    tag: "Хит продаж",
+    format: "PDF (А4 + инструкции)",
+  },
+  {
+    id: 2,
+    title: "Боди-бюстье «Афродита»",
+    doll: "Барби Standard & Curvy",
+    price: 550,
+    priceFormatted: "550 ₽",
+    image: `${BASE}2.png`,
+    tag: "Новинка",
+    format: "PDF (А4 + инструкции)",
+  },
+];
 
 function App() {
   const [currentPage, setCurrentPage] = useState<string>("main");
-  const [cartItems, setCartItems] = useState<string[]>([
-    "Водолазка-боди для Барби",
-    "Боди-бюстье «Афродита»",
-  ]);
-  const cartCount = cartItems.length;
+  const [cart, setCart] = useState<CartItemType[]>(INITIAL_CART);
+  const cartCount = cart.length;
   const [wishlistCount] = useState(3);
   const [notification, setNotification] = useState<string | null>(null);
   const [authModal, setAuthModal] = useState<"login" | "register" | null>(null);
@@ -127,12 +154,50 @@ function App() {
   };
 
   const handleAddToCart = (title: string) => {
-    if (cartItems.includes(title)) {
+    const alreadyInCart = cart.some((it) => it.title === title);
+    if (alreadyInCart) {
       showNotification(`Выкройка «${title}» уже в вашей корзине`);
       return;
     }
-    setCartItems((prev) => [...prev, title]);
+
+    const found = FEATURED_PATTERNS.find((p) => p.title === title);
+    const numPrice = found ? parseInt(found.price.replace(/\D/g, ""), 10) || 490 : 490;
+    const newItem: CartItemType = {
+      id: found ? found.id : Date.now(),
+      title,
+      doll: found ? found.doll : "Барби",
+      price: numPrice,
+      priceFormatted: found ? found.price : `${numPrice} ₽`,
+      image: found ? found.image : `${BASE}1.png`,
+      tag: found?.tag || "Выкройка",
+      format: "PDF (А4 + инструкции)",
+    };
+
+    setCart((prev) => [...prev, newItem]);
     showNotification(`Выкройка «${title}» добавлена в корзину`);
+  };
+
+  const handleRemoveFromCart = (id: number) => {
+    setCart((prev) => prev.filter((it) => it.id !== id));
+    showNotification("Выкройка удалена из корзины");
+  };
+
+  const handleClearCart = () => {
+    setCart([]);
+    showNotification("Корзина очищена");
+  };
+
+  const handleCheckout = () => {
+    if (!currentUser) {
+      setPendingAction("cart");
+      showNotification("Для оформления заказа необходимо войти в аккаунт");
+      setAuthModal("login");
+      return;
+    }
+    const orderNum = `ORD-${Date.now().toString().slice(-6)}`;
+    setCart([]);
+    showNotification(`Заказ #${orderNum} успешно оформлен! Ссылки на PDF отправлены на email.`);
+    navigateTo("account");
   };
 
   const handleSelectCategory = (categoryId: string) => {
@@ -147,7 +212,7 @@ function App() {
       setAuthModal("login");
       return;
     }
-    showNotification(`Корзина: в заказе ${cartCount} выкройки(ек)`);
+    navigateTo("cart");
   };
 
   const handleWishlistClick = () => {
@@ -179,8 +244,9 @@ function App() {
     setCurrentUser(user);
 
     if (pendingAction === "cart") {
-      showNotification(`Добро пожаловать, ${user.name}! В корзине ${cartCount} выкройки(ек)`);
+      showNotification(`Добро пожаловать, ${user.name}! Переходим в корзину.`);
       setPendingAction(null);
+      navigateTo("cart");
     } else if (pendingAction === "wishlist") {
       showNotification(`Добро пожаловать, ${user.name}! Избранное: у вас ${wishlistCount} позиции(й)`);
       setPendingAction(null);
@@ -194,8 +260,9 @@ function App() {
     setCurrentUser(user);
 
     if (pendingAction === "cart") {
-      showNotification(`Регистрация успешна! В корзине ${cartCount} выкройки(ек)`);
+      showNotification(`Регистрация успешна! Переходим в корзину.`);
       setPendingAction(null);
+      navigateTo("cart");
     } else if (pendingAction === "wishlist") {
       showNotification(`Регистрация успешна! Избранное: у вас ${wishlistCount} позиции(й)`);
       setPendingAction(null);
@@ -244,6 +311,18 @@ function App() {
         return <Guys onBackToMain={() => navigateTo("main")} />;
       case "kids":
         return <Kids onBackToMain={() => navigateTo("main")} />;
+      case "cart":
+        return (
+          <Cart
+            items={cart}
+            onRemoveItem={handleRemoveFromCart}
+            onClearCart={handleClearCart}
+            onCheckout={handleCheckout}
+            onContinueShopping={() => navigateTo("catalog")}
+            onBackToMain={() => navigateTo("main")}
+            isLoggedIn={Boolean(currentUser)}
+          />
+        );
       case "main":
       default:
         return (

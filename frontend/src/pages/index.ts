@@ -46,3 +46,6 @@ export type { GuysProps } from "./Guys/Guys.tsx";
 
 export { Kids } from "./Kids/Kids.tsx";
 export type { KidsProps } from "./Kids/Kids.tsx";
+
+export { Cart } from "./Cart/Cart.tsx";
+export type { CartProps, CartItemType } from "./Cart/types.ts";
