@@ -268,6 +268,7 @@ function App() {
         onWishlistClick={handleWishlistClick}
         onSearchSubmit={(q) => showNotification(`Поиск выкройки: "${q}"`)}
         onAuthClick={handleAuthClick}
+        onLogout={handleLogout}
       />
 
       {/* Всплывающее уведомление */}

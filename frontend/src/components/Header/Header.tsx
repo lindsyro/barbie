@@ -10,6 +10,7 @@ export interface HeaderProps {
   onCartClick?: () => void;
   onWishlistClick?: () => void;
   onAuthClick?: () => void;
+  onLogout?: () => void;
   onSearchSubmit?: (query: string) => void;
   menuItems?: MenuItem[];
   activeHref?: string;
@@ -26,6 +27,7 @@ export const Header: React.FC<HeaderProps> = ({
   onCartClick,
   onWishlistClick,
   onAuthClick,
+  onLogout,
   onSearchSubmit,
   menuItems = DEFAULT_MENU_ITEMS,
   activeHref,
@@ -144,26 +146,77 @@ export const Header: React.FC<HeaderProps> = ({
 
             {/* Правая панель: Вход/Регистрация, Поиск, Избранное, Корзина */}
             <div className="header__actions">
-              {/* Вход / Регистрация или Профиль */}
-              <button
-                type="button"
-                className="header__auth-btn"
-                onClick={onAuthClick}
-                aria-label={isLoggedIn ? `Личный кабинет: ${userName || "Профиль"}` : "Вход или регистрация"}
-              >
-                <svg
-                  className="header__auth-icon"
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
+              {/* Вход / Регистрация или Профиль с кнопкой выхода */}
+              {isLoggedIn ? (
+                <div className="header__user-wrapper">
+                  <button
+                    type="button"
+                    className="header__auth-btn"
+                    onClick={onAuthClick}
+                    aria-label={`Личный кабинет: ${userName || "Профиль"}`}
+                    title="Перейти в личный кабинет"
+                  >
+                    <svg
+                      className="header__auth-icon"
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5z" />
+                    </svg>
+                    <span className="header__auth-text">
+                      {userName || "Кабинет"}
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="header__logout-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onLogout?.();
+                    }}
+                    aria-label="Выйти из аккаунта"
+                    title="Выйти из аккаунта"
+                  >
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                      <polyline points="16 17 21 12 16 7" />
+                      <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  className="header__auth-btn"
+                  onClick={onAuthClick}
+                  aria-label="Вход или регистрация"
                 >
-                  <path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5z" />
-                </svg>
-                <span className="header__auth-text">
-                  {isLoggedIn ? (userName || "Кабинет") : "Вход/Регистрация"}
-                </span>
-              </button>
+                  <svg
+                    className="header__auth-icon"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5z" />
+                  </svg>
+                  <span className="header__auth-text">
+                    Вход/Регистрация
+                  </span>
+                </button>
+              )}
 
               {/* Поиск */}
               <div className={`header__search-box ${isSearchOpen ? "header__search-box--open" : ""}`}>
