@@ -206,12 +206,6 @@ function App() {
   };
 
   const handleCartClick = () => {
-    if (!currentUser) {
-      setPendingAction("cart");
-      showNotification("Пожалуйста, войдите в аккаунт для перехода в корзину");
-      setAuthModal("login");
-      return;
-    }
     navigateTo("cart");
   };
 
