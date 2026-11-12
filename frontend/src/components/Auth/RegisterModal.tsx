@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import Modal from "../Modal/Modal.tsx";
+import { registerUser, type User } from "../../api/auth.ts";
 import "./authModal.css";
 
 export interface RegisterModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSwitchToLogin?: () => void;
-  onRegisterSuccess?: (email: string) => void;
+  onRegisterSuccess?: (user: User) => void;
   className?: string;
 }
 
@@ -26,7 +27,7 @@ export const RegisterModal: React.FC<RegisterModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
@@ -70,18 +71,28 @@ export const RegisterModal: React.FC<RegisterModalProps> = ({
 
     setIsLoading(true);
 
-    // Имитация успешной регистрации
-    setTimeout(() => {
+    try {
+      const result = await registerUser({
+        name: trimmedName,
+        email: trimmedEmail,
+        password,
+      });
+
       setIsLoading(false);
-      if (onRegisterSuccess) {
-        onRegisterSuccess(trimmedEmail);
-      }
       setName("");
       setEmail("");
       setPassword("");
       setConfirmPassword("");
       onClose();
-    }, 400);
+
+      if (onRegisterSuccess) {
+        onRegisterSuccess(result.user);
+      }
+    } catch (err) {
+      setIsLoading(false);
+      const message = err instanceof Error ? err.message : "Ошибка при регистрации";
+      setError(message);
+    }
   };
 
   const handleClose = () => {
@@ -107,8 +118,11 @@ export const RegisterModal: React.FC<RegisterModalProps> = ({
           </p>
         </div>
 
+        {/* Общее сообщение об ошибке сервера */}
+        {error && <div className="auth-modal__alert-error">{error}</div>}
+
         {/* Форма регистрации */}
-        <form onSubmit={handleSubmit} className="auth-modal__form" noValidate>
+        <form onSubmit={handleSubmit} className="auth-modal__form" noValidate style={{ marginTop: error ? "0.75rem" : 0 }}>
           {/* Поле Имя */}
           <div className="auth-modal__field">
             <label htmlFor="register-name" className="auth-modal__label">
@@ -236,8 +250,6 @@ export const RegisterModal: React.FC<RegisterModalProps> = ({
               </span>
             </label>
           </div>
-
-          {error && <span className="auth-modal__error-msg">{error}</span>}
 
           {/* Кнопка регистрации */}
           <button

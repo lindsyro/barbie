@@ -3,6 +3,12 @@ import Header from "./components/Header/Header.tsx";
 import Footer from "./components/Footer/Footer.tsx";
 import { LoginModal, RegisterModal } from "./components/index.ts";
 import {
+  type User,
+  getStoredUser,
+  fetchCurrentUser,
+  logoutUser,
+} from "./api/auth.ts";
+import {
   Main,
   Catalog,
   Tutorials,
@@ -84,17 +90,15 @@ function App() {
   const [wishlistCount] = useState(3);
   const [notification, setNotification] = useState<string | null>(null);
   const [authModal, setAuthModal] = useState<"login" | "register" | null>(null);
-  const [currentUser, setCurrentUser] = useState<{ email: string; name?: string } | null>(() => {
-    try {
-      const saved = localStorage.getItem("goose_user");
-      return saved ? JSON.parse(saved) : null;
-    } catch {
-      return null;
-    }
-  });
+  const [currentUser, setCurrentUser] = useState<User | null>(() => getStoredUser());
   const [pendingAction, setPendingAction] = useState<"cart" | "wishlist" | null>(null);
 
   useEffect(() => {
+    // Проверка актуальности токена сессии в PostgreSQL
+    fetchCurrentUser().then((verifiedUser) => {
+      setCurrentUser(verifiedUser);
+    });
+
     const handleHashChange = () => {
       const rawHash = window.location.hash.replace("#", "").trim();
       if (!rawHash) {
@@ -164,25 +168,15 @@ function App() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await logoutUser();
     setCurrentUser(null);
-    try {
-      localStorage.removeItem("goose_user");
-    } catch {
-      // ignore
-    }
     showNotification("Вы успешно вышли из аккаунта");
     navigateTo("main");
   };
 
-  const handleLoginSuccess = (email: string) => {
-    const user = { email, name: email.split("@")[0] };
+  const handleLoginSuccess = (user: User) => {
     setCurrentUser(user);
-    try {
-      localStorage.setItem("goose_user", JSON.stringify(user));
-    } catch {
-      // ignore
-    }
 
     if (pendingAction === "cart") {
       showNotification(`Добро пожаловать, ${user.name}! В корзине ${cartCount} выкройки(ек)`);
@@ -196,14 +190,8 @@ function App() {
     }
   };
 
-  const handleRegisterSuccess = (email: string) => {
-    const user = { email, name: email.split("@")[0] };
+  const handleRegisterSuccess = (user: User) => {
     setCurrentUser(user);
-    try {
-      localStorage.setItem("goose_user", JSON.stringify(user));
-    } catch {
-      // ignore
-    }
 
     if (pendingAction === "cart") {
       showNotification(`Регистрация успешна! В корзине ${cartCount} выкройки(ек)`);

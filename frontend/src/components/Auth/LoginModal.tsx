@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Modal from "../Modal/Modal.tsx";
+import { loginUser, type User } from "../../api/auth.ts";
 import "./authModal.css";
 
 export interface LoginModalProps {
@@ -7,7 +8,7 @@ export interface LoginModalProps {
   onClose: () => void;
   onSwitchToRegister?: () => void;
   onForgotPassword?: () => void;
-  onLoginSuccess?: (email: string) => void;
+  onLoginSuccess?: (user: User) => void;
   className?: string;
 }
 
@@ -26,7 +27,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
@@ -46,16 +47,20 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 
     setIsLoading(true);
 
-    // Имитация успешной авторизации
-    setTimeout(() => {
+    try {
+      const result = await loginUser({ email: trimmedEmail, password });
       setIsLoading(false);
-      if (onLoginSuccess) {
-        onLoginSuccess(trimmedEmail);
-      }
       setEmail("");
       setPassword("");
       onClose();
-    }, 400);
+      if (onLoginSuccess) {
+        onLoginSuccess(result.user);
+      }
+    } catch (err) {
+      setIsLoading(false);
+      const message = err instanceof Error ? err.message : "Неверный email или пароль";
+      setError(message);
+    }
   };
 
   const handleClose = () => {
@@ -81,8 +86,11 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           </p>
         </div>
 
+        {/* Общее сообщение об ошибке сервера */}
+        {error && <div className="auth-modal__alert-error">{error}</div>}
+
         {/* Форма входа */}
-        <form onSubmit={handleSubmit} className="auth-modal__form" noValidate>
+        <form onSubmit={handleSubmit} className="auth-modal__form" noValidate style={{ marginTop: error ? "0.75rem" : 0 }}>
           {/* Поле Email */}
           <div className="auth-modal__field">
             <label htmlFor="login-email" className="auth-modal__label">
@@ -98,7 +106,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   setEmail(e.target.value);
                   if (error) setError(null);
                 }}
-                className={`auth-modal__input ${error && !email ? "auth-modal__input--error" : ""}`}
+                className={`auth-modal__input ${error ? "auth-modal__input--error" : ""}`}
                 autoComplete="email"
                 required
               />
@@ -120,7 +128,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   setPassword(e.target.value);
                   if (error) setError(null);
                 }}
-                className={`auth-modal__input ${error && !password ? "auth-modal__input--error" : ""}`}
+                className={`auth-modal__input ${error ? "auth-modal__input--error" : ""}`}
                 autoComplete="current-password"
                 required
               />
@@ -145,7 +153,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                 )}
               </button>
             </div>
-            {error && <span className="auth-modal__error-msg">{error}</span>}
           </div>
 
           {/* Опции: Запомнить меня и Забыли пароль */}
@@ -177,7 +184,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             className="auth-modal__submit-btn"
             disabled={isLoading}
           >
-            {isLoading ? "Входим..." : "Войти"}
+            {isLoading ? "Проверка данных..." : "Войти"}
           </button>
         </form>
 

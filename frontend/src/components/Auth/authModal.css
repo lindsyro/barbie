@@ -125,6 +125,17 @@
   margin-top: 0.2rem;
 }
 
+.auth-modal__alert-error {
+  padding: 0.75rem 1rem;
+  background-color: rgba(201, 74, 74, 0.08);
+  border: 1px solid rgba(201, 74, 74, 0.3);
+  border-radius: 8px;
+  color: #c94a4a;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  text-align: center;
+}
+
 /* Опции (запомнить меня / забыли пароль) */
 .auth-modal__row-options {
   display: flex;
