@@ -25,4 +25,6 @@ export interface QuickCategoryItem {
 export interface MainProps {
   onAddToCart?: (title: string) => void;
   onSelectCategory?: (category: string) => void;
+  onToggleWishlist?: (patternId: number) => void;
+  wishlistIds?: number[];
 }

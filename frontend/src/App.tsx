@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Header from "./components/Header/Header.tsx";
 import Footer from "./components/Footer/Footer.tsx";
 import { LoginModal, RegisterModal } from "./components/index.ts";
@@ -8,6 +8,16 @@ import {
   fetchCurrentUser,
   logoutUser,
 } from "./api/auth.ts";
+import {
+  fetchWishlist,
+  toggleWishlist,
+  removeFromWishlist,
+  getGuestWishlist,
+  toggleGuestWishlist,
+  removeFromGuestWishlist,
+  syncGuestWishlistWithDatabase,
+  type WishlistPattern,
+} from "./api/wishlist.ts";
 import {
   Main,
   Catalog,
@@ -27,6 +37,7 @@ import {
   Kids,
   Cart,
   type CartItemType,
+  Wishlist,
   FEATURED_PATTERNS,
 } from "./pages/index.ts";
 import "./App.css";
@@ -83,6 +94,8 @@ const KNOWN_PAGES: Record<string, string> = {
   reviews: "reviews",
   cart: "cart",
   basket: "cart",
+  wishlist: "wishlist",
+  favorites: "wishlist",
 };
 
 const BASE = import.meta.env.BASE_URL;
@@ -114,11 +127,29 @@ function App() {
   const [currentPage, setCurrentPage] = useState<string>("main");
   const [cart, setCart] = useState<CartItemType[]>(INITIAL_CART);
   const cartCount = cart.length;
-  const [wishlistCount] = useState(3);
+  const [currentUser, setCurrentUser] = useState<User | null>(() => getStoredUser());
+  const [wishlist, setWishlist] = useState<WishlistPattern[]>(() => {
+    const user = getStoredUser();
+    return user ? [] : getGuestWishlist();
+  });
+  const [isWishlistLoading, setIsWishlistLoading] = useState(false);
+  const wishlistCount = wishlist.length;
+  const wishlistIds = wishlist.map((it) => it.id);
   const [notification, setNotification] = useState<string | null>(null);
   const [authModal, setAuthModal] = useState<"login" | "register" | null>(null);
-  const [currentUser, setCurrentUser] = useState<User | null>(() => getStoredUser());
   const [pendingAction, setPendingAction] = useState<"cart" | "wishlist" | null>(null);
+
+  const refreshWishlist = useCallback(async () => {
+    try {
+      setIsWishlistLoading(true);
+      const data = await fetchWishlist();
+      setWishlist(data.items || []);
+    } catch (err) {
+      console.error("Ошибка загрузки избранного из БД:", err);
+    } finally {
+      setIsWishlistLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     // Проверка актуальности токена сессии в PostgreSQL
@@ -141,6 +172,41 @@ function App() {
     window.addEventListener("hashchange", handleHashChange);
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
+
+  // Загрузка и синхронизация избранного для авторизованного пользователя
+  useEffect(() => {
+    if (!currentUser) return;
+    let ignore = false;
+    const guestItems = getGuestWishlist();
+
+    if (guestItems.length > 0) {
+      syncGuestWishlistWithDatabase(guestItems)
+        .then((synced) => {
+          if (!ignore) {
+            setWishlist(synced.items || []);
+          }
+        })
+        .catch(() => {
+          fetchWishlist().then((data) => {
+            if (!ignore) setWishlist(data.items || []);
+          });
+        });
+    } else {
+      fetchWishlist()
+        .then((data) => {
+          if (!ignore) {
+            setWishlist(data.items || []);
+          }
+        })
+        .catch((err) => {
+          console.error("Ошибка загрузки избранного из БД:", err);
+        });
+    }
+
+    return () => {
+      ignore = true;
+    };
+  }, [currentUser]);
 
   const navigateTo = (page: string) => {
     window.location.hash = page;
@@ -205,18 +271,99 @@ function App() {
     navigateTo("catalog");
   };
 
+  const handleToggleWishlist = async (patternId: number) => {
+    const found = FEATURED_PATTERNS.find((p) => p.id === patternId);
+    const numPrice = found ? parseInt(found.price.replace(/\D/g, ""), 10) || 490 : 490;
+    const payload: WishlistPattern = {
+      id: patternId,
+      title: found ? found.title : `Выкройка #${patternId}`,
+      doll: found ? found.doll : "Барби",
+      price: numPrice,
+      tag: found?.tag || "Выкройка",
+      image: found?.image || `${BASE}1.png`,
+      format: "PDF (А4 + инструкции)",
+    };
+
+    // 1. Для неавторизованного пользователя — сохраняем в localStorage с мягким уведомлением
+    if (!currentUser) {
+      const res = toggleGuestWishlist(payload);
+      setWishlist(res.items);
+      if (res.inWishlist) {
+        showNotification("Выкройка добавлена в избранное. Войдите в аккаунт, чтобы не потерять подборку.");
+      } else {
+        showNotification("Выкройка удалена из избранного");
+      }
+      return;
+    }
+
+    // 2. Для авторизованного пользователя — сохраняем в PostgreSQL
+    try {
+      const res = await toggleWishlist(patternId, payload);
+      setWishlist(res.wishlist.items);
+      showNotification(res.message);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Не удалось обновить избранное";
+      showNotification(msg);
+    }
+  };
+
+  const handleRemoveFromWishlist = async (patternId: number) => {
+    // 1. Если пользователь гость — удаляем из localStorage
+    if (!currentUser) {
+      const updated = removeFromGuestWishlist(patternId);
+      setWishlist(updated);
+      showNotification("Выкройка удалена из избранного");
+      return;
+    }
+
+    // 2. Для авторизованного пользователя — удаляем из базы данных
+    try {
+      const res = await removeFromWishlist(patternId);
+      setWishlist(res.items);
+      showNotification("Выкройка удалена из избранного");
+    } catch {
+      showNotification("Не удалось удалить выкройку из избранного");
+    }
+  };
+
+  const handleAddAllWishlistToCart = () => {
+    if (wishlist.length === 0) return;
+    let added = 0;
+    setCart((prev) => {
+      const existingTitles = new Set(prev.map((it) => it.title));
+      const newItems: CartItemType[] = [];
+
+      for (const w of wishlist) {
+        if (!existingTitles.has(w.title)) {
+          newItems.push({
+            id: w.id,
+            title: w.title,
+            doll: w.doll,
+            price: w.price,
+            priceFormatted: `${w.price} ₽`,
+            image: w.image,
+            tag: w.tag,
+            format: w.format || "PDF (А4 + инструкции)",
+          });
+          added++;
+        }
+      }
+      return [...prev, ...newItems];
+    });
+
+    if (added > 0) {
+      showNotification(`Добавлено в корзину: ${added} выкройки(ек)`);
+    } else {
+      showNotification("Все выкройки из избранного уже в вашей корзине");
+    }
+  };
+
   const handleCartClick = () => {
     navigateTo("cart");
   };
 
   const handleWishlistClick = () => {
-    if (!currentUser) {
-      setPendingAction("wishlist");
-      showNotification("Пожалуйста, войдите в аккаунт для просмотра избранного");
-      setAuthModal("login");
-      return;
-    }
-    showNotification(`Избранное: у вас ${wishlistCount} позиции(й)`);
+    navigateTo("wishlist");
   };
 
   const handleAuthClick = () => {
@@ -230,36 +377,57 @@ function App() {
   const handleLogout = async () => {
     await logoutUser();
     setCurrentUser(null);
+    setWishlist(getGuestWishlist());
     showNotification("Вы успешно вышли из аккаунта");
     navigateTo("main");
   };
 
-  const handleLoginSuccess = (user: User) => {
+  // Синхронизация и слияние гостевого избранного из localStorage с PostgreSQL
+  const syncWishlistOnAuth = async (user: User) => {
+    const guestItems = getGuestWishlist();
+    if (guestItems.length > 0) {
+      try {
+        const synced = await syncGuestWishlistWithDatabase(guestItems);
+        setWishlist(synced.items || []);
+        showNotification(`Добро пожаловать, ${user.name}! Избранное синхронизировано с вашим аккаунтом.`);
+        return;
+      } catch (err) {
+        console.error("Ошибка объединения избранного:", err);
+      }
+    }
+    await refreshWishlist();
+  };
+
+  const handleLoginSuccess = async (user: User) => {
     setCurrentUser(user);
+    await syncWishlistOnAuth(user);
 
     if (pendingAction === "cart") {
       showNotification(`Добро пожаловать, ${user.name}! Переходим в корзину.`);
       setPendingAction(null);
       navigateTo("cart");
     } else if (pendingAction === "wishlist") {
-      showNotification(`Добро пожаловать, ${user.name}! Избранное: у вас ${wishlistCount} позиции(й)`);
+      showNotification(`Добро пожаловать, ${user.name}! Переходим в избранное.`);
       setPendingAction(null);
+      navigateTo("wishlist");
     } else {
       showNotification(`Добро пожаловать в личный кабинет, ${user.name}!`);
       navigateTo("account");
     }
   };
 
-  const handleRegisterSuccess = (user: User) => {
+  const handleRegisterSuccess = async (user: User) => {
     setCurrentUser(user);
+    await syncWishlistOnAuth(user);
 
     if (pendingAction === "cart") {
       showNotification(`Регистрация успешна! Переходим в корзину.`);
       setPendingAction(null);
       navigateTo("cart");
     } else if (pendingAction === "wishlist") {
-      showNotification(`Регистрация успешна! Избранное: у вас ${wishlistCount} позиции(й)`);
+      showNotification(`Регистрация успешна! Переходим в избранное.`);
       setPendingAction(null);
+      navigateTo("wishlist");
     } else {
       showNotification(`Регистрация успешна! Добро пожаловать, ${user.name}!`);
       navigateTo("account");
@@ -317,12 +485,30 @@ function App() {
             isLoggedIn={Boolean(currentUser)}
           />
         );
+      case "wishlist":
+        return (
+          <Wishlist
+            items={wishlist}
+            isLoading={isWishlistLoading}
+            isLoggedIn={Boolean(currentUser)}
+            onRemoveFromWishlist={handleRemoveFromWishlist}
+            onAddToCart={handleAddToCart}
+            onAddAllToCart={handleAddAllWishlistToCart}
+            onBackToMain={() => navigateTo("main")}
+            onOpenLogin={() => {
+              setPendingAction("wishlist");
+              setAuthModal("login");
+            }}
+          />
+        );
       case "main":
       default:
         return (
           <Main
             onAddToCart={handleAddToCart}
             onSelectCategory={handleSelectCategory}
+            onToggleWishlist={handleToggleWishlist}
+            wishlistIds={wishlistIds}
           />
         );
     }

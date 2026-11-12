@@ -24,7 +24,9 @@ router.get("/", async (req, res, next) => {
     }
 
     const items = await prisma.wishlistItem.findMany({
-      where: { contextId },
+      where: req.user?.id
+        ? { OR: [{ userId: req.user.id }, { contextId: req.user.id }] }
+        : { contextId },
       include: { pattern: true },
       orderBy: { addedAt: "desc" },
     });
@@ -88,7 +90,9 @@ router.post("/toggle", async (req, res, next) => {
     }
 
     const updated = await prisma.wishlistItem.findMany({
-      where: { contextId },
+      where: req.user?.id
+        ? { OR: [{ userId: req.user.id }, { contextId: req.user.id }] }
+        : { contextId },
       include: { pattern: true },
       orderBy: { addedAt: "desc" },
     });
@@ -98,6 +102,67 @@ router.post("/toggle", async (req, res, next) => {
       message: inWishlist
         ? `«${pattern.title}» добавлена в избранное`
         : `«${pattern.title}» удалена из избранного`,
+      wishlist: formatWishlist(updated),
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * POST /api/wishlist/sync
+ * Объединение гостевого списка избранного из localStorage с базой данных пользователя
+ */
+router.post("/sync", async (req, res, next) => {
+  try {
+    const contextId = getContextId(req);
+    if (!contextId || !req.user?.id) {
+      return res.status(401).json({
+        error: "Unauthorized",
+        message: "Требуется авторизация для синхронизации избранного",
+      });
+    }
+
+    const { patternIds = [] } = req.body || {};
+    const validIds = Array.isArray(patternIds)
+      ? patternIds.map(Number).filter((id) => !isNaN(id) && id > 0)
+      : [];
+
+    if (validIds.length > 0) {
+      // Проверяем существующие выкройки
+      const existingPatterns = await prisma.pattern.findMany({
+        where: { id: { in: validIds } },
+        select: { id: true },
+      });
+      const validPatternIds = existingPatterns.map((p) => p.id);
+
+      for (const patternId of validPatternIds) {
+        await prisma.wishlistItem.upsert({
+          where: {
+            contextId_patternId: {
+              contextId: req.user.id,
+              patternId,
+            },
+          },
+          update: { userId: req.user.id },
+          create: {
+            contextId: req.user.id,
+            userId: req.user.id,
+            patternId,
+          },
+        });
+      }
+    }
+
+    const updated = await prisma.wishlistItem.findMany({
+      where: { OR: [{ userId: req.user.id }, { contextId: req.user.id }] },
+      include: { pattern: true },
+      orderBy: { addedAt: "desc" },
+    });
+
+    return res.json({
+      message: "Избранное успешно синхронизировано с аккаунтом",
+      mergedCount: validIds.length,
       wishlist: formatWishlist(updated),
     });
   } catch (err) {
@@ -119,14 +184,21 @@ router.delete("/:patternId", async (req, res, next) => {
     const numId = Number(req.params.patternId);
 
     await prisma.wishlistItem.deleteMany({
-      where: {
-        contextId,
-        patternId: numId,
-      },
+      where: req.user?.id
+        ? {
+            patternId: numId,
+            OR: [{ userId: req.user.id }, { contextId: req.user.id }],
+          }
+        : {
+            contextId,
+            patternId: numId,
+          },
     });
 
     const updated = await prisma.wishlistItem.findMany({
-      where: { contextId },
+      where: req.user?.id
+        ? { OR: [{ userId: req.user.id }, { contextId: req.user.id }] }
+        : { contextId },
       include: { pattern: true },
       orderBy: { addedAt: "desc" },
     });

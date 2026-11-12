@@ -49,3 +49,7 @@ export type { KidsProps } from "./Kids/Kids.tsx";
 
 export { Cart } from "./Cart/Cart.tsx";
 export type { CartProps, CartItemType } from "./Cart/types.ts";
+
+export { Wishlist } from "./Wishlist/Wishlist.tsx";
+export type { WishlistProps, WishlistPattern } from "./Wishlist/types.ts";
+
