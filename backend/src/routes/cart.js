@@ -1,35 +1,23 @@
 import { Router } from "express";
-import { carts, patterns } from "../data/mockData.js";
+import prisma from "../db.js";
 import { getContextId } from "../middleware/auth.js";
 
 const router = Router();
 
-function getCartForContext(contextId) {
-  if (!carts.has(contextId)) {
-    carts.set(contextId, []);
-  }
-  return carts.get(contextId);
-}
+function formatCart(cartItems) {
+  const enrichedItems = cartItems
+    .filter((it) => it.pattern)
+    .map((it) => ({
+      patternId: it.pattern.id,
+      title: it.pattern.title,
+      doll: it.pattern.doll,
+      price: it.pattern.price,
+      image: it.pattern.image,
+      format: it.pattern.format,
+      addedAt: it.addedAt,
+    }));
 
-function formatCart(items) {
-  let totalPrice = 0;
-  const enrichedItems = [];
-
-  for (const item of items) {
-    const pattern = patterns.find((p) => p.id === item.patternId);
-    if (pattern) {
-      totalPrice += pattern.price;
-      enrichedItems.push({
-        patternId: pattern.id,
-        title: pattern.title,
-        doll: pattern.doll,
-        price: pattern.price,
-        image: pattern.image,
-        format: pattern.format || "PDF (A4 + инструкции)",
-        addedAt: item.addedAt,
-      });
-    }
-  }
+  const totalPrice = enrichedItems.reduce((sum, item) => sum + item.price, 0);
 
   return {
     itemsCount: enrichedItems.length,
@@ -40,73 +28,106 @@ function formatCart(items) {
 
 /**
  * GET /api/cart
- * Получение текущей корзины пользователя
+ * Получение текущей корзины пользователя из PostgreSQL
  */
-router.get("/", (req, res) => {
-  const contextId = getContextId(req);
-  if (!contextId) {
-    return res.json({
-      itemsCount: 0,
-      totalPrice: 0,
-      items: [],
-    });
-  }
+router.get("/", async (req, res, next) => {
+  try {
+    const contextId = getContextId(req);
+    if (!contextId) {
+      return res.json({ itemsCount: 0, totalPrice: 0, items: [] });
+    }
 
-  const items = getCartForContext(contextId);
-  return res.json(formatCart(items));
+    const items = await prisma.cartItem.findMany({
+      where: { contextId },
+      include: { pattern: true },
+      orderBy: { addedAt: "asc" },
+    });
+
+    return res.json(formatCart(items));
+  } catch (err) {
+    next(err);
+  }
 });
 
 /**
  * POST /api/cart
- * Добавление выкройки в корзину (цифровой товар, 1 экземпляр)
- * Body: { patternId }
+ * Добавление цифровой выкройки в корзину (1 экземпляр)
  */
-router.post("/", (req, res) => {
-  const contextId = getContextId(req);
-  if (!contextId) {
-    return res.status(401).json({
-      error: "Unauthorized",
-      message: "Для добавления в корзину требуется авторизация или гостевая сессия",
+router.post("/", async (req, res, next) => {
+  try {
+    const contextId = getContextId(req);
+    if (!contextId) {
+      return res.status(401).json({
+        error: "Unauthorized",
+        message: "Для добавления в корзину требуется авторизация или гостевая сессия",
+      });
+    }
+
+    const { patternId } = req.body || {};
+    const numId = Number(patternId);
+
+    const pattern = await prisma.pattern.findUnique({
+      where: { id: numId },
     });
-  }
 
-  const { patternId } = req.body || {};
-  const numId = Number(patternId);
+    if (!pattern) {
+      return res.status(404).json({
+        error: "NotFound",
+        message: "Выкройка не найдена в каталоге",
+      });
+    }
 
-  const pattern = patterns.find((p) => p.id === numId);
-  if (!pattern) {
-    return res.status(404).json({
-      error: "NotFound",
-      message: "Выкройка не найдена в каталоге",
+    // Проверяем, есть ли уже этот цифровой товар в корзине
+    const existing = await prisma.cartItem.findUnique({
+      where: {
+        contextId_patternId: {
+          contextId,
+          patternId: numId,
+        },
+      },
     });
-  }
 
-  const cart = getCartForContext(contextId);
-  const alreadyInCart = cart.some((it) => it.patternId === numId);
+    if (existing) {
+      const currentCart = await prisma.cartItem.findMany({
+        where: { contextId },
+        include: { pattern: true },
+        orderBy: { addedAt: "asc" },
+      });
 
-  if (alreadyInCart) {
-    return res.status(200).json({
-      alreadyInCart: true,
-      message: `Выкройка «${pattern.title}» уже есть в вашей корзине`,
-      cart: formatCart(cart),
+      return res.status(200).json({
+        alreadyInCart: true,
+        message: `Выкройка «${pattern.title}» уже есть в вашей корзине`,
+        cart: formatCart(currentCart),
+      });
+    }
+
+    await prisma.cartItem.create({
+      data: {
+        contextId,
+        userId: req.user?.id || null,
+        patternId: numId,
+      },
     });
+
+    const updatedCart = await prisma.cartItem.findMany({
+      where: { contextId },
+      include: { pattern: true },
+      orderBy: { addedAt: "asc" },
+    });
+
+    return res.status(201).json({
+      alreadyInCart: false,
+      message: `«${pattern.title}» добавлена в корзину`,
+      cart: formatCart(updatedCart),
+    });
+  } catch (err) {
+    next(err);
   }
-
-  cart.push({
-    patternId: numId,
-    addedAt: new Date().toISOString(),
-  });
-
-  return res.status(201).json({
-    alreadyInCart: false,
-    message: `«${pattern.title}» добавлена в корзину`,
-    cart: formatCart(cart),
-  });
 });
 
 /**
  * PATCH /api/cart/:patternId
- * Поскольку товар цифровой, изменение количества не применимо
+ * Неприменимо для цифровых выкроек
  */
 router.patch("/:patternId", (req, res) => {
   return res.status(400).json({
@@ -117,42 +138,59 @@ router.patch("/:patternId", (req, res) => {
 
 /**
  * DELETE /api/cart/:patternId
- * Удаление товара из корзины
+ * Удаление выкройки из корзины
  */
-router.delete("/:patternId", (req, res) => {
-  const contextId = getContextId(req);
-  if (!contextId) {
-    return res.status(401).json({ error: "Unauthorized", message: "Требуется авторизация" });
+router.delete("/:patternId", async (req, res, next) => {
+  try {
+    const contextId = getContextId(req);
+    if (!contextId) {
+      return res.status(401).json({ error: "Unauthorized", message: "Требуется авторизация" });
+    }
+
+    const numId = Number(req.params.patternId);
+
+    await prisma.cartItem.deleteMany({
+      where: {
+        contextId,
+        patternId: numId,
+      },
+    });
+
+    const updatedCart = await prisma.cartItem.findMany({
+      where: { contextId },
+      include: { pattern: true },
+      orderBy: { addedAt: "asc" },
+    });
+
+    return res.json({
+      message: "Товар удален из корзины",
+      cart: formatCart(updatedCart),
+    });
+  } catch (err) {
+    next(err);
   }
-
-  const numId = Number(req.params.patternId);
-  const cart = getCartForContext(contextId);
-  const itemIndex = cart.findIndex((it) => it.patternId === numId);
-
-  if (itemIndex !== -1) {
-    cart.splice(itemIndex, 1);
-  }
-
-  return res.json({
-    message: "Товар удален из корзины",
-    cart: formatCart(cart),
-  });
 });
 
 /**
  * DELETE /api/cart
  * Полная очистка корзины
  */
-router.delete("/", (req, res) => {
-  const contextId = getContextId(req);
-  if (contextId) {
-    carts.set(contextId, []);
-  }
+router.delete("/", async (req, res, next) => {
+  try {
+    const contextId = getContextId(req);
+    if (contextId) {
+      await prisma.cartItem.deleteMany({
+        where: { contextId },
+      });
+    }
 
-  return res.json({
-    message: "Корзина очищена",
-    cart: { itemsCount: 0, totalPrice: 0, items: [] },
-  });
+    return res.json({
+      message: "Корзина очищена",
+      cart: { itemsCount: 0, totalPrice: 0, items: [] },
+    });
+  } catch (err) {
+    next(err);
+  }
 });
 
 export default router;

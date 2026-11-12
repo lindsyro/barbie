@@ -1,102 +1,143 @@
 import { Router } from "express";
-import { wishlists, patterns } from "../data/mockData.js";
+import prisma from "../db.js";
 import { getContextId } from "../middleware/auth.js";
 
 const router = Router();
 
-function getWishlistForContext(contextId) {
-  if (!wishlists.has(contextId)) {
-    wishlists.set(contextId, new Set());
-  }
-  return wishlists.get(contextId);
-}
-
-function formatWishlist(setOfIds) {
-  const ids = Array.from(setOfIds);
-  const items = ids
-    .map((id) => patterns.find((p) => p.id === id))
-    .filter(Boolean);
-
+function formatWishlist(items) {
+  const patternsList = items.map((it) => it.pattern).filter(Boolean);
   return {
-    total: items.length,
-    items,
+    total: patternsList.length,
+    items: patternsList,
   };
 }
 
 /**
  * GET /api/wishlist
- * Список избранных выкроек пользователя
+ * Список избранного пользователя из PostgreSQL
  */
-router.get("/", (req, res) => {
-  const contextId = getContextId(req);
-  if (!contextId) {
-    return res.json({ total: 0, items: [] });
-  }
+router.get("/", async (req, res, next) => {
+  try {
+    const contextId = getContextId(req);
+    if (!contextId) {
+      return res.json({ total: 0, items: [] });
+    }
 
-  const set = getWishlistForContext(contextId);
-  return res.json(formatWishlist(set));
+    const items = await prisma.wishlistItem.findMany({
+      where: { contextId },
+      include: { pattern: true },
+      orderBy: { addedAt: "desc" },
+    });
+
+    return res.json(formatWishlist(items));
+  } catch (err) {
+    next(err);
+  }
 });
 
 /**
  * POST /api/wishlist/toggle
- * Переключение состояния избранного (добавить / убрать)
- * Body: { patternId }
+ * Добавить / удалить выкройку из избранного
  */
-router.post("/toggle", (req, res) => {
-  const contextId = getContextId(req);
-  if (!contextId) {
-    return res.status(401).json({
-      error: "Unauthorized",
-      message: "Для добавления в избранное необходимо войти в аккаунт",
+router.post("/toggle", async (req, res, next) => {
+  try {
+    const contextId = getContextId(req);
+    if (!contextId) {
+      return res.status(401).json({
+        error: "Unauthorized",
+        message: "Для добавления в избранное необходимо войти в аккаунт",
+      });
+    }
+
+    const { patternId } = req.body || {};
+    const numId = Number(patternId);
+
+    const pattern = await prisma.pattern.findUnique({
+      where: { id: numId },
     });
+
+    if (!pattern) {
+      return res.status(404).json({ error: "NotFound", message: "Выкройка не найдена" });
+    }
+
+    const existing = await prisma.wishlistItem.findUnique({
+      where: {
+        contextId_patternId: {
+          contextId,
+          patternId: numId,
+        },
+      },
+    });
+
+    let inWishlist = false;
+
+    if (existing) {
+      await prisma.wishlistItem.delete({
+        where: { id: existing.id },
+      });
+      inWishlist = false;
+    } else {
+      await prisma.wishlistItem.create({
+        data: {
+          contextId,
+          userId: req.user?.id || null,
+          patternId: numId,
+        },
+      });
+      inWishlist = true;
+    }
+
+    const updated = await prisma.wishlistItem.findMany({
+      where: { contextId },
+      include: { pattern: true },
+      orderBy: { addedAt: "desc" },
+    });
+
+    return res.json({
+      inWishlist,
+      message: inWishlist
+        ? `«${pattern.title}» добавлена в избранное`
+        : `«${pattern.title}» удалена из избранного`,
+      wishlist: formatWishlist(updated),
+    });
+  } catch (err) {
+    next(err);
   }
-
-  const { patternId } = req.body || {};
-  const numId = Number(patternId);
-
-  const pattern = patterns.find((p) => p.id === numId);
-  if (!pattern) {
-    return res.status(404).json({ error: "NotFound", message: "Выкройка не найдена" });
-  }
-
-  const set = getWishlistForContext(contextId);
-  let inWishlist = false;
-
-  if (set.has(numId)) {
-    set.delete(numId);
-    inWishlist = false;
-  } else {
-    set.add(numId);
-    inWishlist = true;
-  }
-
-  return res.json({
-    inWishlist,
-    message: inWishlist
-      ? `«${pattern.title}» добавлена в избранное`
-      : `«${pattern.title}» удалена из избранного`,
-    wishlist: formatWishlist(set),
-  });
 });
 
 /**
  * DELETE /api/wishlist/:patternId
  * Удаление выкройки из избранного
  */
-router.delete("/:patternId", (req, res) => {
-  const contextId = getContextId(req);
-  if (!contextId) {
-    return res.status(401).json({ error: "Unauthorized", message: "Требуется авторизация" });
+router.delete("/:patternId", async (req, res, next) => {
+  try {
+    const contextId = getContextId(req);
+    if (!contextId) {
+      return res.status(401).json({ error: "Unauthorized", message: "Требуется авторизация" });
+    }
+
+    const numId = Number(req.params.patternId);
+
+    await prisma.wishlistItem.deleteMany({
+      where: {
+        contextId,
+        patternId: numId,
+      },
+    });
+
+    const updated = await prisma.wishlistItem.findMany({
+      where: { contextId },
+      include: { pattern: true },
+      orderBy: { addedAt: "desc" },
+    });
+
+    return res.json({
+      message: "Выкройка удалена из избранного",
+      wishlist: formatWishlist(updated),
+    });
+  } catch (err) {
+    next(err);
   }
-
-  const numId = Number(req.params.patternId);
-  const set = getWishlistForContext(contextId);
-  set.delete(numId);
-
-  return res.json({
-    message: "Выкройка удалена из избранного",
-    wishlist: formatWishlist(set),
-  });
 });
 
 export default router;

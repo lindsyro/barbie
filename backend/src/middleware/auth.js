@@ -1,30 +1,37 @@
-import { users, sessions } from "../data/mockData.js";
+import prisma from "../db.js";
 
 /**
- * Middleware для извлечения пользователя из Bearer токена
+ * Middleware для извлечения пользователя из Bearer токена в PostgreSQL
  */
-export function authenticate(req, res, next) {
-  const authHeader = req.headers.authorization || "";
-  let token = null;
+export async function authenticate(req, res, next) {
+  try {
+    const authHeader = req.headers.authorization || "";
+    let token = null;
 
-  if (authHeader.startsWith("Bearer ")) {
-    token = authHeader.slice(7).trim();
-  } else if (req.headers["x-auth-token"]) {
-    token = String(req.headers["x-auth-token"]).trim();
-  }
-
-  if (token && sessions.has(token)) {
-    const userId = sessions.get(token);
-    const user = users.find((u) => u.id === userId);
-    if (user) {
-      req.user = {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        createdAt: user.createdAt,
-      };
-      req.token = token;
+    if (authHeader.startsWith("Bearer ")) {
+      token = authHeader.slice(7).trim();
+    } else if (req.headers["x-auth-token"]) {
+      token = String(req.headers["x-auth-token"]).trim();
     }
+
+    if (token) {
+      const session = await prisma.session.findUnique({
+        where: { token },
+        include: { user: true },
+      });
+
+      if (session?.user) {
+        req.user = {
+          id: session.user.id,
+          email: session.user.email,
+          name: session.user.name,
+          createdAt: session.user.createdAt,
+        };
+        req.token = token;
+      }
+    }
+  } catch (err) {
+    console.error("Ошибка аутентификации:", err);
   }
 
   next();

@@ -1,30 +1,39 @@
 import { Router } from "express";
-import { categories, patterns } from "../data/mockData.js";
+import prisma from "../db.js";
 
 const router = Router();
 
 /**
  * GET /api/categories
- * Список категорий выкроек с актуальным количеством товаров
+ * Список категорий выкроек с актуальным количеством товаров из PostgreSQL
  */
-router.get("/", (req, res) => {
-  const categoriesWithCounts = categories.map((cat) => {
-    let count = 0;
-    if (cat.id === "all") {
-      count = patterns.length;
-    } else {
-      count = patterns.filter((p) => p.category === cat.id).length;
-    }
-    return {
-      ...cat,
-      count: String(count),
-    };
-  });
+router.get("/", async (req, res, next) => {
+  try {
+    const totalPatternsCount = await prisma.pattern.count();
 
-  return res.json({
-    total: categoriesWithCounts.length,
-    items: categoriesWithCounts,
-  });
+    const categories = await prisma.category.findMany({
+      include: {
+        _count: {
+          select: { patterns: true },
+        },
+      },
+      orderBy: { id: "asc" },
+    });
+
+    const items = categories.map((cat) => ({
+      id: cat.id,
+      name: cat.name,
+      scale: cat.scale,
+      count: String(cat.id === "all" ? totalPatternsCount : cat._count.patterns),
+    }));
+
+    return res.json({
+      total: items.length,
+      items,
+    });
+  } catch (err) {
+    next(err);
+  }
 });
 
 export default router;

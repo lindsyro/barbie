@@ -1,5 +1,7 @@
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import prisma from "./src/db.js";
 import { authenticate } from "./src/middleware/auth.js";
 import authRouter from "./src/routes/auth.js";
 import patternsRouter from "./src/routes/patterns.js";
@@ -36,7 +38,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// 4. Определение текущего пользователя по Bearer-токену
+// 4. Определение текущего пользователя по Bearer-токену в PostgreSQL
 app.use(authenticate);
 
 // 5. Корневой маршрут и проверка работоспособности
@@ -44,6 +46,7 @@ app.get("/", (req, res) => {
   res.json({
     name: "GOOSE Fashion House API",
     version: "1.0.0",
+    database: "PostgreSQL (goose)",
     status: "running",
     endpoints: {
       health: "GET /api/health",
@@ -83,12 +86,22 @@ app.get("/", (req, res) => {
   });
 });
 
-app.get("/api/health", (req, res) => {
-  res.json({
-    status: "ok",
-    uptimeSeconds: Math.floor(process.uptime()),
-    timestamp: new Date().toISOString(),
-  });
+app.get("/api/health", async (req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.json({
+      status: "ok",
+      database: "connected (PostgreSQL / goose)",
+      uptimeSeconds: Math.floor(process.uptime()),
+      timestamp: new Date().toISOString(),
+    });
+  } catch (err) {
+    res.status(503).json({
+      status: "error",
+      database: "disconnected",
+      error: err.message,
+    });
+  }
 });
 
 // 6. Подключение маршрутов API
@@ -123,6 +136,7 @@ const server = app.listen(PORT, () => {
   console.log(`
 ==================================================
   🦢 GOOSE Fashion House API Server
+  🗄️  База данных:   PostgreSQL (база: goose)
   🚀 Сервер запущен: http://localhost:${PORT}
   📡 Проверка API:   http://localhost:${PORT}/api/health
   📚 Каталог выкроек: http://localhost:${PORT}/api/patterns
@@ -131,10 +145,11 @@ const server = app.listen(PORT, () => {
 });
 
 // Корректная остановка (graceful shutdown)
-const handleShutdown = () => {
+const handleShutdown = async () => {
   console.log("\nОстановка сервера GOOSE Fashion House...");
-  server.close(() => {
-    console.log("Сервер остановлен.");
+  server.close(async () => {
+    await prisma.$disconnect();
+    console.log("Сервер остановлен, соединение с БД закрыто.");
     process.exit(0);
   });
 };

@@ -1,0 +1,149 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String         @id @default(uuid())
+  email        String         @unique
+  name         String
+  passwordHash String
+  salt         String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  sessions     Session[]
+  cartItems    CartItem[]
+  wishlist     WishlistItem[]
+  orders       Order[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@map("sessions")
+}
+
+model Category {
+  id       String    @id
+  name     String
+  scale    String
+  patterns Pattern[]
+
+  @@map("categories")
+}
+
+model Pattern {
+  id           Int            @id @default(autoincrement())
+  title        String
+  doll         String
+  scale        String
+  categoryId   String?
+  category     Category?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  price        Int
+  tag          String
+  rating       Float          @default(5.0)
+  reviewsCount Int            @default(0)
+  image        String
+  description  String         @db.Text
+  difficulty   String         @default("Легкий")
+  format       String         @default("PDF (A4 + инструкции)")
+  isFeatured   Boolean        @default(false)
+  createdAt    DateTime       @default(now())
+
+  cartItems    CartItem[]
+  wishlist     WishlistItem[]
+  orderItems   OrderItem[]
+
+  @@map("patterns")
+}
+
+model CartItem {
+  id        String   @id @default(uuid())
+  contextId String
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  patternId Int
+  pattern   Pattern  @relation(fields: [patternId], references: [id], onDelete: Cascade)
+  addedAt   DateTime @default(now())
+
+  @@unique([contextId, patternId])
+  @@map("cart_items")
+}
+
+model WishlistItem {
+  id        String   @id @default(uuid())
+  contextId String
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  patternId Int
+  pattern   Pattern  @relation(fields: [patternId], references: [id], onDelete: Cascade)
+  addedAt   DateTime @default(now())
+
+  @@unique([contextId, patternId])
+  @@map("wishlist_items")
+}
+
+model Order {
+  id            String      @id
+  userId        String?
+  user          User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userEmail     String
+  userName      String
+  status        String      @default("paid")
+  paymentMethod String      @default("card")
+  totalAmount   Int
+  currency      String      @default("RUB")
+  createdAt     DateTime    @default(now())
+
+  items         OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id          String   @id @default(uuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  patternId   Int
+  pattern     Pattern  @relation(fields: [patternId], references: [id])
+  title       String
+  doll        String
+  price       Int
+  format      String
+  downloadUrl String
+
+  @@unique([orderId, patternId])
+  @@map("order_items")
+}
+
+model Review {
+  id           Int      @id @default(autoincrement())
+  author       String
+  doll         String
+  patternTitle String
+  rating       Int      @default(5)
+  text         String   @db.Text
+  createdAt    DateTime @default(now())
+
+  @@map("reviews")
+}
+
+model Subscriber {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  promoCode String   @default("GOOSE10")
+  createdAt DateTime @default(now())
+
+  @@map("subscribers")
+}
