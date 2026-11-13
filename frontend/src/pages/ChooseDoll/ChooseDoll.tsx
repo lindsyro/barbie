@@ -9,7 +9,7 @@ export interface ChooseDollProps {
   onNavigateToCatalog?: (categoryOrHash?: string) => void;
 }
 
-type CategoryType = "all" | "girls" | "guys" | "curvy" | "collectible" | "bjd";
+type CategoryType = "all" | "girls" | "guys" | "curvy" | "collectible" | "bjd" | "child";
 
 const BASE = import.meta.env.BASE_URL;
 
