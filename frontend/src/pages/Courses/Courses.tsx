@@ -1,5 +1,6 @@
 import React from "react";
 import { Breadcrumbs } from "../../components/Breadcrumbs/Breadcrumbs.tsx";
+import { PageHeader } from "../../components/PageHeader/PageHeader.tsx";
 import { PagePlaceholder } from "../../components/PagePlaceholder/PagePlaceholder.tsx";
 import "../pages.css";
 
@@ -12,11 +13,7 @@ export const Courses: React.FC<CoursesProps> = ({ onBackToMain }) => {
     <div className="page-container">
       <Breadcrumbs current="Курсы" onBackToMain={onBackToMain} />
 
-      <div className="page-header">
-        <span className="page-header__subtitle">Обучение шитью кукольной одежды</span>
-        <h1 className="page-header__title">Курсы</h1>
-        <div className="page-header__line" />
-      </div>
+      <PageHeader title="Курсы" subtitle="Обучение шитью кукольной одежды" />
 
       <PagePlaceholder
         icon={

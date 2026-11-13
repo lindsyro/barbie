@@ -1,5 +1,6 @@
 import React from "react";
 import { Breadcrumbs } from "../../components/Breadcrumbs/Breadcrumbs.tsx";
+import { PageHeader } from "../../components/PageHeader/PageHeader.tsx";
 import { PagePlaceholder } from "../../components/PagePlaceholder/PagePlaceholder.tsx";
 import "../pages.css";
 
@@ -14,11 +15,10 @@ export const Reviews: React.FC<ReviewsProps> = ({ onBackToMain }) => {
       <Breadcrumbs current="Отзывы мастериц" onBackToMain={onBackToMain} />
 
       {/* Заголовок страницы */}
-      <div className="page-header">
-        <span className="page-header__subtitle">Галерея готовых работ</span>
-        <h1 className="page-header__title">Отзывы мастериц</h1>
-        <div className="page-header__line" />
-      </div>
+      <PageHeader
+        title="Отзывы мастериц"
+        subtitle="Галерея готовых работ"
+      />
 
       {/* Заглушка страницы */}
       <PagePlaceholder

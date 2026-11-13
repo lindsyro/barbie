@@ -1,5 +1,6 @@
 import React from "react";
 import { Breadcrumbs } from "../../components/Breadcrumbs/Breadcrumbs.tsx";
+import { PageHeader } from "../../components/PageHeader/PageHeader.tsx";
 import { PagePlaceholder } from "../../components/PagePlaceholder/PagePlaceholder.tsx";
 import "../pages.css";
 
@@ -14,11 +15,7 @@ export const Measurements: React.FC<MeasurementsProps> = ({ onBackToMain }) => {
       <Breadcrumbs current="Мерки кукол" onBackToMain={onBackToMain} />
 
       {/* Заголовок страницы */}
-      <div className="page-header">
-        <span className="page-header__subtitle">Таблицы параметров</span>
-        <h1 className="page-header__title">Мерки кукол</h1>
-        <div className="page-header__line" />
-      </div>
+      <PageHeader title="Мерки кукол" subtitle="Таблицы параметров" />
 
       {/* Заглушка страницы */}
       <PagePlaceholder

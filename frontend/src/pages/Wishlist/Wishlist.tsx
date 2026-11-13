@@ -1,5 +1,6 @@
 import React from "react";
 import { Breadcrumbs } from "../../components/Breadcrumbs/Breadcrumbs.tsx";
+import { PageHeader } from "../../components/PageHeader/PageHeader.tsx";
 import type { WishlistProps } from "./types.ts";
 import "./wishlist.css";
 import "../pages.css";
@@ -20,11 +21,10 @@ export const Wishlist: React.FC<WishlistProps> = ({
       <Breadcrumbs current="Избранное" onBackToMain={onBackToMain} />
 
       {/* Заголовок страницы */}
-      <div className="page-header">
-        <span className="page-header__subtitle">Ваша персональная подборка</span>
-        <h1 className="page-header__title">Избранные выкройки</h1>
-        <div className="page-header__line" />
-      </div>
+      <PageHeader
+        title="Избранные выкройки"
+        subtitle="Ваша персональная подборка"
+      />
 
       {/* Содержимое страницы */}
       {isLoading ? (

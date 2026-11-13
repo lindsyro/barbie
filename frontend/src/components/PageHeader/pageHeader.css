@@ -1,0 +1,52 @@
+/* ==========================================================================
+   PageHeader Component Styles (Заголовок страниц)
+   ========================================================================== */
+
+.page-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.page-header__subtitle {
+  display: block;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--color-gold-site);
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.page-header__title {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: var(--color-chocolate);
+  margin: 0 0 0.5rem 0;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+}
+
+.page-header__line {
+  width: 36px;
+  height: 2px;
+  background: var(--color-gold-site);
+  margin: 0 auto;
+}
+
+.page-header__extra {
+  margin-top: 0.75rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@media (max-width: 640px) {
+  .page-header {
+    margin-bottom: 1.25rem;
+  }
+
+  .page-header__title {
+    font-size: 1.45rem;
+  }
+}

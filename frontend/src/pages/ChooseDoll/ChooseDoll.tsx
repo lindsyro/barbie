@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { Breadcrumbs } from "../../components/Breadcrumbs/Breadcrumbs.tsx";
+import { PageHeader } from "../../components/PageHeader/PageHeader.tsx";
 import { DOLLS_DATA, type DollItem } from "./dollsData.ts";
 import "./chooseDoll.css";
 import "../pages.css";
@@ -68,11 +69,10 @@ export const ChooseDoll: React.FC<ChooseDollProps> = ({
       <Breadcrumbs current="Выбрать куклу" onBackToMain={onBackToMain} />
 
       {/* Заголовок страницы */}
-      <div className="page-header">
-        <span className="page-header__subtitle">Анатомический справочник GOOSE</span>
-        <h1 className="page-header__title">Выбрать куклу</h1>
-        <div className="page-header__line" />
-      </div>
+      <PageHeader
+        title="Выбрать куклу"
+        subtitle="Анатомический справочник GOOSE"
+      />
 
       {/* Панель фильтров и поиска */}
       <div className="choose-doll-toolbar">

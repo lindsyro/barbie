@@ -1,5 +1,6 @@
 import React from "react";
 import { Breadcrumbs } from "../../components/Breadcrumbs/Breadcrumbs.tsx";
+import { PageHeader } from "../../components/PageHeader/PageHeader.tsx";
 import { PagePlaceholder } from "../../components/PagePlaceholder/PagePlaceholder.tsx";
 import "../pages.css";
 
@@ -12,11 +13,10 @@ export const Catalog: React.FC<CatalogProps> = ({ onBackToMain }) => {
     <div className="page-container">
       <Breadcrumbs current="Каталог выкроек" onBackToMain={onBackToMain} />
 
-      <div className="page-header">
-        <span className="page-header__subtitle">Авторские лекала</span>
-        <h1 className="page-header__title">Каталог выкроек</h1>
-        <div className="page-header__line" />
-      </div>
+      <PageHeader
+        title="Каталог выкроек"
+        subtitle="Авторские лекала"
+      />
 
       <PagePlaceholder
         icon={

@@ -1,5 +1,6 @@
 import React from "react";
 import { Breadcrumbs } from "../../components/Breadcrumbs/Breadcrumbs.tsx";
+import { PageHeader } from "../../components/PageHeader/PageHeader.tsx";
 import { PagePlaceholder } from "../../components/PagePlaceholder/PagePlaceholder.tsx";
 import "../pages.css";
 
@@ -14,11 +15,10 @@ export const ShoppingTerms: React.FC<ShoppingTermsProps> = ({ onBackToMain }) =>
       <Breadcrumbs current="Условия покупки" onBackToMain={onBackToMain} />
 
       {/* Заголовок страницы */}
-      <div className="page-header">
-        <span className="page-header__subtitle">Порядок оформления и доставки</span>
-        <h1 className="page-header__title">Условия покупки</h1>
-        <div className="page-header__line" />
-      </div>
+      <PageHeader
+        title="Условия покупки"
+        subtitle="Порядок оформления и доставки"
+      />
 
       {/* Заглушка страницы */}
       <PagePlaceholder

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Breadcrumbs } from "../../components/Breadcrumbs/Breadcrumbs.tsx";
+import { PageHeader } from "../../components/PageHeader/PageHeader.tsx";
 import type { CartProps } from "./types.ts";
 import "./cart.css";
 import "../pages.css";
@@ -51,11 +52,10 @@ export const Cart: React.FC<CartProps> = ({
       <Breadcrumbs current="Корзина" onBackToMain={onBackToMain} />
 
       {/* Заголовок страницы */}
-      <div className="page-header">
-        <span className="page-header__subtitle">Оформление заказа</span>
-        <h1 className="page-header__title">Корзина покупок</h1>
-        <div className="page-header__line" />
-      </div>
+      <PageHeader
+        title="Корзина покупок"
+        subtitle="Оформление заказа"
+      />
 
       {/* Контент: если корзина пуста */}
       {items.length === 0 ? (

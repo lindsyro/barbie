@@ -14,6 +14,9 @@ export type { BreadcrumbsProps, BreadcrumbItem } from "./Breadcrumbs/Breadcrumbs
 export { PagePlaceholder } from "./PagePlaceholder/PagePlaceholder.tsx";
 export type { PagePlaceholderProps } from "./PagePlaceholder/PagePlaceholder.tsx";
 
+export { PageHeader } from "./PageHeader/PageHeader.tsx";
+export type { PageHeaderProps } from "./PageHeader/PageHeader.tsx";
+
 export { Modal } from "./Modal/Modal.tsx";
 export type { ModalProps } from "./Modal/Modal.tsx";
 

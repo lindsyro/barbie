@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Breadcrumbs } from "../../components/Breadcrumbs/Breadcrumbs.tsx";
+import { PageHeader } from "../../components/PageHeader/PageHeader.tsx";
 import { PagePlaceholder } from "../../components/PagePlaceholder/PagePlaceholder.tsx";
 import {
   fetchPurchasedPatterns,
@@ -80,15 +81,14 @@ export const Account: React.FC<AccountProps> = ({
       <Breadcrumbs current="Личный кабинет" onBackToMain={onBackToMain} />
 
       {/* Заголовок страницы */}
-      <div className="page-header">
-        <span className="page-header__subtitle">
-          {user
+      <PageHeader
+        title="Личный кабинет"
+        subtitle={
+          user
             ? `Добро пожаловать, ${user.name || user.email}`
-            : "Персональный раздел"}
-        </span>
-        <h1 className="page-header__title">Личный кабинет</h1>
-        <div className="page-header__line" />
-      </div>
+            : "Персональный раздел"
+        }
+      />
 
       {/* Если пользователь не авторизован */}
       {!user ? (
