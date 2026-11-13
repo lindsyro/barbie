@@ -1,13 +1,9 @@
-/**
- * Данные всех 27 кукол из папки frontend/public/dolls
- */
-
 export interface DollItem {
   id: number;
   fileName: string;
   name: string;
   dollType: string;
-  category: "girls" | "guys" | "curvy" | "collectible" | "bjd";
+  category: "girls" | "guys" | "curvy" | "collectible" | "bjd" | "child";
   categoryLabel: string;
   scale: string;
   height: string;
@@ -25,7 +21,7 @@ export const DOLLS_DATA: DollItem[] = [
   {
     id: 1,
     fileName: "Барби Made to Move в синем купальнике.png",
-    name: "Барби Made to Move (Standard)",
+    name: "Barbie MTM Tall (Барби высокая)",
     dollType: "Стандартное шарнирное тело 1/6",
     category: "girls",
     categoryLabel: "Девушки 1/6",
@@ -137,15 +133,15 @@ export const DOLLS_DATA: DollItem[] = [
   {
     id: 9,
     fileName: "Кукла в матово-синем купальнике-3.png",
-    name: "Барби Tall (Высокая)",
+    name: "Barbie Kelly (Барби Келли)",
     dollType: "Удлинённое тело 1/6 Tall",
-    category: "girls",
+    category: "child",
     categoryLabel: "Девушки 1/6",
     scale: "1/6",
     height: "31.5 см",
     measurements: { bust: "12.8 см", waist: "9.2 см", hips: "13.2 см" },
-    features: "Увеличенный рост и удлинённые конечности, идеальна для макси-платьев и брюк-палаццо.",
-    tag: "Tall",
+    features: "Описание тут",
+    tag: "child",
     catalogHash: "girls-1-6",
   },
   {
@@ -179,7 +175,7 @@ export const DOLLS_DATA: DollItem[] = [
   {
     id: 12,
     fileName: "Кукла в матовом серо-синем купальнике-15.png",
-    name: "Барби Pivotal Body",
+    name: "Barbie MTM Petite (Барби петит)",
     dollType: "Шарнирное пластиковое тело",
     category: "girls",
     categoryLabel: "Девушки 1/6",
@@ -187,13 +183,13 @@ export const DOLLS_DATA: DollItem[] = [
     height: "29.2 см",
     measurements: { bust: "12.6 см", waist: "8.9 см", hips: "12.9 см" },
     features: "Шарниры в локтях и коленях с анатомическими контурами рук и ног.",
-    tag: "Pivotal",
+    tag: "",
     catalogHash: "girls-1-6",
   },
   {
     id: 13,
     fileName: "Кукла в матовом синем купальнике-8.png",
-    name: "Barbie Silkstone (BFMC)",
+    name: "Barbie MTM Curvy",
     dollType: "Винтажное литое тело Silkstone",
     category: "collectible",
     categoryLabel: "Коллекционные",
@@ -201,21 +197,21 @@ export const DOLLS_DATA: DollItem[] = [
     height: "29.5 см",
     measurements: { bust: "13.2 см", waist: "8.4 см", hips: "13.0 см" },
     features: "Тяжёлый матовый материал silkstone, классическая тонкая талия стиля 50-60-х годов.",
-    tag: "Silkstone",
+    tag: "Curvy",
     catalogHash: "girls-1-6",
   },
   {
     id: 14,
     fileName: "Кукла в матовом сланцево-синем купальнике-16.png",
-    name: "Барби Curvy Made to Move",
-    dollType: "Шарнирное пышное тело 1/6",
-    category: "curvy",
-    categoryLabel: "Пышки (Curvy)",
+    name: "Barbie MTM Standart",
+    dollType: "Шарнирное тело 1/6",
+    category: "",
+    categoryLabel: "",
     scale: "1/6",
     height: "29.5 см",
     measurements: { bust: "14.4 см", waist: "11.2 см", hips: "16.2 см" },
     features: "Шарнирная подвижность в сочетании с пышными бёдрами и полной грудью.",
-    tag: "Хит Curvy",
+    tag: "Хит",
     catalogHash: "girls-1-6",
   },
   {
@@ -333,7 +329,7 @@ export const DOLLS_DATA: DollItem[] = [
   {
     id: 23,
     fileName: "Кукла в сланцево-синем купальнике-6.png",
-    name: "Барби Twist 'n Turn 90-х",
+    name: "Barbie 90s (Барби 90-х)",
     dollType: "Винтажное поворотное тело TNT",
     category: "girls",
     categoryLabel: "Девушки 1/6",

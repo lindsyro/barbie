@@ -30,6 +30,7 @@ export const ChooseDoll: React.FC<ChooseDollProps> = ({
       { id: "curvy", label: "Пышки (Curvy)", count: DOLLS_DATA.filter((d) => d.category === "curvy").length },
       { id: "collectible", label: "Коллекционные", count: DOLLS_DATA.filter((d) => d.category === "collectible").length },
       { id: "bjd", label: "BJD / Авторские", count: DOLLS_DATA.filter((d) => d.category === "bjd").length },
+      { id: "child", label: "Дети", count: DOLLS_DATA.filter((d) => d.category === "child").length },
     ];
   }, []);
 
@@ -72,13 +73,6 @@ export const ChooseDoll: React.FC<ChooseDollProps> = ({
         <h1 className="page-header__title">Выбрать куклу</h1>
         <div className="page-header__line" />
       </div>
-
-      {/* Вводная плашка с подсказкой */}
-      {/* <div className="choose-doll-intro">
-        <p className="choose-doll-intro__text">
-          В нашей коллекции представлены <strong>{DOLLS_DATA.length} типов тел</strong> кукол: от классических и шарнирных Барби Made to Move до мускулистых Кенов, пышных фигур Curvy и коллекционных Integrity Toys. Выберите вашу куклу, чтобы сразу увидеть идеально подходящие выкройки без необходимости корректировать размеры.
-        </p>
-      </div> */}
 
       {/* Панель фильтров и поиска */}
       <div className="choose-doll-toolbar">
