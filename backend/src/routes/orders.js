@@ -96,6 +96,57 @@ router.post("/", requireAuth, async (req, res, next) => {
 });
 
 /**
+ * GET /api/orders/purchased
+ * Список всех купленных выкроек текущего пользователя со ссылками на скачивание
+ */
+router.get("/purchased", requireAuth, async (req, res, next) => {
+  try {
+    const orders = await prisma.order.findMany({
+      where: { userId: req.user.id, status: "paid" },
+      include: {
+        items: {
+          include: {
+            pattern: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const purchasedMap = new Map();
+    for (const order of orders) {
+      for (const item of order.items) {
+        if (!purchasedMap.has(item.patternId)) {
+          purchasedMap.set(item.patternId, {
+            id: item.id,
+            patternId: item.patternId,
+            title: item.title,
+            doll: item.doll,
+            price: item.price,
+            format: item.format,
+            downloadUrl: item.downloadUrl,
+            orderId: order.id,
+            purchasedAt: order.createdAt,
+            image: item.pattern?.image || `/patterns/${item.patternId}.png`,
+            tag: item.pattern?.tag || "Куплено",
+            difficulty: item.pattern?.difficulty || "Легкий",
+          });
+        }
+      }
+    }
+
+    const items = Array.from(purchasedMap.values());
+    return res.json({
+      total: items.length,
+      items,
+      ordersCount: orders.length,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
  * GET /api/orders
  * Список заказов текущего пользователя
  */
@@ -103,7 +154,13 @@ router.get("/", requireAuth, async (req, res, next) => {
   try {
     const userOrders = await prisma.order.findMany({
       where: { userId: req.user.id },
-      include: { items: true },
+      include: {
+        items: {
+          include: {
+            pattern: true,
+          },
+        },
+      },
       orderBy: { createdAt: "desc" },
     });
 

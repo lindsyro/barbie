@@ -455,6 +455,7 @@ function App() {
             onBackToMain={() => navigateTo("main")}
             onLogout={handleLogout}
             onOpenLogin={() => setAuthModal("login")}
+            onNavigateToCatalog={() => navigateTo("catalog")}
           />
         );
       case "choose-doll":
