@@ -459,7 +459,12 @@ function App() {
           />
         );
       case "choose-doll":
-        return <ChooseDoll onBackToMain={() => navigateTo("main")} />;
+        return (
+          <ChooseDoll
+            onBackToMain={() => navigateTo("main")}
+            onNavigateToCatalog={(hash) => navigateTo(hash || "catalog")}
+          />
+        );
       case "measurements":
         return <Measurements onBackToMain={() => navigateTo("main")} />;
       case "shopping-terms":

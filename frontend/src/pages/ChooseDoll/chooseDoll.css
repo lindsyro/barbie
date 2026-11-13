@@ -1,0 +1,518 @@
+/* ==========================================================================
+   Choose Doll Page Styles (Гид по выбору куклы и типам тел GOOSE)
+   ========================================================================== */
+
+.choose-doll-page {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Вводная плашка с подсказкой */
+.choose-doll-intro {
+  background: #ffffff;
+  border: 1px solid var(--color-cappuccino);
+  border-left: 4px solid var(--color-gold-site);
+  border-radius: 12px;
+  padding: 1.25rem 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  box-shadow: 0 4px 20px rgba(74, 52, 38, 0.04);
+}
+
+.choose-doll-intro__text {
+  font-size: 0.925rem;
+  color: var(--color-taupe);
+  line-height: 1.55;
+  margin: 0;
+}
+
+.choose-doll-intro__text strong {
+  color: var(--color-chocolate);
+}
+
+/* Панель фильтров и поиска */
+.choose-doll-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  background: #ffffff;
+  border: 1px solid var(--color-cappuccino);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 4px 18px rgba(74, 52, 38, 0.03);
+}
+
+.choose-doll-search-row {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.choose-doll-search {
+  position: relative;
+  flex: 1;
+}
+
+.choose-doll-search__icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-taupe);
+  pointer-events: none;
+}
+
+.choose-doll-search__input {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 2.6rem;
+  border: 1px solid var(--color-cappuccino);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  background: var(--bg-soft);
+  color: var(--color-chocolate);
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.choose-doll-search__input:focus {
+  border-color: var(--color-gold-site);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(166, 129, 66, 0.12);
+}
+
+/* Категории фильтров */
+.choose-doll-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.choose-doll-filter-btn {
+  background: var(--bg-soft);
+  border: 1px solid var(--color-cappuccino);
+  color: var(--color-chocolate);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.choose-doll-filter-btn:hover {
+  border-color: var(--color-gold-site);
+  background: #ffffff;
+}
+
+.choose-doll-filter-btn--active {
+  background: var(--color-chocolate);
+  color: #ffffff;
+  border-color: var(--color-chocolate);
+}
+
+.choose-doll-filter-btn__count {
+  font-size: 0.725rem;
+  opacity: 0.8;
+  background: rgba(0, 0, 0, 0.08);
+  padding: 0.1rem 0.45rem;
+  border-radius: 10px;
+}
+
+.choose-doll-filter-btn--active .choose-doll-filter-btn__count {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Сетка карточек кукол */
+.dolls-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.75rem;
+}
+
+@media (max-width: 640px) {
+  .dolls-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+}
+
+/* Карточка куклы */
+.doll-card {
+  background: #ffffff;
+  border: 1px solid var(--color-cappuccino);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 18px rgba(74, 52, 38, 0.04);
+}
+
+.doll-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(166, 129, 66, 0.45);
+  box-shadow: 0 10px 28px rgba(74, 52, 38, 0.09);
+}
+
+.doll-card__img-box {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: var(--bg-soft);
+  cursor: pointer;
+}
+
+.doll-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.doll-card:hover .doll-card__img {
+  transform: scale(1.04);
+}
+
+.doll-card__tag {
+  position: absolute;
+  top: 0.85rem;
+  left: 0.85rem;
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--color-gold-site);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.25rem 0.65rem;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.doll-card__scale-badge {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+  background: rgba(74, 52, 38, 0.85);
+  color: #ffffff;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 0.25rem 0.55rem;
+  border-radius: 4px;
+  backdrop-filter: blur(4px);
+}
+
+.doll-card__body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.doll-card__cat-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--color-taupe);
+  margin-bottom: 0.35rem;
+}
+
+.doll-card__title {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--color-chocolate);
+  margin: 0 0 0.35rem 0;
+  line-height: 1.25;
+}
+
+.doll-card__type {
+  font-size: 0.8125rem;
+  color: var(--color-taupe);
+  margin: 0 0 0.75rem 0;
+}
+
+/* Полоса мерок куклы */
+.doll-card__measurements {
+  display: flex;
+  justify-content: space-between;
+  background: var(--bg-soft);
+  border-radius: 6px;
+  padding: 0.45rem 0.65rem;
+  margin-bottom: 0.85rem;
+  font-size: 0.75rem;
+  color: var(--color-chocolate);
+}
+
+.doll-card__measurements span {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+}
+
+.doll-card__measurements strong {
+  color: var(--color-gold-site);
+  font-size: 0.8rem;
+}
+
+.doll-card__features {
+  font-size: 0.785rem;
+  color: var(--color-taupe);
+  line-height: 1.45;
+  margin: 0 0 1rem 0;
+  flex: 1;
+}
+
+.doll-card__footer {
+  margin-top: auto;
+  display: flex;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-ivory);
+}
+
+.doll-card__btn-patterns {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.6rem 0.85rem;
+  background: var(--color-chocolate);
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
+}
+
+.doll-card__btn-patterns:hover {
+  background: var(--color-gold-site);
+}
+
+.doll-card__btn-details {
+  padding: 0.6rem 0.85rem;
+  background: none;
+  border: 1px solid var(--color-cappuccino);
+  color: var(--color-chocolate);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.doll-card__btn-details:hover {
+  border-color: var(--color-gold-site);
+  color: var(--color-gold-site);
+}
+
+/* Модальное окно куклы */
+.doll-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(30, 20, 15, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+.doll-modal {
+  background: #ffffff;
+  border-radius: 16px;
+  max-width: 780px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  position: relative;
+  animation: scaleUp 0.25s ease;
+}
+
+@media (max-width: 720px) {
+  .doll-modal {
+    grid-template-columns: 1fr;
+  }
+}
+
+.doll-modal__close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg-soft);
+  border: 1px solid var(--color-cappuccino);
+  color: var(--color-chocolate);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.doll-modal__close-btn:hover {
+  background: var(--color-chocolate);
+  color: #ffffff;
+}
+
+.doll-modal__img-box {
+  background: var(--bg-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.doll-modal__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.doll-modal__body {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.doll-modal__badge {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 0.725rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--color-gold-site);
+  background: rgba(166, 129, 66, 0.1);
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+}
+
+.doll-modal__title {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: var(--color-chocolate);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.doll-modal__type {
+  font-size: 0.875rem;
+  color: var(--color-taupe);
+  margin: 0;
+}
+
+.doll-modal__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  margin: 0.5rem 0;
+}
+
+.doll-modal__table td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--color-ivory);
+}
+
+.doll-modal__table td:first-child {
+  color: var(--color-taupe);
+}
+
+.doll-modal__table td:last-child {
+  color: var(--color-chocolate);
+  font-weight: 600;
+  text-align: right;
+}
+
+.doll-modal__actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: auto;
+  padding-top: 1rem;
+}
+
+.doll-modal__cta-btn {
+  flex: 1;
+  padding: 0.85rem 1.25rem;
+  background: var(--color-gold-site);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.doll-modal__cta-btn:hover {
+  background: #8f6d33;
+}
+
+/* Пустой результат поиска */
+.dolls-empty {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  background: #ffffff;
+  border: 1px solid var(--color-cappuccino);
+  border-radius: 12px;
+}
+
+.dolls-empty__title {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-chocolate);
+  margin: 0 0 0.5rem 0;
+}
+
+.dolls-empty__desc {
+  font-size: 0.875rem;
+  color: var(--color-taupe);
+  margin: 0 0 1.25rem 0;
+}
+
+.dolls-empty__reset-btn {
+  padding: 0.65rem 1.25rem;
+  background: var(--color-chocolate);
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleUp {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}

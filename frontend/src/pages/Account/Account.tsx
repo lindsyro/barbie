@@ -123,6 +123,42 @@ export const Account: React.FC<AccountProps> = ({
         />
       ) : (
         <div className="account-layout">
+          {/* 1. Карточка профиля */}
+          <div className="account-profile-card">
+            <div className="account-profile-card__left">
+              <div className="account-avatar">
+                {(user.name || user.email || "U").charAt(0).toUpperCase()}
+              </div>
+              <div className="account-user-info">
+                <h2 className="account-user-name">{user.name || "Покупатель"}</h2>
+                <p className="account-user-email">{user.email}</p>
+              </div>
+            </div>
+
+            <div className="account-profile-card__actions">
+              <div className="account-stat-pill">
+                <span>Куплено выкроек:</span>
+                <span className="account-stat-pill__count">{purchased.length}</span>
+              </div>
+
+              {onLogout && (
+                <button
+                  type="button"
+                  onClick={onLogout}
+                  className="account-logout-btn"
+                  title="Выйти из аккаунта"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                  </svg>
+                  <span>Выйти</span>
+                </button>
+              )}
+            </div>
+          </div>
+
           {/* 2. Раздел: Купленные выкройки */}
           <section className="account-section" aria-label="Купленные выкройки">
             <div className="account-section__header">
