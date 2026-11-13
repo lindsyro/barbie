@@ -146,7 +146,7 @@ export const ChooseDoll: React.FC<ChooseDollProps> = ({
                 title="Нажмите для просмотра крупным планом"
               >
                 <img
-                  src={`${BASE}dolls/${encodeURI(doll.fileName)}`}
+                  src={`${BASE}dolls/${encodeURI(doll.fileName.normalize("NFC"))}`}
                   alt={doll.name}
                   className="doll-card__img"
                   loading="lazy"
@@ -224,7 +224,7 @@ export const ChooseDoll: React.FC<ChooseDollProps> = ({
 
             <div className="doll-modal__img-box">
               <img
-                src={`${BASE}dolls/${encodeURI(selectedDoll.fileName)}`}
+                src={`${BASE}dolls/${encodeURI(selectedDoll.fileName.normalize("NFC"))}`}
                 alt={selectedDoll.name}
                 className="doll-modal__img"
               />

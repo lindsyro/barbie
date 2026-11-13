@@ -34,7 +34,7 @@ export const DOLLS_DATA: DollItem[] = [
   },
   {
     id: 2,
-    fileName: "Зелёноволосая кукла с розовыми узорами-8.png",
+    fileName: "Зелёноволосая кукла с розовыми узорами-8.png",
     name: "Фантазийная шарнирная кукла BJD",
     dollType: "Шарнирное художественное тело",
     category: "bjd",
