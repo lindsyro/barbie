@@ -9,7 +9,7 @@ export const FEATURED_PATTERNS: PatternItem[] = [
     tag: "Хит продаж",
     doll: "Барби / Made to Move",
     price: "490 ₽",
-    image: `${BASE}1.png`,
+    image: `${BASE}patterns/27/1.png`,
   },
   {
     id: 2,
@@ -17,7 +17,7 @@ export const FEATURED_PATTERNS: PatternItem[] = [
     tag: "Новинка",
     doll: "Барби Standard & Curvy",
     price: "550 ₽",
-    image: `${BASE}2.png`,
+    image: `${BASE}patterns/19/2.png`,
   },
   {
     id: 3,
@@ -25,7 +25,7 @@ export const FEATURED_PATTERNS: PatternItem[] = [
     tag: "BJD",
     doll: "MiniFee (40-42 см)",
     price: "690 ₽",
-    image: `${BASE}3.png`,
+    image: `${BASE}patterns/21/3.png`,
   },
   {
     id: 4,
@@ -33,7 +33,7 @@ export const FEATURED_PATTERNS: PatternItem[] = [
     tag: "Мужская коллекция",
     doll: "Ken Fashionistas / BMR1959",
     price: "490 ₽",
-    image: `${BASE}4.png`,
+    image: `${BASE}patterns/22/4.png`,
   },
 ];
 

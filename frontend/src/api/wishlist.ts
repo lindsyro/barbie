@@ -56,7 +56,7 @@ const DEMO_FALLBACK_PATTERNS: WishlistPattern[] = [
     scale: "1/6",
     price: 490,
     tag: "Хит продаж",
-    image: `${BASE}1.png`,
+    image: `${BASE}patterns/27/1.png`,
     description: "Базовое облегающее боди с длинным рукавом и воротником-стойкой для кукол Barbie.",
   },
   {
@@ -66,7 +66,7 @@ const DEMO_FALLBACK_PATTERNS: WishlistPattern[] = [
     scale: "1/4",
     price: 690,
     tag: "BJD",
-    image: `${BASE}3.png`,
+    image: `${BASE}patterns/21/3.png`,
     description: "Стильный трикотажный комплект для шарнирных кукол BJD 1/4.",
   },
   {
@@ -76,7 +76,7 @@ const DEMO_FALLBACK_PATTERNS: WishlistPattern[] = [
     scale: "1/6",
     price: 490,
     tag: "Мужская коллекция",
-    image: `${BASE}4.png`,
+    image: `${BASE}patterns/22/4.png`,
     description: "Мужская водолазка из эластичного трикотажа для кукол Ken.",
   },
 ];
@@ -120,7 +120,7 @@ function setFallbackWishlist(items: WishlistPattern[], userId: string): void {
  * Нормализация пути к изображению
  */
 export function normalizePatternImage(img: string): string {
-  if (!img) return `${BASE}1.png`;
+  if (!img) return `${BASE}patterns/27/1.png`;
   if (img.startsWith("http://") || img.startsWith("https://")) return img;
   if (img.startsWith("/")) {
     return `${BASE}${img.slice(1)}`;
@@ -430,7 +430,7 @@ function toggleWishlistFallback(
           doll: patternFallback?.doll || "Барби",
           price: patternFallback?.price || 490,
           tag: patternFallback?.tag || "Выкройка",
-          image: patternFallback?.image || `${BASE}1.png`,
+          image: patternFallback?.image || `${BASE}patterns/27/1.png`,
           format: "PDF (A4 + инструкции)",
         },
         ...current.items,

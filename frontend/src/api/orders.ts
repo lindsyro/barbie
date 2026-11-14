@@ -39,7 +39,7 @@ function isStaticHosting(): boolean {
 }
 
 function normalizePatternImage(img: string): string {
-  if (!img) return `${BASE}1.png`;
+  if (!img) return `${BASE}patterns/27/1.png`;
   if (img.startsWith("http://") || img.startsWith("https://")) return img;
   if (img.startsWith("/")) {
     return `${BASE}${img.slice(1)}`;
@@ -56,10 +56,10 @@ const FALLBACK_USER_PURCHASED: PurchasedPattern[] = [
     doll: "Барби / Made to Move",
     price: 490,
     format: "PDF (А4 + инструкции)",
-    downloadUrl: `${BASE}1.png`, // в демо-режиме ссылка на файл
+    downloadUrl: `${BASE}patterns/27/1.png`, // в демо-режиме ссылка на файл
     orderId: "ORD-774102-USER",
     purchasedAt: new Date().toISOString(),
-    image: `${BASE}1.png`,
+    image: `${BASE}patterns/27/1.png`,
     tag: "Хит продаж",
     difficulty: "Легкий",
   },

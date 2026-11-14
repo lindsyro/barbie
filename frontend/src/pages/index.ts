@@ -4,6 +4,8 @@ export type { PatternItem, AdvantageItem, QuickCategoryItem, MainProps } from ".
 
 export { Catalog } from "./Catalog/Catalog.tsx";
 export type { CatalogProps } from "./Catalog/Catalog.tsx";
+export { CATALOG_PATTERNS, CATALOG_CATEGORIES } from "./Catalog/catalogData.ts";
+export type { CatalogPatternItem, CatalogCategoryMeta } from "./Catalog/catalogData.ts";
 
 export { Tutorials } from "./Tutorials/Tutorials.tsx";
 export type { TutorialsProps } from "./Tutorials/Tutorials.tsx";
@@ -35,21 +37,8 @@ export type { ShoppingTermsProps } from "./ShoppingTerms/ShoppingTerms.tsx";
 export { Reviews } from "./Reviews/Reviews.tsx";
 export type { ReviewsProps } from "./Reviews/Reviews.tsx";
 
-export { Girls16 } from "./Girls16/Girls16.tsx";
-export type { Girls16Props } from "./Girls16/Girls16.tsx";
-
-export { Girls14 } from "./Girls14/Girls14.tsx";
-export type { Girls14Props } from "./Girls14/Girls14.tsx";
-
-export { Guys } from "./Guys/Guys.tsx";
-export type { GuysProps } from "./Guys/Guys.tsx";
-
-export { Kids } from "./Kids/Kids.tsx";
-export type { KidsProps } from "./Kids/Kids.tsx";
-
 export { Cart } from "./Cart/Cart.tsx";
 export type { CartProps, CartItemType } from "./Cart/types.ts";
 
 export { Wishlist } from "./Wishlist/Wishlist.tsx";
 export type { WishlistProps, WishlistPattern } from "./Wishlist/types.ts";
-

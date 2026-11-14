@@ -31,10 +31,7 @@ import {
   Measurements,
   ShoppingTerms,
   Reviews,
-  Girls16,
-  Girls14,
-  Guys,
-  Kids,
+  CATALOG_PATTERNS,
   Cart,
   type CartItemType,
   Wishlist,
@@ -107,7 +104,7 @@ const INITIAL_CART: CartItemType[] = [
     doll: "Барби / Made to Move",
     price: 490,
     priceFormatted: "490 ₽",
-    image: `${BASE}1.png`,
+    image: `${BASE}patterns/27/1.png`,
     tag: "Хит продаж",
     format: "PDF (А4 + инструкции)",
   },
@@ -117,14 +114,68 @@ const INITIAL_CART: CartItemType[] = [
     doll: "Барби Standard & Curvy",
     price: 550,
     priceFormatted: "550 ₽",
-    image: `${BASE}2.png`,
+    image: `${BASE}patterns/19/2.png`,
     tag: "Новинка",
     format: "PDF (А4 + инструкции)",
   },
 ];
 
+function parseCatalogCategoryFromHash(hash: string): { category: string; subcategory: string } | null {
+  const clean = hash.replace("#", "").trim().toLowerCase();
+
+  if (clean === "catalog") return { category: "all", subcategory: "all" };
+
+  // 1/6
+  if (clean === "girls-1-6" || clean === "barbie" || clean === "barbie1") {
+    return { category: "girls-1-6", subcategory: "all" };
+  }
+  if (
+    [
+      "barbie-standard",
+      "barbie-curvy",
+      "barbie-tall",
+      "barbie-90s",
+      "mizi",
+      "momoko",
+      "poppy-parker",
+      "blythe",
+      "rainbow-high",
+    ].includes(clean)
+  ) {
+    return { category: "girls-1-6", subcategory: clean };
+  }
+
+  // 1/4
+  if (["girls-1-4", "barbie2", "girls-1", "girls-2", "girls-3"].includes(clean)) {
+    return { category: "girls-1-4", subcategory: "all" };
+  }
+  if (["minifee", "bjd-msd"].includes(clean)) {
+    return { category: "girls-1-4", subcategory: clean };
+  }
+
+  // Guys
+  if (["guys", "ken", "men"].includes(clean)) {
+    return { category: "guys", subcategory: "all" };
+  }
+  if (["ken-standard", "ken-broad", "adonis-2-0", "fr-homme"].includes(clean)) {
+    return { category: "guys", subcategory: clean };
+  }
+
+  // Kids
+  if (["kids", "children"].includes(clean)) {
+    return { category: "kids", subcategory: "all" };
+  }
+  if (["chelsea", "lati-yellow", "obitsu-11"].includes(clean)) {
+    return { category: "kids", subcategory: clean };
+  }
+
+  return null;
+}
+
 function App() {
   const [currentPage, setCurrentPage] = useState<string>("main");
+  const [catalogCategory, setCatalogCategory] = useState<string>("all");
+  const [catalogSubcategory, setCatalogSubcategory] = useState<string>("all");
   const [cart, setCart] = useState<CartItemType[]>(INITIAL_CART);
   const cartCount = cart.length;
   const [currentUser, setCurrentUser] = useState<User | null>(() => getStoredUser());
@@ -163,6 +214,16 @@ function App() {
         setCurrentPage("main");
         return;
       }
+
+      const catalogMatch = parseCatalogCategoryFromHash(rawHash);
+      if (catalogMatch) {
+        setCurrentPage("catalog");
+        setCatalogCategory(catalogMatch.category);
+        setCatalogSubcategory(catalogMatch.subcategory);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+
       const pageKey = KNOWN_PAGES[rawHash] || (rawHash.startsWith("barbie") || rawHash.startsWith("ken") || rawHash.startsWith("girls") ? "catalog" : rawHash);
       setCurrentPage(pageKey);
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -226,17 +287,25 @@ function App() {
       return;
     }
 
-    const found = FEATURED_PATTERNS.find((p) => p.title === title);
-    const numPrice = found ? parseInt(found.price.replace(/\D/g, ""), 10) || 490 : 490;
+    const foundCatalog = CATALOG_PATTERNS.find((p) => p.title === title);
+    const foundFeatured = FEATURED_PATTERNS.find((p) => p.title === title);
+    const found = foundCatalog || foundFeatured;
+
+    const numPrice = found
+      ? typeof found.price === "number"
+        ? found.price
+        : parseInt(String(found.price).replace(/\D/g, ""), 10) || 490
+      : 490;
+
     const newItem: CartItemType = {
       id: found ? found.id : Date.now(),
       title,
       doll: found ? found.doll : "Барби",
       price: numPrice,
-      priceFormatted: found ? found.price : `${numPrice} ₽`,
-      image: found ? found.image : `${BASE}1.png`,
+      priceFormatted: `${numPrice} ₽`,
+      image: found ? found.image : `${BASE}patterns/27/1.png`,
       tag: found?.tag || "Выкройка",
-      format: "PDF (А4 + инструкции)",
+      format: found && "format" in found ? found.format : "PDF (А4 + инструкции)",
     };
 
     setCart((prev) => [...prev, newItem]);
@@ -267,21 +336,28 @@ function App() {
   };
 
   const handleSelectCategory = (categoryId: string) => {
-    showNotification(`Выбрана категория: ${categoryId}`);
-    navigateTo("catalog");
+    setCatalogCategory(categoryId);
+    setCatalogSubcategory("all");
+    navigateTo(categoryId === "all" ? "catalog" : categoryId);
   };
 
   const handleToggleWishlist = async (patternId: number) => {
-    const found = FEATURED_PATTERNS.find((p) => p.id === patternId);
-    const numPrice = found ? parseInt(found.price.replace(/\D/g, ""), 10) || 490 : 490;
+    const foundCatalog = CATALOG_PATTERNS.find((p) => p.id === patternId);
+    const foundFeatured = FEATURED_PATTERNS.find((p) => p.id === patternId);
+    const found = foundCatalog || foundFeatured;
+    const numPrice = found
+      ? typeof found.price === "number"
+        ? found.price
+        : parseInt(String(found.price).replace(/\D/g, ""), 10) || 490
+      : 490;
     const payload: WishlistPattern = {
       id: patternId,
       title: found ? found.title : `Выкройка #${patternId}`,
       doll: found ? found.doll : "Барби",
       price: numPrice,
       tag: found?.tag || "Выкройка",
-      image: found?.image || `${BASE}1.png`,
-      format: "PDF (А4 + инструкции)",
+      image: found?.image || `${BASE}patterns/27/1.png`,
+      format: found && "format" in found ? found.format : "PDF (А4 + инструкции)",
     };
 
     // 1. Для неавторизованного пользователя — сохраняем в localStorage с мягким уведомлением
@@ -437,7 +513,23 @@ function App() {
   const renderCurrentPage = () => {
     switch (currentPage) {
       case "catalog":
-        return <Catalog onBackToMain={() => navigateTo("main")} />;
+      case "girls-1-6":
+      case "girls-1-4":
+      case "guys":
+      case "kids":
+        return (
+          <Catalog
+            key={`${catalogCategory}_${catalogSubcategory}`}
+            initialCategory={catalogCategory}
+            initialSubcategory={catalogSubcategory}
+            onBackToMain={() => navigateTo("main")}
+            onAddToCart={handleAddToCart}
+            onToggleWishlist={handleToggleWishlist}
+            wishlistIds={wishlistIds}
+            cartItems={cart}
+            onNavigateToChooseDoll={() => navigateTo("choose-doll")}
+          />
+        );
       case "tutorials":
         return <Tutorials onBackToMain={() => navigateTo("main")} />;
       case "courses":
@@ -471,14 +563,6 @@ function App() {
         return <ShoppingTerms onBackToMain={() => navigateTo("main")} />;
       case "reviews":
         return <Reviews onBackToMain={() => navigateTo("main")} />;
-      case "girls-1-6":
-        return <Girls16 onBackToMain={() => navigateTo("main")} />;
-      case "girls-1-4":
-        return <Girls14 onBackToMain={() => navigateTo("main")} />;
-      case "guys":
-        return <Guys onBackToMain={() => navigateTo("main")} />;
-      case "kids":
-        return <Kids onBackToMain={() => navigateTo("main")} />;
       case "cart":
         return (
           <Cart
