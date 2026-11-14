@@ -35,28 +35,27 @@ router.post("/", requireAuth, async (req, res, next) => {
       });
     }
 
-    const patterns = await prisma.pattern.findMany({
-      where: { id: { in: uniquePatternIds } },
-    });
-
-    if (patterns.length === 0) {
-      return res.status(404).json({
-        error: "NotFound",
-        message: "Выбранные выкройки не найдены",
-      });
-    }
+    const itemsPayload = Array.isArray(req.body.items) ? req.body.items : [];
+    const orderItemsData = itemsPayload.length > 0
+      ? itemsPayload.map((it) => ({
+          patternId: Number(it.patternId || it.id),
+          title: it.title || `Выкройка #${it.patternId || it.id}`,
+          doll: it.doll || "Кукла",
+          price: Number(it.price) || 450,
+          format: it.format || "PDF (А4 + инструкции)",
+          downloadUrl: it.downloadUrl || `/downloads/patterns/${it.patternId || it.id}-pattern.pdf`,
+        }))
+      : uniquePatternIds.map((id) => ({
+          patternId: id,
+          title: `Выкройка #${id}`,
+          doll: "Кукла",
+          price: 450,
+          format: "PDF (А4 + инструкции)",
+          downloadUrl: `/downloads/patterns/${id}-pattern.pdf`,
+        }));
 
     const orderId = `ORD-${Date.now().toString().slice(-6)}-${crypto.randomBytes(2).toString("hex").toUpperCase()}`;
-    const totalAmount = patterns.reduce((sum, p) => sum + p.price, 0);
-
-    const orderItemsData = patterns.map((p) => ({
-      patternId: p.id,
-      title: p.title,
-      doll: p.doll,
-      price: p.price,
-      format: p.format,
-      downloadUrl: `/downloads/patterns/${p.id}-pattern.pdf`,
-    }));
+    const totalAmount = orderItemsData.reduce((sum, p) => sum + p.price, 0);
 
     // Создаем заказ и очищаем корзину в транзакции
     const order = await prisma.$transaction(async (tx) => {

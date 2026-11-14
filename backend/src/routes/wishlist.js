@@ -5,7 +5,7 @@ import { getContextId } from "../middleware/auth.js";
 const router = Router();
 
 function formatWishlist(items) {
-  const patternsList = items.map((it) => it.pattern).filter(Boolean);
+  const patternsList = items.map((it) => ({ id: it.patternId, patternId: it.patternId }));
   return {
     total: patternsList.length,
     items: patternsList,
@@ -14,7 +14,7 @@ function formatWishlist(items) {
 
 /**
  * GET /api/wishlist
- * Список избранного пользователя из PostgreSQL
+ * Список избранного пользователя из PostgreSQL (ID выкроек)
  */
 router.get("/", async (req, res, next) => {
   try {
@@ -27,7 +27,6 @@ router.get("/", async (req, res, next) => {
       where: req.user?.id
         ? { OR: [{ userId: req.user.id }, { contextId: req.user.id }] }
         : { contextId },
-      include: { pattern: true },
       orderBy: { addedAt: "desc" },
     });
 
@@ -54,12 +53,8 @@ router.post("/toggle", async (req, res, next) => {
     const { patternId } = req.body || {};
     const numId = Number(patternId);
 
-    const pattern = await prisma.pattern.findUnique({
-      where: { id: numId },
-    });
-
-    if (!pattern) {
-      return res.status(404).json({ error: "NotFound", message: "Выкройка не найдена" });
+    if (!numId || isNaN(numId)) {
+      return res.status(400).json({ error: "BadRequest", message: "Некорректный ID выкройки" });
     }
 
     const existing = await prisma.wishlistItem.findUnique({
@@ -93,15 +88,14 @@ router.post("/toggle", async (req, res, next) => {
       where: req.user?.id
         ? { OR: [{ userId: req.user.id }, { contextId: req.user.id }] }
         : { contextId },
-      include: { pattern: true },
       orderBy: { addedAt: "desc" },
     });
 
     return res.json({
       inWishlist,
       message: inWishlist
-        ? `«${pattern.title}» добавлена в избранное`
-        : `«${pattern.title}» удалена из избранного`,
+        ? `Выкройка #${numId} добавлена в избранное`
+        : `Выкройка #${numId} удалена из избранного`,
       wishlist: formatWishlist(updated),
     });
   } catch (err) {
@@ -128,41 +122,30 @@ router.post("/sync", async (req, res, next) => {
       ? patternIds.map(Number).filter((id) => !isNaN(id) && id > 0)
       : [];
 
-    if (validIds.length > 0) {
-      // Проверяем существующие выкройки
-      const existingPatterns = await prisma.pattern.findMany({
-        where: { id: { in: validIds } },
-        select: { id: true },
-      });
-      const validPatternIds = existingPatterns.map((p) => p.id);
-
-      for (const patternId of validPatternIds) {
-        await prisma.wishlistItem.upsert({
-          where: {
-            contextId_patternId: {
-              contextId: req.user.id,
-              patternId,
-            },
-          },
-          update: { userId: req.user.id },
-          create: {
+    for (const patternId of validIds) {
+      await prisma.wishlistItem.upsert({
+        where: {
+          contextId_patternId: {
             contextId: req.user.id,
-            userId: req.user.id,
             patternId,
           },
-        });
-      }
+        },
+        update: { userId: req.user.id },
+        create: {
+          contextId: req.user.id,
+          userId: req.user.id,
+          patternId,
+        },
+      });
     }
 
     const updated = await prisma.wishlistItem.findMany({
       where: { OR: [{ userId: req.user.id }, { contextId: req.user.id }] },
-      include: { pattern: true },
       orderBy: { addedAt: "desc" },
     });
 
     return res.json({
-      message: "Избранное успешно синхронизировано с аккаунтом",
-      mergedCount: validIds.length,
+      message: "Избранное синхронизировано",
       wishlist: formatWishlist(updated),
     });
   } catch (err) {
@@ -178,28 +161,31 @@ router.delete("/:patternId", async (req, res, next) => {
   try {
     const contextId = getContextId(req);
     if (!contextId) {
-      return res.status(401).json({ error: "Unauthorized", message: "Требуется авторизация" });
+      return res.status(401).json({
+        error: "Unauthorized",
+        message: "Требуется авторизация",
+      });
     }
 
     const numId = Number(req.params.patternId);
+    if (!numId || isNaN(numId)) {
+      return res.status(400).json({ error: "BadRequest", message: "Некорректный ID выкройки" });
+    }
 
     await prisma.wishlistItem.deleteMany({
-      where: req.user?.id
-        ? {
-            patternId: numId,
-            OR: [{ userId: req.user.id }, { contextId: req.user.id }],
-          }
-        : {
-            contextId,
-            patternId: numId,
-          },
+      where: {
+        patternId: numId,
+        OR: [
+          { contextId },
+          ...(req.user?.id ? [{ userId: req.user.id }, { contextId: req.user.id }] : []),
+        ],
+      },
     });
 
     const updated = await prisma.wishlistItem.findMany({
       where: req.user?.id
         ? { OR: [{ userId: req.user.id }, { contextId: req.user.id }] }
         : { contextId },
-      include: { pattern: true },
       orderBy: { addedAt: "desc" },
     });
 

@@ -1,39 +1,16 @@
 import { Router } from "express";
-import prisma from "../db.js";
 
 const router = Router();
 
 /**
  * GET /api/categories
- * Список категорий выкроек с актуальным количеством товаров из PostgreSQL
+ * Каталог выкроек вынесен на frontend (статический каталог)
  */
-router.get("/", async (req, res, next) => {
-  try {
-    const totalPatternsCount = await prisma.pattern.count();
-
-    const categories = await prisma.category.findMany({
-      include: {
-        _count: {
-          select: { patterns: true },
-        },
-      },
-      orderBy: { id: "asc" },
-    });
-
-    const items = categories.map((cat) => ({
-      id: cat.id,
-      name: cat.name,
-      scale: cat.scale,
-      count: String(cat.id === "all" ? totalPatternsCount : cat._count.patterns),
-    }));
-
-    return res.json({
-      total: items.length,
-      items,
-    });
-  } catch (err) {
-    next(err);
-  }
+router.get("/", (req, res) => {
+  return res.json({
+    total: 0,
+    items: [],
+  });
 });
 
 export default router;

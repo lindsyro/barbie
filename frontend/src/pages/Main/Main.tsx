@@ -73,7 +73,12 @@ export const Main: React.FC<MainProps> = ({
               const isLiked = wishlistSet.has(item.id);
               return (
                 <article key={item.id} className="main-pattern-card">
-                  <div className="main-pattern-card__img-box">
+                  <div
+                    className="main-pattern-card__img-box"
+                    onClick={() => onSelectCategory?.("all")}
+                    style={{ cursor: "pointer" }}
+                    title="Перейти в каталог"
+                  >
                     <img src={item.image} alt={item.title} className="main-pattern-card__img" />
                     <span className="main-pattern-card__tag">{item.tag}</span>
                     <button
@@ -104,7 +109,14 @@ export const Main: React.FC<MainProps> = ({
                   </div>
                 <div className="main-pattern-card__body">
                   <span className="main-pattern-card__doll">{item.doll}</span>
-                  <h3 className="main-pattern-card__title">{item.title}</h3>
+                  <h3
+                    className="main-pattern-card__title"
+                    onClick={() => onSelectCategory?.("all")}
+                    style={{ cursor: "pointer" }}
+                    title="Перейти в каталог"
+                  >
+                    {item.title}
+                  </h3>
                   <div className="main-pattern-card__footer">
                     <span className="main-pattern-card__price">{item.price}</span>
                     <button

@@ -4,6 +4,7 @@
  */
 
 import { getStoredToken, getStoredUser } from "./auth.ts";
+import { CATALOG_PATTERNS } from "../pages/Catalog/catalogData.ts";
 
 export interface WishlistPattern {
   id: number;
@@ -20,6 +21,34 @@ export interface WishlistPattern {
   difficulty?: string;
   format?: string;
   isFeatured?: boolean;
+}
+
+export function enrichWishlistItem(it: Partial<WishlistPattern> & { id: number }): WishlistPattern {
+  const cat = CATALOG_PATTERNS.find((p) => p.id === it.id);
+  if (cat) {
+    return {
+      id: cat.id,
+      title: cat.title,
+      doll: cat.doll,
+      scale: cat.scale,
+      categoryId: cat.category,
+      price: cat.price,
+      tag: cat.tag,
+      image: cat.image,
+      description: cat.description,
+      difficulty: cat.difficulty,
+      format: cat.format,
+    };
+  }
+  return {
+    id: it.id,
+    title: it.title || `Выкройка #${it.id}`,
+    doll: it.doll || "Барби",
+    price: it.price || 450,
+    tag: it.tag || "Выкройка",
+    image: normalizePatternImage(it.image || ""),
+    format: it.format || "PDF (А4 + инструкции)",
+  };
 }
 
 export interface WishlistResponse {
@@ -50,34 +79,34 @@ function isStaticHosting(): boolean {
 // Начальные данные для демо-пользователя в офлайн/статическом режиме
 const DEMO_FALLBACK_PATTERNS: WishlistPattern[] = [
   {
-    id: 1,
-    title: "Водолазка-боди для Барби",
-    doll: "Барби / Made to Move",
+    id: 27,
+    title: "Водолазка-боди для Барби стандарт",
+    doll: "Barbie Standard (Барби стандарт)",
     scale: "1/6",
-    price: 490,
-    tag: "Хит продаж",
+    price: 450,
+    tag: "Топы и боди",
     image: `${BASE}patterns/27/1.png`,
-    description: "Базовое облегающее боди с длинным рукавом и воротником-стойкой для кукол Barbie.",
+    description: "Электронная выкройка: Водолазка-боди для Барби стандарт в формате PDF с бесплатным видеоуроком по пошиву.",
   },
   {
-    id: 3,
-    title: "Выкройка MiniFee: кофточка и брюки клёш",
-    doll: "MiniFee (40-42 см)",
+    id: 21,
+    title: "Кофточка и брюки клёш для MiniFee",
+    doll: "MiniFee (Минифи)",
     scale: "1/4",
-    price: 690,
-    tag: "BJD",
+    price: 790,
+    tag: "Костюмы",
     image: `${BASE}patterns/21/3.png`,
-    description: "Стильный трикотажный комплект для шарнирных кукол BJD 1/4.",
+    description: "Бумажная выкройка: Кофточка и брюки клёш для куклы MiniFee.",
   },
   {
-    id: 4,
-    title: "Элегантная водолазка-боди для Кена",
-    doll: "Ken Fashionistas / BMR1959",
+    id: 22,
+    title: "Водолазка-боди для Ken",
+    doll: "Ken (качок, Made to Move) / Ken MTM Standard",
     scale: "1/6",
-    price: 490,
-    tag: "Мужская коллекция",
+    price: 450,
+    tag: "Базовый гардероб",
     image: `${BASE}patterns/22/4.png`,
-    description: "Мужская водолазка из эластичного трикотажа для кукол Ken.",
+    description: "Электронная выкройка: Водолазка-боди для куклы Ken в формате PDF с кратким описанием пошива и бесплатным видеоуроком.",
   },
 ];
 
@@ -282,10 +311,7 @@ export async function syncGuestWishlistWithDatabase(
 
     return {
       total: data.wishlist.total,
-      items: data.wishlist.items.map((it) => ({
-        ...it,
-        image: normalizePatternImage(it.image),
-      })),
+      items: data.wishlist.items.map(enrichWishlistItem),
     };
   } catch {
     const current = getFallbackWishlist(user.id);
@@ -347,10 +373,7 @@ export async function fetchWishlist(): Promise<WishlistResponse> {
     const data: WishlistResponse = await response.json();
     return {
       total: data.total ?? data.items?.length ?? 0,
-      items: (data.items || []).map((it) => ({
-        ...it,
-        image: normalizePatternImage(it.image),
-      })),
+      items: (data.items || []).map(enrichWishlistItem),
     };
   } catch {
     return getFallbackWishlist(user.id);
@@ -400,10 +423,7 @@ export async function toggleWishlist(
       message: data.message,
       wishlist: {
         total: data.wishlist.total,
-        items: data.wishlist.items.map((it) => ({
-          ...it,
-          image: normalizePatternImage(it.image),
-        })),
+        items: data.wishlist.items.map(enrichWishlistItem),
       },
     };
   } catch (err) {
@@ -481,10 +501,7 @@ export async function removeFromWishlist(patternId: number): Promise<WishlistRes
     const data: { wishlist: WishlistResponse } = await response.json();
     return {
       total: data.wishlist.total,
-      items: data.wishlist.items.map((it) => ({
-        ...it,
-        image: normalizePatternImage(it.image),
-      })),
+      items: data.wishlist.items.map(enrichWishlistItem),
     };
   } catch {
     const current = getFallbackWishlist(user.id);

@@ -51,16 +51,16 @@ function normalizePatternImage(img: string): string {
 const FALLBACK_USER_PURCHASED: PurchasedPattern[] = [
   {
     id: "item-user-1",
-    patternId: 1,
-    title: "Водолазка-боди для Барби",
-    doll: "Барби / Made to Move",
-    price: 490,
-    format: "PDF (А4 + инструкции)",
+    patternId: 27,
+    title: "Водолазка-боди для Барби стандарт",
+    doll: "Barbie Standard (Барби стандарт)",
+    price: 450,
+    format: "PDF + видеоурок",
     downloadUrl: `${BASE}patterns/27/1.png`, // в демо-режиме ссылка на файл
     orderId: "ORD-774102-USER",
     purchasedAt: new Date().toISOString(),
     image: `${BASE}patterns/27/1.png`,
-    tag: "Хит продаж",
+    tag: "Топы и боди",
     difficulty: "Легкий",
   },
 ];

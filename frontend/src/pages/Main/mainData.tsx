@@ -1,41 +1,31 @@
+import { CATALOG_PATTERNS } from "../Catalog/catalogData.ts";
 import type { PatternItem, AdvantageItem, QuickCategoryItem } from "./types.ts";
 
-const BASE = import.meta.env.BASE_URL;
+/**
+ * Подборка популярных выкроек на главной странице — формируется напрямую из CATALOG_PATTERNS.
+ * ID соответствуют реальным позициям каталога:
+ *  - 27: Водолазка-боди для Барби стандарт
+ *  - 19: Боди-бюстье «Афродита» (Барби пышка МТМ)
+ *  - 1:  Платье с корсетом (Mizi Katie Girl / Barbie Standard MTM)
+ *  - 22: Водолазка-боди для Ken
+ *  - 8:  Парка для Integrity FR6 и NU.Face
+ *  - 21: Кофточка и брюки клёш для MiniFee
+ *  - 34: Платье «Аргентина» (Integrity FR6)
+ *  - 25: Водолазка-боди для Blythe
+ */
+export const POPULAR_PATTERN_IDS = [27, 19, 1, 22, 8, 21, 34, 25];
 
-export const FEATURED_PATTERNS: PatternItem[] = [
-  {
-    id: 1,
-    title: "Водолазка-боди для Барби",
-    tag: "Хит продаж",
-    doll: "Барби / Made to Move",
-    price: "490 ₽",
-    image: `${BASE}patterns/27/1.png`,
-  },
-  {
-    id: 2,
-    title: "Боди-бюстье «Афродита»",
-    tag: "Новинка",
-    doll: "Барби Standard & Curvy",
-    price: "550 ₽",
-    image: `${BASE}patterns/19/2.png`,
-  },
-  {
-    id: 3,
-    title: "Выкройка MiniFee: кофточка и брюки клёш",
-    tag: "BJD",
-    doll: "MiniFee (40-42 см)",
-    price: "690 ₽",
-    image: `${BASE}patterns/21/3.png`,
-  },
-  {
-    id: 4,
-    title: "Элегантная водолазка-боди для Кена",
-    tag: "Мужская коллекция",
-    doll: "Ken Fashionistas / BMR1959",
-    price: "490 ₽",
-    image: `${BASE}patterns/22/4.png`,
-  },
-];
+export const FEATURED_PATTERNS: PatternItem[] = POPULAR_PATTERN_IDS
+  .map((id) => CATALOG_PATTERNS.find((item) => item.id === id))
+  .filter((item): item is NonNullable<typeof item> => Boolean(item))
+  .map((item) => ({
+    id: item.id,
+    title: item.title,
+    tag: item.tag,
+    doll: item.doll,
+    price: item.priceFormatted,
+    image: item.image,
+  }));
 
 export const ADVANTAGES: AdvantageItem[] = [
   {
@@ -84,10 +74,29 @@ export const ADVANTAGES: AdvantageItem[] = [
 ];
 
 export const CATEGORIES_QUICK: QuickCategoryItem[] = [
-  { name: "Все выкройки", id: "all", count: "48" },
-  { name: "Барби Standard", id: "barbie-std", count: "18" },
-  { name: "Барби Curvy (Пышка)", id: "barbie-curvy", count: "12" },
-  { name: "Кен (Ken)", id: "ken", count: "8" },
-  { name: "MiniFee (BJD)", id: "minifee", count: "6" },
-  { name: "Блайз (Blythe)", id: "blythe", count: "4" },
+  {
+    name: "Все выкройки",
+    id: "all",
+    count: String(CATALOG_PATTERNS.length),
+  },
+  {
+    name: "Девушки 1/6",
+    id: "girls-1-6",
+    count: String(CATALOG_PATTERNS.filter((p) => p.category === "girls-1-6").length),
+  },
+  {
+    name: "Мужчины (Ken / Adonis)",
+    id: "guys",
+    count: String(CATALOG_PATTERNS.filter((p) => p.category === "guys").length),
+  },
+  {
+    name: "Девушки 1/4 (MiniFee)",
+    id: "girls-1-4",
+    count: String(CATALOG_PATTERNS.filter((p) => p.category === "girls-1-4").length),
+  },
+  {
+    name: "Дети и мини (Kelly)",
+    id: "kids",
+    count: String(CATALOG_PATTERNS.filter((p) => p.category === "kids").length),
+  },
 ];

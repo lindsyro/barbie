@@ -4,138 +4,9 @@ import crypto from "node:crypto";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Наполнение базы данных goose начальными данными...");
+  console.log("🌱 Наполнение базы данных goose начальными данными (пользователи, отзывы, подписки)...");
 
-  // 1. Категории
-  const categoriesData = [
-    { id: "all", name: "Все выкройки", scale: "all" },
-    { id: "barbie-std", name: "Барби Standard", scale: "1/6" },
-    { id: "barbie-curvy", name: "Барби Curvy (Пышка)", scale: "1/6" },
-    { id: "ken", name: "Кен (Ken)", scale: "1/6" },
-    { id: "minifee", name: "MiniFee (BJD)", scale: "1/4" },
-    { id: "blythe", name: "Блайз (Blythe)", scale: "1/6" },
-    { id: "kids", name: "Куклы-дети (Chelsea, Lati)", scale: "kids" },
-  ];
-
-  for (const cat of categoriesData) {
-    await prisma.category.upsert({
-      where: { id: cat.id },
-      update: cat,
-      create: cat,
-    });
-  }
-  console.log("✓ Категории добавлены");
-
-  // 2. Выкройки
-  const patternsData = [
-    {
-      id: 1,
-      title: "Водолазка-боди для Барби",
-      doll: "Барби / Made to Move",
-      scale: "1/6",
-      categoryId: "barbie-std",
-      price: 490,
-      tag: "Хит продаж",
-      rating: 4.9,
-      reviewsCount: 38,
-      image: "/1.png",
-      description: "Базовое облегающее боди с длинным рукавом и воротником-стойкой для кукол Barbie Made to Move и со стандартным типом тела. Включает детальные выкройки в формате PDF (А4) и пошаговый видеоурок.",
-      difficulty: "Легкий",
-      format: "PDF (A4 + инструкции)",
-      isFeatured: true,
-    },
-    {
-      id: 2,
-      title: "Боди-бюстье «Афродита»",
-      doll: "Барби Standard & Curvy",
-      scale: "1/6",
-      categoryId: "barbie-curvy",
-      price: 550,
-      tag: "Новинка",
-      rating: 5.0,
-      reviewsCount: 19,
-      image: "/2.png",
-      description: "Изящное вечернее боди с рельефными швами и чашечками. Подходит для классических и пышных тел Барби (Curvy).",
-      difficulty: "Средний",
-      format: "PDF (A4 + инструкции)",
-      isFeatured: true,
-    },
-    {
-      id: 3,
-      title: "Выкройка MiniFee: кофточка и брюки клёш",
-      doll: "MiniFee (40-42 см)",
-      scale: "1/4",
-      categoryId: "minifee",
-      price: 690,
-      tag: "BJD",
-      rating: 4.8,
-      reviewsCount: 14,
-      image: "/3.png",
-      description: "Стильный трикотажный комплект для шарнирных кукол BJD 1/4 (линейка Fairyland MiniFee Moe/Active line). Точная посадка по фигуре.",
-      difficulty: "Средний",
-      format: "PDF (A4 + инструкции)",
-      isFeatured: true,
-    },
-    {
-      id: 4,
-      title: "Элегантная водолазка-боди для Кена",
-      doll: "Ken Fashionistas / BMR1959",
-      scale: "1/6",
-      categoryId: "ken",
-      price: 490,
-      tag: "Мужская коллекция",
-      rating: 4.9,
-      reviewsCount: 22,
-      image: "/4.png",
-      description: "Мужская водолазка из эластичного трикотажа для кукол Ken со стандартным и мускулистым телом Broad.",
-      difficulty: "Легкий",
-      format: "PDF (A4 + инструкции)",
-      isFeatured: true,
-    },
-    {
-      id: 5,
-      title: "Тренч оверсайз для Блайз",
-      doll: "Блайз (Blythe)",
-      scale: "1/6",
-      categoryId: "blythe",
-      price: 620,
-      tag: "Тренды",
-      rating: 4.9,
-      reviewsCount: 17,
-      image: "/5.png",
-      description: "Двубортный тренчкот с поясом, эполетами и подкладкой для кукол Blythe (на родном или шарнирном теле TBL).",
-      difficulty: "Продвинутый",
-      format: "PDF (A4 + инструкции)",
-      isFeatured: false,
-    },
-    {
-      id: 6,
-      title: "Платье с оборками для Челси",
-      doll: "Челси (Chelsea)",
-      scale: "kids",
-      categoryId: "kids",
-      price: 390,
-      tag: "Малыши",
-      rating: 5.0,
-      reviewsCount: 9,
-      image: "/6.png",
-      description: "Нежное воздушное платье для кукол-сестричек Челси (14 см) с удобной застёжкой на микро-липучку.",
-      difficulty: "Легкий",
-      format: "PDF (A4 + инструкции)",
-      isFeatured: false,
-    },
-  ];
-
-  for (const pat of patternsData) {
-    await prisma.pattern.upsert({
-      where: { id: pat.id },
-      update: pat,
-      create: pat,
-    });
-  }
-  console.log("✓ Выкройки добавлены");
-
-  // 3. Демо-пользователь
+  // 1. Демо-пользователь
   const demoSalt = crypto.randomBytes(16).toString("hex");
   const demoPasswordHash = crypto.scryptSync("password123", demoSalt, 64).toString("hex");
 
@@ -160,30 +31,30 @@ async function main() {
     },
   });
 
-  // Предзаполненная корзина демо-пользователя (2 цифровые выкройки)
+  // Предзаполненная корзина демо-пользователя (выкройки 27 и 19 из каталога)
   await prisma.cartItem.deleteMany({ where: { contextId: demoUser.id } });
   await prisma.cartItem.createMany({
     data: [
-      { contextId: demoUser.id, userId: demoUser.id, patternId: 1 },
-      { contextId: demoUser.id, userId: demoUser.id, patternId: 2 },
+      { contextId: demoUser.id, userId: demoUser.id, patternId: 27 },
+      { contextId: demoUser.id, userId: demoUser.id, patternId: 19 },
     ],
     skipDuplicates: true,
   });
 
-  // Предзаполненное избранное демо-пользователя (3 выкройки)
+  // Предзаполненное избранное демо-пользователя (выкройки 27, 21, 22 из каталога)
   await prisma.wishlistItem.deleteMany({ where: { contextId: demoUser.id } });
   await prisma.wishlistItem.createMany({
     data: [
-      { contextId: demoUser.id, userId: demoUser.id, patternId: 1 },
-      { contextId: demoUser.id, userId: demoUser.id, patternId: 3 },
-      { contextId: demoUser.id, userId: demoUser.id, patternId: 4 },
+      { contextId: demoUser.id, userId: demoUser.id, patternId: 27 },
+      { contextId: demoUser.id, userId: demoUser.id, patternId: 21 },
+      { contextId: demoUser.id, userId: demoUser.id, patternId: 22 },
     ],
     skipDuplicates: true,
   });
 
   console.log("✓ Демо-пользователь (demo@goose.ru / password123) создан");
 
-  // 4. Отзывы
+  // 2. Отзывы
   const reviewsCount = await prisma.review.count();
   if (reviewsCount === 0) {
     await prisma.review.createMany({
@@ -191,21 +62,21 @@ async function main() {
         {
           author: "Елена Смирнова",
           doll: "Барби Made to Move",
-          patternTitle: "Водолазка-боди для Барби",
+          patternTitle: "Водолазка-боди для Барби стандарт",
           rating: 5,
           text: "Выкройка идеальная! Села на Йогу как влитая, никаких лишних складок. Контрольный квадрат на А4 совпал с первого раза.",
         },
         {
           author: "Анастасия",
           doll: "MiniFee Chloe",
-          patternTitle: "Выкройка MiniFee: кофточка и брюки клёш",
+          patternTitle: "Кофточка и брюки клёш для MiniFee",
           rating: 5,
           text: "Найти хорошую выкройку на Минифи сложно, но этот комплект превзошел все ожидания! Спасибо за видео-пояснения.",
         },
         {
           author: "Мария К.",
           doll: "Ken BMR1959",
-          patternTitle: "Элегантная водолазка-боди для Кена",
+          patternTitle: "Водолазка-боди для Ken",
           rating: 5,
           text: "Кен теперь одет стильно! Шьётся за полчаса, очень подробное описание.",
         },
@@ -214,7 +85,7 @@ async function main() {
     console.log("✓ Отзывы добавлены");
   }
 
-  // 5. Подписчик
+  // 3. Подписчик
   await prisma.subscriber.upsert({
     where: { email: "demo@goose.ru" },
     update: {},

@@ -99,24 +99,24 @@ const BASE = import.meta.env.BASE_URL;
 
 const INITIAL_CART: CartItemType[] = [
   {
-    id: 1,
-    title: "Водолазка-боди для Барби",
-    doll: "Барби / Made to Move",
-    price: 490,
-    priceFormatted: "490 ₽",
+    id: 27,
+    title: "Водолазка-боди для Барби стандарт",
+    doll: "Barbie Standard (Барби стандарт)",
+    price: 450,
+    priceFormatted: "450 ₽",
     image: `${BASE}patterns/27/1.png`,
-    tag: "Хит продаж",
-    format: "PDF (А4 + инструкции)",
+    tag: "Топы и боди",
+    format: "PDF + видеоурок",
   },
   {
-    id: 2,
+    id: 19,
     title: "Боди-бюстье «Афродита»",
-    doll: "Барби Standard & Curvy",
-    price: 550,
-    priceFormatted: "550 ₽",
+    doll: "Barbie Made to Move Curvy (Барби МТМ пышка)",
+    price: 590,
+    priceFormatted: "590 ₽",
     image: `${BASE}patterns/19/2.png`,
-    tag: "Новинка",
-    format: "PDF (А4 + инструкции)",
+    tag: "Боди",
+    format: "PDF + видеоурок",
   },
 ];
 

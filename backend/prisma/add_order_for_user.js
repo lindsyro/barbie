@@ -19,17 +19,14 @@ async function main() {
 
   console.log(`✓ Найден пользователь: ${user.name} (${user.email}, ID: ${user.id})`);
 
-  // 2. Поиск выкройки (выбираем выкройку #1 «Водолазка-боди для Барби»)
-  const pattern = await prisma.pattern.findUnique({
-    where: { id: 1 },
-  });
-
-  if (!pattern) {
-    console.error("❌ Выкройка #1 не найдена в базе данных.");
-    return;
-  }
-
-  console.log(`✓ Выбрана выкройка для покупки: «${pattern.title}» (${pattern.doll}, ${pattern.price} ₽)`);
+  const pattern = {
+    id: 27,
+    title: "Водолазка-боди для Барби стандарт",
+    doll: "Barbie Standard (Барби стандарт)",
+    price: 450,
+    format: "PDF + видеоурок",
+    downloadUrl: "/patterns/27/1.png",
+  };
 
   const orderId = `ORD-774102-USER`;
 
@@ -56,8 +53,8 @@ async function main() {
             title: pattern.title,
             doll: pattern.doll,
             price: pattern.price,
-            format: pattern.format || "PDF (A4 + инструкции)",
-            downloadUrl: `/downloads/patterns/${pattern.id}-pattern.pdf`,
+            format: pattern.format,
+            downloadUrl: pattern.downloadUrl,
           },
         ],
       },
@@ -67,16 +64,12 @@ async function main() {
     },
   });
 
-  console.log("\n🎉 Заказ успешно добавлен в базу данных:");
-  console.log(`- Номер заказа: #${order.id}`);
-  console.log(`- Статус: ${order.status}`);
-  console.log(`- Сумма: ${order.totalAmount} ₽`);
-  console.log(`- Позиции: ${order.items.map((it) => it.title).join(", ")}`);
+  console.log(`🎉 Заказ #${order.id} успешно привязан к пользователю ${user.name}!`);
 }
 
 main()
   .catch((e) => {
-    console.error("Ошибка при добавлении заказа:", e);
+    console.error("Ошибка добавления заказа:", e);
     process.exit(1);
   })
   .finally(async () => {

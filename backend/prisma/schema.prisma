@@ -34,47 +34,12 @@ model Session {
   @@map("sessions")
 }
 
-model Category {
-  id       String    @id
-  name     String
-  scale    String
-  patterns Pattern[]
-
-  @@map("categories")
-}
-
-model Pattern {
-  id           Int            @id @default(autoincrement())
-  title        String
-  doll         String
-  scale        String
-  categoryId   String?
-  category     Category?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  price        Int
-  tag          String
-  rating       Float          @default(5.0)
-  reviewsCount Int            @default(0)
-  image        String
-  description  String         @db.Text
-  difficulty   String         @default("Легкий")
-  format       String         @default("PDF (A4 + инструкции)")
-  isFeatured   Boolean        @default(false)
-  createdAt    DateTime       @default(now())
-
-  cartItems    CartItem[]
-  wishlist     WishlistItem[]
-  orderItems   OrderItem[]
-
-  @@map("patterns")
-}
-
 model CartItem {
   id        String   @id @default(uuid())
   contextId String
   userId    String?
   user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   patternId Int
-  pattern   Pattern  @relation(fields: [patternId], references: [id], onDelete: Cascade)
   addedAt   DateTime @default(now())
 
   @@unique([contextId, patternId])
@@ -87,7 +52,6 @@ model WishlistItem {
   userId    String?
   user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   patternId Int
-  pattern   Pattern  @relation(fields: [patternId], references: [id], onDelete: Cascade)
   addedAt   DateTime @default(now())
 
   @@unique([contextId, patternId])
@@ -116,7 +80,6 @@ model OrderItem {
   orderId     String
   order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   patternId   Int
-  pattern     Pattern  @relation(fields: [patternId], references: [id])
   title       String
   doll        String
   price       Int
