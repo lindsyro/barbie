@@ -10,7 +10,7 @@ export interface ChooseDollProps {
   onNavigateToCatalog?: (categoryOrHash?: string) => void;
 }
 
-type CategoryType = "all" | "girls" | "guys" | "curvy" | "collectible" | "bjd" | "child";
+type FilterCategory = "all" | DollItem["category"];
 
 const BASE = import.meta.env.BASE_URL;
 
@@ -18,42 +18,22 @@ export const ChooseDoll: React.FC<ChooseDollProps> = ({
   onBackToMain,
   onNavigateToCatalog,
 }) => {
-  const [activeCategory, setActiveCategory] = useState<CategoryType>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedDoll, setSelectedDoll] = useState<DollItem | null>(null);
-
-  // Категории с подсчётом количества
-  const categories: { id: CategoryType; label: string; count: number }[] = useMemo(() => {
-    return [
-      { id: "all", label: "Все куклы", count: DOLLS_DATA.length },
-      { id: "girls", label: "Девушки 1/6", count: DOLLS_DATA.filter((d) => d.category === "girls").length },
-      { id: "guys", label: "Парни / Кен", count: DOLLS_DATA.filter((d) => d.category === "guys").length },
-      { id: "curvy", label: "Пышки (Curvy)", count: DOLLS_DATA.filter((d) => d.category === "curvy").length },
-      { id: "collectible", label: "Коллекционные", count: DOLLS_DATA.filter((d) => d.category === "collectible").length },
-      { id: "bjd", label: "BJD / Авторские", count: DOLLS_DATA.filter((d) => d.category === "bjd").length },
-      { id: "child", label: "Дети", count: DOLLS_DATA.filter((d) => d.category === "child").length },
-    ];
-  }, []);
 
   // Фильтрация и поиск
   const filteredDolls = useMemo(() => {
     return DOLLS_DATA.filter((doll) => {
-      // 1. Фильтр по категории
-      if (activeCategory !== "all" && doll.category !== activeCategory) {
-        return false;
-      }
-      // 2. Поиск по тексту
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase().trim();
         const inName = doll.name.toLowerCase().includes(query);
-        const inType = doll.dollType.toLowerCase().includes(query);
-        const inFeatures = doll.features.toLowerCase().includes(query);
-        const inTag = doll.tag.toLowerCase().includes(query);
-        return inName || inType || inFeatures || inTag;
+        const inCategory = doll.category.toLowerCase().includes(query);
+        const inHeight = doll.height.toLowerCase().includes(query);
+        return inName || inCategory || inHeight;
       }
       return true;
     });
-  }, [activeCategory, searchQuery]);
+  }, [searchQuery]);
 
   const handleSelectDollPatterns = (doll: DollItem) => {
     if (onNavigateToCatalog) {
@@ -94,26 +74,11 @@ export const ChooseDoll: React.FC<ChooseDollProps> = ({
             <input
               type="text"
               className="choose-doll-search__input"
-              placeholder="Поиск куклы по названию, типу тела или молду (например, Made to Move, Broad, Curvy, Silkstone)..."
+              placeholder="Поиск куклы..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-        </div>
-
-        {/* Табы категорий */}
-        <div className="choose-doll-filters">
-          {categories.map((cat) => (
-            <button
-              key={cat.id}
-              type="button"
-              className={`choose-doll-filter-btn ${activeCategory === cat.id ? "choose-doll-filter-btn--active" : ""}`}
-              onClick={() => setActiveCategory(cat.id)}
-            >
-              <span>{cat.label}</span>
-              <span className="choose-doll-filter-btn__count">{cat.count}</span>
-            </button>
-          ))}
         </div>
       </div>
 
@@ -151,34 +116,16 @@ export const ChooseDoll: React.FC<ChooseDollProps> = ({
                   className="doll-card__img"
                   loading="lazy"
                 />
-                <span className="doll-card__tag">{doll.tag}</span>
-                <span className="doll-card__scale-badge">{doll.scale}</span>
               </div>
 
               {/* Информация о кукле */}
               <div className="doll-card__body">
                 <div className="doll-card__cat-row">
-                  <span>{doll.categoryLabel}</span>
+                  <span>{doll.category}</span>
                   <span>{doll.height}</span>
                 </div>
 
                 <h3 className="doll-card__title">{doll.name}</h3>
-                <p className="doll-card__type">{doll.dollType}</p>
-
-                {/* Мерки фигуры */}
-                <div className="doll-card__measurements">
-                  <span>
-                    ОГ: <strong>{doll.measurements.bust}</strong>
-                  </span>
-                  <span>
-                    ОТ: <strong>{doll.measurements.waist}</strong>
-                  </span>
-                  <span>
-                    ОБ: <strong>{doll.measurements.hips}</strong>
-                  </span>
-                </div>
-
-                <p className="doll-card__features">{doll.features}</p>
 
                 {/* Кнопки действий */}
                 <div className="doll-card__footer">
@@ -198,9 +145,9 @@ export const ChooseDoll: React.FC<ChooseDollProps> = ({
                     type="button"
                     className="doll-card__btn-details"
                     onClick={() => setSelectedDoll(doll)}
-                    title="Подробные мерки куклы"
+                    title="Подробнее о кукле"
                   >
-                    Мерки
+                    Подробнее
                   </button>
                 </div>
               </div>
@@ -231,34 +178,21 @@ export const ChooseDoll: React.FC<ChooseDollProps> = ({
             </div>
 
             <div className="doll-modal__body">
-              <span className="doll-modal__badge">{selectedDoll.categoryLabel} • {selectedDoll.scale}</span>
+              <span className="doll-modal__badge">{selectedDoll.category}</span>
               <h2 className="doll-modal__title">{selectedDoll.name}</h2>
-              <p className="doll-modal__type">{selectedDoll.dollType}</p>
 
               <table className="doll-modal__table">
                 <tbody>
                   <tr>
+                    <td>Категория:</td>
+                    <td>{selectedDoll.category}</td>
+                  </tr>
+                  <tr>
                     <td>Рост куклы:</td>
                     <td>{selectedDoll.height}</td>
                   </tr>
-                  <tr>
-                    <td>Обхват груди (ОГ):</td>
-                    <td>{selectedDoll.measurements.bust}</td>
-                  </tr>
-                  <tr>
-                    <td>Обхват талии (ОТ):</td>
-                    <td>{selectedDoll.measurements.waist}</td>
-                  </tr>
-                  <tr>
-                    <td>Обхват бёдер (ОБ):</td>
-                    <td>{selectedDoll.measurements.hips}</td>
-                  </tr>
                 </tbody>
               </table>
-
-              <p style={{ fontSize: "0.85rem", color: "var(--color-taupe)", lineHeight: 1.5, margin: 0 }}>
-                {selectedDoll.features}
-              </p>
 
               <div className="doll-modal__actions">
                 <button
