@@ -10,8 +10,6 @@ export interface ChooseDollProps {
   onNavigateToCatalog?: (categoryOrHash?: string) => void;
 }
 
-type FilterCategory = "all" | DollItem["category"];
-
 const BASE = import.meta.env.BASE_URL;
 
 export const ChooseDoll: React.FC<ChooseDollProps> = ({
@@ -145,9 +143,9 @@ export const ChooseDoll: React.FC<ChooseDollProps> = ({
                     type="button"
                     className="doll-card__btn-details"
                     onClick={() => setSelectedDoll(doll)}
-                    title="Подробнее о кукле"
+                    title="Мерки куклы"
                   >
-                    Подробнее
+                    Мерки
                   </button>
                 </div>
               </div>
