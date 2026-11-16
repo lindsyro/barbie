@@ -5,6 +5,7 @@ export interface DollItem {
   category: 'Девушки 1/6' | 'Девушки 1/4' | 'Парни' | 'Дети';
   height: string;
   catalogHash: string;
+  measurementsFileName?: string;
 }
 
 export const DOLLS_DATA: DollItem[] = [
@@ -15,6 +16,7 @@ export const DOLLS_DATA: DollItem[] = [
     category: "Девушки 1/6",
     height: "29.2 см",
     catalogHash: "girls-1-6",
+    measurementsFileName: "barbiePetit.png",
   },
   {
     id: 2,
@@ -23,6 +25,7 @@ export const DOLLS_DATA: DollItem[] = [
     category: "Девушки 1/6",
     height: "29.5 см",
     catalogHash: "girls-1-6",
+    measurementsFileName: "barbieStandart.png",
   },
   {
     id: 3,
@@ -31,6 +34,7 @@ export const DOLLS_DATA: DollItem[] = [
     category: "Девушки 1/6",
     height: "29 см",
     catalogHash: "girls-1-6",
+    measurementsFileName: "tall.png",
   },
   {
     id: 4,
@@ -39,6 +43,7 @@ export const DOLLS_DATA: DollItem[] = [
     category: "Девушки 1/6",
     height: "29.5 см",
     catalogHash: "girls-1-6",
+    measurementsFileName: "barbieCurvy.png",
   },
   {
     id: 5,
@@ -47,6 +52,7 @@ export const DOLLS_DATA: DollItem[] = [
     category: "Девушки 1/6",
     height: "29.0 см",
     catalogHash: "girls-1-6",
+    measurementsFileName: "barbie90.png",
   },
   {
     id: 6,
@@ -55,27 +61,30 @@ export const DOLLS_DATA: DollItem[] = [
     category: "Дети",
     height: "31.5 см",
     catalogHash: "kids",
+    measurementsFileName: "barbieKelli.png",
   },
   {
     id: 7,
     fileName: "Каталожная кукла в сланцево-синем купальнике-5.png",
-    name: "Integrity Fashion Royalty 6",
+    name: "Integrity Toys Fashion Royalty 6 (Интегрити ФР6)",
     category: "Девушки 1/6",
     height: "29.0 см",
     catalogHash: "girls-1-6",
+    measurementsFileName: "fashionRoyalty.png",
   },
   {
     id: 8,
     fileName: "Кукла в закрытом сланцево-синем купальнике-4.png",
-    name: "Integrity NU Face",
+    name: "Integrity Toys NU Face (Интегрити ню фейс)",
     category: "Девушки 1/6",
     height: "26.5 см",
     catalogHash: "girls-1-6",
+    measurementsFileName: "NuFace.png",
   },
   {
     id: 9,
     fileName: "Кукла в сланцево-синем купальнике-14.png",
-    name: "Integrity Industry",
+    name: "Integrity Industry (Интегрити индастри)",
     category: "Девушки 1/6",
     height: "26.5 см",
     catalogHash: "girls-1-6",
@@ -87,11 +96,12 @@ export const DOLLS_DATA: DollItem[] = [
     category: "Девушки 1/6",
     height: "29.0 см",
     catalogHash: "girls-1-6",
+    measurementsFileName: "poppyParker.png",
   },
   {
     id: 11,
     fileName: "Коллекционная кукла в сланцево-синем купальнике-2.png",
-    name: "Integrity Fashion Royalty 16",
+    name: "Integrity Fashion Royalty 16 (Интегрити ФР16)",
     category: "Девушки 1/4",
     height: "29.5 см",
     catalogHash: "girls-1-4",
@@ -99,7 +109,7 @@ export const DOLLS_DATA: DollItem[] = [
   {
     id: 12,
     fileName: "Кукла в сланцево-синем купальнике-18.png",
-    name: "Poppy Parker FR 16",
+    name: "Poppy Parker FR 16 (Поппи Паркер ФР16)",
     category: "Девушки 1/4",
     height: "29.3 см",
     catalogHash: "girls-1-4",
@@ -107,10 +117,11 @@ export const DOLLS_DATA: DollItem[] = [
   {
     id: 13,
     fileName: "Коллекционная кукла в серо-синем купальнике-1.png",
-    name: "Minifi",
+    name: "Minifi (Минифи)",
     category: "Девушки 1/4",
     height: "30.5 см",
     catalogHash: "girls-1-4",
+    measurementsFileName: "minifi.png",
   },
   {
     id: 14,
@@ -119,6 +130,7 @@ export const DOLLS_DATA: DollItem[] = [
     category: "Девушки 1/6",
     height: "30.0 см",
     catalogHash: "girls-1-6",
+    measurementsFileName: "miziKatieGirl.png",
   },
   {
     id: 15,
@@ -127,11 +139,12 @@ export const DOLLS_DATA: DollItem[] = [
     category: "Девушки 1/6",
     height: "29.0 см",
     catalogHash: "girls-1-6",
+    measurementsFileName: "momoko.png",
   },
   {
     id: 16,
     fileName: "Зелёноволосая кукла с розовыми узорами-8.png",
-    name: "Rainbow High",
+    name: "Rainbow High (Рейнбоу хай)",
     category: "Девушки 1/6",
     height: "28-30 см",
     catalogHash: "girls-1-6",
@@ -155,49 +168,55 @@ export const DOLLS_DATA: DollItem[] = [
   {
     id: 19,
     fileName: "Игрушечная кукла в синих плавках-1.png",
-    name: "Ken MTM Standart",
+    name: "Ken MTM Standart (Кен стандарт)",
     category: "Парни",
     height: "30.5 см",
     catalogHash: "guys",
+    measurementsFileName: "kenStandart.png",
   },
   {
     id: 20,
     fileName: "Мужская кукла в матово-синих плавках-10.png",
-    name: "Ken MTM (качок)",
+    name: "Ken MTM (Кен качок)",
     category: "Парни",
     height: "31.5 см",
     catalogHash: "guys",
+    measurementsFileName: "kenBaff.png",
   },
   {
     id: 21,
     fileName: "Кукла в матовых синих плавках-2.png",
-    name: "Integrity FR Homme",
+    name: "Integrity FR Homme (Интегрити ФР хомм)",
     category: "Парни",
     height: "30.5 см",
     catalogHash: "guys",
+    measurementsFileName: "homme.png",
   },
   {
     id: 22,
     fileName: "Мужская кукла в матовых синих плавках-4.png",
-    name: "Integrity Monarch",
+    name: "Integrity Monarch (Интегрити монарх)",
     category: "Парни",
     height: "30.5 см",
     catalogHash: "guys",
+    measurementsFileName: "monarch.png",
   },
   {
     id: 23,
     fileName: "Кукла в сланцево-синих плавках-5.png",
-    name: "Adonis 2.0",
+    name: "Adonis 2.0 (Адонис 2.0)",
     category: "Парни",
     height: "30.0 см",
     catalogHash: "guys",
+    measurementsFileName: "adonis.png",
   },
   {
     id: 24,
     fileName: "Кукла в матовых синих плавках-7.png",
-    name: "Nekot Doll",
+    name: "Necot Doll (Некотт долл)",
     category: "Парни",
     height: "30.5 см",
     catalogHash: "guys",
+    measurementsFileName: "nekotDoll.png",
   },
 ];

@@ -43,42 +43,49 @@ export const ChooseDoll: React.FC<ChooseDollProps> = ({
 
   return (
     <div className="page-container choose-doll-page">
-      {/* Хлебные крошки */}
-      <Breadcrumbs current="Выбрать куклу" onBackToMain={onBackToMain} />
+      {/* Верхняя строка: хлебные крошки слева, компактный поиск справа */}
+      <div className="choose-doll-top-bar">
+        <Breadcrumbs current="Выбрать куклу" onBackToMain={onBackToMain} />
+
+        <div className="choose-doll-compact-search">
+          <svg
+            className="choose-doll-compact-search__icon"
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input
+            type="text"
+            className="choose-doll-compact-search__input"
+            placeholder="Поиск куклы..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              className="choose-doll-compact-search__clear"
+              onClick={() => setSearchQuery("")}
+              title="Очистить поиск"
+              aria-label="Очистить поиск"
+            >
+              ×
+            </button>
+          )}
+        </div>
+      </div>
 
       {/* Заголовок страницы */}
       <PageHeader
         title="Выбрать куклу"
         subtitle="Анатомический справочник GOOSE"
       />
-
-      {/* Панель фильтров и поиска */}
-      <div className="choose-doll-toolbar">
-        {/* Поисковая строка */}
-        <div className="choose-doll-search-row">
-          <div className="choose-doll-search">
-            <svg
-              className="choose-doll-search__icon"
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-            <input
-              type="text"
-              className="choose-doll-search__input"
-              placeholder="Поиск куклы..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-        </div>
-      </div>
 
       {/* Сетка кукол */}
       {filteredDolls.length === 0 ? (
@@ -92,7 +99,6 @@ export const ChooseDoll: React.FC<ChooseDollProps> = ({
             className="dolls-empty__reset-btn"
             onClick={() => {
               setSearchQuery("");
-              setActiveCategory("all");
             }}
           >
             Сбросить поиск
@@ -103,11 +109,7 @@ export const ChooseDoll: React.FC<ChooseDollProps> = ({
           {filteredDolls.map((doll) => (
             <article key={doll.id} className="doll-card">
               {/* Фото куклы в купальнике */}
-              <div
-                className="doll-card__img-box"
-                onClick={() => setSelectedDoll(doll)}
-                title="Нажмите для просмотра крупным планом"
-              >
+              <div className="doll-card__img-box">
                 <img
                   src={`${BASE}dolls/${encodeURI(doll.fileName.normalize("NFC"))}`}
                   alt={doll.name}
@@ -154,7 +156,7 @@ export const ChooseDoll: React.FC<ChooseDollProps> = ({
         </div>
       )}
 
-      {/* Модальное окно крупного просмотра куклы */}
+      {/* Модальное окно: только фото мерок и кнопка смотреть выкройки */}
       {selectedDoll && (
         <div className="doll-modal-overlay" onClick={() => setSelectedDoll(null)}>
           <div className="doll-modal" onClick={(e) => e.stopPropagation()}>
@@ -167,43 +169,37 @@ export const ChooseDoll: React.FC<ChooseDollProps> = ({
               ×
             </button>
 
-            <div className="doll-modal__img-box">
-              <img
-                src={`${BASE}dolls/${encodeURI(selectedDoll.fileName.normalize("NFC"))}`}
-                alt={selectedDoll.name}
-                className="doll-modal__img"
-              />
+            {/* Фото мерок */}
+            <div className="doll-modal__measurements-box">
+              {selectedDoll.measurementsFileName ? (
+                <img
+                  src={`${BASE}measurements/${encodeURI(selectedDoll.measurementsFileName)}`}
+                  alt={`Мерки ${selectedDoll.name}`}
+                  className="doll-modal__measurements-img"
+                />
+              ) : (
+                <div className="doll-modal__measurements-empty">
+                  <p>Таблица мерок для этой модели куклы готовится к публикации.</p>
+                </div>
+              )}
             </div>
 
-            <div className="doll-modal__body">
-              <span className="doll-modal__badge">{selectedDoll.category}</span>
-              <h2 className="doll-modal__title">{selectedDoll.name}</h2>
-
-              <table className="doll-modal__table">
-                <tbody>
-                  <tr>
-                    <td>Категория:</td>
-                    <td>{selectedDoll.category}</td>
-                  </tr>
-                  <tr>
-                    <td>Рост куклы:</td>
-                    <td>{selectedDoll.height}</td>
-                  </tr>
-                </tbody>
-              </table>
-
-              <div className="doll-modal__actions">
-                <button
-                  type="button"
-                  className="doll-modal__cta-btn"
-                  onClick={() => {
-                    handleSelectDollPatterns(selectedDoll);
-                    setSelectedDoll(null);
-                  }}
-                >
-                  <span>Смотреть выкройки для этой куклы</span>
-                </button>
-              </div>
+            {/* Кнопка смотреть выкройки */}
+            <div className="doll-modal__footer-btn-box">
+              <button
+                type="button"
+                className="doll-modal__cta-btn"
+                onClick={() => {
+                  handleSelectDollPatterns(selectedDoll);
+                  setSelectedDoll(null);
+                }}
+              >
+                <span>Смотреть выкройки</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                  <polyline points="12 5 19 12 12 19" />
+                </svg>
+              </button>
             </div>
           </div>
         </div>
