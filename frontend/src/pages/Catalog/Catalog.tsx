@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { Breadcrumbs, PageHeader, SearchInput } from "@/components/index.ts";
+import { Breadcrumbs, PageHeader, SearchInput, UserIcon, CartIcon } from "@/components/index.ts";
 import {
   CATALOG_CATEGORIES,
   CATALOG_PATTERNS,
@@ -162,9 +162,6 @@ export const Catalog: React.FC<CatalogProps> = ({
           <p className="catalog-empty__desc">
             По заданным фильтрам и поисковому запросу «{searchQuery}» пока ничего нет.
           </p>
-          <button type="button" className="catalog-empty__btn" onClick={handleResetFilters}>
-            Сбросить фильтры
-          </button>
         </div>
       ) : (
         <div className="catalog-grid">
@@ -201,10 +198,7 @@ export const Catalog: React.FC<CatalogProps> = ({
             }
           }}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="12" cy="7" r="4" />
-            <path d="M5.5 21v-2a6.5 6.5 0 0 1 13 0v2" />
-          </svg>
+          <UserIcon size={16} />
           <span>Выбрать куклу по меркам</span>
         </button>
       </div>
@@ -318,11 +312,7 @@ export const Catalog: React.FC<CatalogProps> = ({
                     setSelectedPattern(null);
                   }}
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="9" cy="21" r="1" />
-                    <circle cx="20" cy="21" r="1" />
-                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-                  </svg>
+                  <CartIcon size={16} />
                   <span>Добавить в корзину</span>
                 </button>
               </div>

@@ -1,4 +1,9 @@
 export { SearchIcon } from "./SearchIcon.tsx";
 export { ArrowRightIcon } from "./ArrowRightIcon.tsx";
 export { CloseIcon } from "./CloseIcon.tsx";
+export { HeartIcon, type HeartIconProps } from "./HeartIcon.tsx";
+export { CartIcon } from "./CartIcon.tsx";
+export { CheckIcon } from "./CheckIcon.tsx";
+export { ImageIcon } from "./ImageIcon.tsx";
+export { UserIcon } from "./UserIcon.tsx";
 export type { IconProps } from "./types.ts";

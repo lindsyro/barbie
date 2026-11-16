@@ -29,5 +29,14 @@ export type { RegisterModalProps } from "./Auth/RegisterModal.tsx";
 export { SearchInput } from "./SearchInput/SearchInput.tsx";
 export type { SearchInputProps } from "./SearchInput/SearchInput.tsx";
 
-export { SearchIcon, ArrowRightIcon, CloseIcon } from "./icons/index.ts";
-export type { IconProps } from "./icons/index.ts";
+export {
+  SearchIcon,
+  ArrowRightIcon,
+  CloseIcon,
+  HeartIcon,
+  CartIcon,
+  CheckIcon,
+  ImageIcon,
+  UserIcon,
+} from "./icons/index.ts";
+export type { IconProps, HeartIconProps } from "./icons/index.ts";
