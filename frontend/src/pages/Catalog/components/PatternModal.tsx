@@ -106,23 +106,21 @@ const PatternModalContent: React.FC<PatternModalContentProps> = ({
       {/* Описание и покупка */}
       <div className="catalog-modal__body">
         <span className="catalog-modal__badge">
-          Масштаб {pattern.scale} • {pattern.tag}
+          {pattern.category === "girls-1-6"
+            ? "Девушки 1/6"
+            : pattern.category === "girls-1-4"
+            ? "Девушки 1/4"
+            : pattern.category === "guys"
+            ? "Парни"
+            : "Миниатюры"}
         </span>
         <h2 className="catalog-modal__title">{pattern.title}</h2>
         <p className="catalog-modal__doll">
           Рекомендовано для кукол: <strong>{pattern.doll}</strong>
         </p>
 
-        <p className="catalog-modal__desc">{pattern.description}</p>
-
-        {pattern.fabricRecommended && (
-          <div className="catalog-modal__fabrics">
-            <strong>Рекомендуемые материалы:</strong> {pattern.fabricRecommended}
-          </div>
-        )}
-
         <div className="catalog-modal__footer">
-          <span className="catalog-modal__price">{pattern.priceFormatted}</span>
+          <span className="catalog-modal__price">{pattern.price} ₽</span>
 
           <button
             type="button"

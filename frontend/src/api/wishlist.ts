@@ -30,14 +30,11 @@ export function enrichWishlistItem(it: Partial<WishlistPattern> & { id: number }
       id: cat.id,
       title: cat.title,
       doll: cat.doll,
-      scale: cat.scale,
       categoryId: cat.category,
       price: cat.price,
-      tag: cat.tag,
+      tag: "Выкройка",
       image: cat.image,
-      description: cat.description,
-      difficulty: cat.difficulty,
-      format: cat.format,
+      format: "PDF (А4 + инструкции)",
     };
   }
   return {

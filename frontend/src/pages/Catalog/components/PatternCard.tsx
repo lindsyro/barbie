@@ -86,7 +86,7 @@ export const PatternCard: React.FC<PatternCardProps> = React.memo(
           {/* Нижняя плашка: цена и корзина */}
           <div className="catalog-card__footer">
             <span className="catalog-card__price">
-              {pattern.priceFormatted}
+              {pattern.price} ₽
             </span>
 
             <button

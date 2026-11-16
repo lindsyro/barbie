@@ -304,8 +304,8 @@ function App() {
       price: numPrice,
       priceFormatted: `${numPrice} ₽`,
       image: found ? found.image : `${BASE}patterns/27/1.png`,
-      tag: found?.tag || "Выкройка",
-      format: found && "format" in found ? found.format : "PDF (А4 + инструкции)",
+      tag: found && "tag" in found && typeof found.tag === "string" ? found.tag : "Выкройка",
+      format: found && "format" in found && typeof found.format === "string" ? found.format : "PDF (А4 + инструкции)",
     };
 
     setCart((prev) => [...prev, newItem]);
@@ -355,9 +355,9 @@ function App() {
       title: found ? found.title : `Выкройка #${patternId}`,
       doll: found ? found.doll : "Барби",
       price: numPrice,
-      tag: found?.tag || "Выкройка",
+      tag: found && "tag" in found && typeof found.tag === "string" ? found.tag : "Выкройка",
       image: found?.image || `${BASE}patterns/27/1.png`,
-      format: found && "format" in found ? found.format : "PDF (А4 + инструкции)",
+      format: found && "format" in found && typeof found.format === "string" ? found.format : "PDF (А4 + инструкции)",
     };
 
     // 1. Для неавторизованного пользователя — сохраняем в localStorage с мягким уведомлением

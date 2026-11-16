@@ -21,9 +21,9 @@ export const FEATURED_PATTERNS: PatternItem[] = POPULAR_PATTERN_IDS
   .map((item) => ({
     id: item.id,
     title: item.title,
-    tag: item.tag,
+    tag: "Выкройка",
     doll: item.doll,
-    price: item.priceFormatted,
+    price: `${item.price} ₽`,
     image: item.image,
   }));
 

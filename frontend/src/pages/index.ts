@@ -4,8 +4,8 @@ export type { PatternItem, AdvantageItem, QuickCategoryItem, MainProps } from ".
 
 export { Catalog } from "./Catalog/Catalog.tsx";
 export type { CatalogProps } from "./Catalog/Catalog.tsx";
-export { CATALOG_PATTERNS, CATALOG_CATEGORIES } from "./Catalog/catalogData.ts";
-export type { CatalogPatternItem, CatalogCategoryMeta } from "./Catalog/catalogData.ts";
+export { CATALOG_PATTERNS } from "./Catalog/catalogData.ts";
+export type { CatalogPatternItem } from "./Catalog/catalogData.ts";
 
 export { Tutorials } from "./Tutorials/Tutorials.tsx";
 export type { TutorialsProps } from "./Tutorials/Tutorials.tsx";

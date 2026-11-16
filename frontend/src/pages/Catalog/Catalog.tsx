@@ -1,11 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { Breadcrumbs, PageHeader, SearchInput, UserIcon } from "@/components/index.ts";
-import {
-  CATALOG_CATEGORIES,
-  CATALOG_PATTERNS,
-  type CatalogPatternItem,
-  type CatalogCategoryMeta,
-} from "./catalogData.ts";
+import { CATALOG_PATTERNS, type CatalogPatternItem } from "./catalogData.ts";
 import { PatternCard, PatternModal } from "./components/index.ts";
 import "./catalog.css";
 
@@ -22,9 +17,37 @@ export interface CatalogProps {
 
 type MainCategoryId = "all" | "girls-1-6" | "girls-1-4" | "guys" | "kids";
 
+const CATEGORY_INFO: Record<MainCategoryId, { title: string; subtitle: string; breadcrumb: string }> = {
+  all: {
+    title: "Каталог выкроек",
+    subtitle: "Авторские PDF-лекала GOOSE Fashion House",
+    breadcrumb: "Все выкройки",
+  },
+  "girls-1-6": {
+    title: "Выкройки для девушек 1/6",
+    subtitle: "Барби Standard, Curvy, Tall, Mizi, Momoko, Poppy Parker, Блайз",
+    breadcrumb: "Для девушек 1/6",
+  },
+  "girls-1-4": {
+    title: "Выкройки для девушек 1/4",
+    subtitle: "Коллекции для шарнирных кукол BJD и MiniFee",
+    breadcrumb: "Для девушек 1/4",
+  },
+  guys: {
+    title: "Выкройки для парней",
+    subtitle: "Мужская кукольная мода: Кен, Adonis 2.0, FR Homme",
+    breadcrumb: "Для парней",
+  },
+  kids: {
+    title: "Выкройки для миниатюрных кукол",
+    subtitle: "Келли, Chelsea (Челси), Lati Yellow, Obitsu 11",
+    breadcrumb: "Для детей и миниатюр",
+  },
+};
+
 export const Catalog: React.FC<CatalogProps> = ({
   initialCategory = "all",
-  initialSubcategory = "all",
+  initialSubcategory: _initialSubcategory = "all",
   onBackToMain,
   onAddToCart,
   onToggleWishlist,
@@ -40,9 +63,6 @@ export const Catalog: React.FC<CatalogProps> = ({
       : "all";
   });
 
-  // Выбранная подкатегория
-  const [activeSubcategory, setActiveSubcategory] = useState<string>(initialSubcategory);
-
   // Поисковая строка и сортировка
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"popular" | "price_asc" | "price_desc">("popular");
@@ -57,13 +77,7 @@ export const Catalog: React.FC<CatalogProps> = ({
   const wishlistSet = useMemo(() => new Set(wishlistIds), [wishlistIds]);
   const cartTitlesSet = useMemo(() => new Set(cartItems.map((c) => c.title)), [cartItems]);
 
-  // Метаданные текущей активной категории
-  const currentCategoryMeta: CatalogCategoryMeta = useMemo(() => {
-    return (
-      CATALOG_CATEGORIES.find((c) => c.id === activeCategory) ||
-      CATALOG_CATEGORIES[0]
-    );
-  }, [activeCategory]);
+  const currentCategoryMeta = CATEGORY_INFO[activeCategory] || CATEGORY_INFO.all;
 
   // Фильтрация и сортировка выкроек
   const filteredPatterns = useMemo(() => {
@@ -72,18 +86,12 @@ export const Catalog: React.FC<CatalogProps> = ({
       if (activeCategory !== "all" && item.category !== activeCategory) {
         return false;
       }
-      // 2. Фильтр по подкатегории
-      if (activeSubcategory !== "all" && item.subcategory !== activeSubcategory) {
-        return false;
-      }
-      // 3. Поиск
+      // 2. Поиск
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim();
         const inTitle = item.title.toLowerCase().includes(q);
         const inDoll = item.doll.toLowerCase().includes(q);
-        const inDesc = item.description.toLowerCase().includes(q);
-        const inTag = item.tag.toLowerCase().includes(q);
-        return inTitle || inDoll || inDesc || inTag;
+        return inTitle || inDoll;
       }
       return true;
     });
@@ -96,11 +104,10 @@ export const Catalog: React.FC<CatalogProps> = ({
     }
 
     return result;
-  }, [activeCategory, activeSubcategory, searchQuery, sortBy]);
+  }, [activeCategory, searchQuery, sortBy]);
 
   const handleResetFilters = () => {
     setActiveCategory("all");
-    setActiveSubcategory("all");
     setSearchQuery("");
     setSortBy("popular");
     window.location.hash = "catalog";
