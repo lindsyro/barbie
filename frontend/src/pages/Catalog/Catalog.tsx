@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { Breadcrumbs } from "../../components/Breadcrumbs/Breadcrumbs.tsx";
-import { PageHeader } from "../../components/PageHeader/PageHeader.tsx";
+import { Breadcrumbs, PageHeader, SearchInput } from "@/components/index.ts";
 import {
   CATALOG_CATEGORIES,
   CATALOG_PATTERNS,
@@ -8,7 +7,6 @@ import {
   type CatalogCategoryMeta,
 } from "./catalogData.ts";
 import "./catalog.css";
-import "../pages.css";
 
 export interface CatalogProps {
   initialCategory?: string;
@@ -94,18 +92,6 @@ export const Catalog: React.FC<CatalogProps> = ({
     );
   }, [activeCategory]);
 
-  // Подсчёт количества товаров в каждой категории
-  const categoryCounts = useMemo(() => {
-    const counts: Record<string, number> = {
-      all: CATALOG_PATTERNS.length,
-      "girls-1-6": CATALOG_PATTERNS.filter((p) => p.category === "girls-1-6").length,
-      "girls-1-4": CATALOG_PATTERNS.filter((p) => p.category === "girls-1-4").length,
-      guys: CATALOG_PATTERNS.filter((p) => p.category === "guys").length,
-      kids: CATALOG_PATTERNS.filter((p) => p.category === "kids").length,
-    };
-    return counts;
-  }, []);
-
   // Фильтрация и сортировка выкроек
   const filteredPatterns = useMemo(() => {
     let result = CATALOG_PATTERNS.filter((item) => {
@@ -139,12 +125,6 @@ export const Catalog: React.FC<CatalogProps> = ({
     return result;
   }, [activeCategory, activeSubcategory, searchQuery, sortBy]);
 
-  const handleCategoryClick = (catId: MainCategoryId) => {
-    setActiveCategory(catId);
-    setActiveSubcategory("all");
-    window.location.hash = catId === "all" ? "catalog" : catId;
-  };
-
   const handleResetFilters = () => {
     setActiveCategory("all");
     setActiveSubcategory("all");
@@ -155,89 +135,24 @@ export const Catalog: React.FC<CatalogProps> = ({
 
   return (
     <div className="page-container catalog-page">
-      {/* Хлебные крошки */}
-      <Breadcrumbs
-        current={activeCategory === "all" ? "Каталог выкроек" : currentCategoryMeta.breadcrumb}
-        onBackToMain={onBackToMain}
-      />
+      {/* Верхняя строка: хлебные крошки слева, компактный поиск справа */}
+      <div className="page-top-bar">
+        <Breadcrumbs
+          current={activeCategory === "all" ? "Каталог выкроек" : currentCategoryMeta.breadcrumb}
+          onBackToMain={onBackToMain}
+        />
+        <SearchInput
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Поиск выкройки..."
+        />
+      </div>
 
       {/* Динамический заголовок страницы */}
       <PageHeader
         title={currentCategoryMeta.title}
         subtitle={currentCategoryMeta.subtitle}
       />
-
-      {/* 1. Панель фильтров и управления каталогом */}
-      <div className="catalog-toolbar">
-        {/* Табы основных категорий с подсчётом */}
-        <div className="catalog-tabs">
-          {CATALOG_CATEGORIES.map((cat) => (
-            <button
-              key={cat.id}
-              type="button"
-              className={`catalog-tab ${activeCategory === cat.id ? "catalog-tab--active" : ""}`}
-              onClick={() => handleCategoryClick(cat.id)}
-            >
-              <span>{cat.label}</span>
-              <span className="catalog-tab__count">{categoryCounts[cat.id] || 0}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Чипсы быстрых подкатегорий (Барби Стандарт, Curvy, Tall, 90-е и т.д.) */}
-        {currentCategoryMeta.subcategories.length > 0 && (
-          <div className="catalog-subcategories">
-            {currentCategoryMeta.subcategories.map((sub) => (
-              <button
-                key={sub.id}
-                type="button"
-                className={`catalog-chip ${activeSubcategory === sub.id ? "catalog-chip--active" : ""}`}
-                onClick={() => setActiveSubcategory(sub.id)}
-              >
-                {sub.label}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* Панель поиска и сортировки */}
-        <div className="catalog-controls">
-          <div className="catalog-search">
-            <svg
-              className="catalog-search__icon"
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-            <input
-              type="text"
-              className="catalog-search__input"
-              placeholder="Поиск по названию платья, кукле или ткани (например, боди, Кен, MiniFee, бархат)..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-
-          <div className="catalog-sort">
-            <span className="catalog-sort__label">Сортировка:</span>
-            <select
-              className="catalog-sort__select"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as "popular" | "price_asc" | "price_desc")}
-            >
-              <option value="popular">По популярности</option>
-              <option value="price_asc">Сначала дешевле</option>
-              <option value="price_desc">Сначала дороже</option>
-            </select>
-          </div>
-        </div>
-      </div>
 
       {/* 2. Сетка выкроек */}
       {filteredPatterns.length === 0 ? (

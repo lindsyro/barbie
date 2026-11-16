@@ -1,10 +1,6 @@
 import React, { useState, useMemo } from "react";
-import { Breadcrumbs, PageHeader } from "@/components/index.ts";
-import {
-  ChooseDollSearch,
-  DollCard,
-  DollMeasurementsModal,
-} from "./components/index.ts";
+import { Breadcrumbs, PageHeader, SearchInput } from "@/components/index.ts";
+import { DollCard, DollMeasurementsModal } from "./components/index.ts";
 import { DOLLS_DATA, type DollItem } from "./dollsData.ts";
 import { searchDolls } from "./searchDolls.ts";
 import "./chooseDoll.css";
@@ -37,9 +33,13 @@ export const ChooseDoll: React.FC<ChooseDollProps> = ({
   return (
     <div className="page-container choose-doll-page">
       {/* Верхняя строка: хлебные крошки слева, компактный поиск справа */}
-      <div className="choose-doll-top-bar">
+      <div className="page-top-bar">
         <Breadcrumbs current="Выбрать куклу" onBackToMain={onBackToMain} />
-        <ChooseDollSearch value={searchQuery} onChange={setSearchQuery} />
+        <SearchInput
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Поиск куклы..."
+        />
       </div>
 
       {/* Заголовок страницы */}

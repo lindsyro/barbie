@@ -1,0 +1,65 @@
+/* ==========================================================================
+   SearchInput Component Styles
+   ========================================================================== */
+
+.search-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 260px;
+  max-width: 100%;
+}
+
+.search-input__icon {
+  position: absolute;
+  left: 0.75rem;
+  color: var(--color-taupe);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-input__field {
+  width: 100%;
+  padding: 0.45rem 1.85rem 0.45rem 2.2rem;
+  font-size: 0.8125rem;
+  font-family: inherit;
+  color: var(--color-chocolate);
+  background: #ffffff;
+  border: 1px solid var(--color-cappuccino);
+  border-radius: 20px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+}
+
+.search-input__field:focus {
+  border-color: var(--color-gold-site);
+  box-shadow: 0 0 0 3px rgba(166, 129, 66, 0.12);
+}
+
+.search-input__clear {
+  position: absolute;
+  right: 0.65rem;
+  background: none;
+  border: none;
+  color: var(--color-taupe);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-input__clear:hover {
+  color: var(--color-chocolate);
+}
+
+@media (max-width: 640px) {
+  .search-input {
+    width: 100%;
+  }
+}

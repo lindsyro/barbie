@@ -1,33 +1,37 @@
 import React from "react";
 import { SearchIcon } from "@/components/icons/index.ts";
+import "./searchInput.css";
 
-export interface ChooseDollSearchProps {
+export interface SearchInputProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
   className?: string;
+  autoFocus?: boolean;
 }
 
-export const ChooseDollSearch: React.FC<ChooseDollSearchProps> = ({
+export const SearchInput: React.FC<SearchInputProps> = ({
   value,
   onChange,
-  placeholder = "Поиск куклы...",
+  placeholder = "Поиск...",
   className = "",
+  autoFocus = false,
 }) => {
   return (
-    <div className={`choose-doll-compact-search ${className}`.trim()}>
-      <SearchIcon className="choose-doll-compact-search__icon" size={15} />
+    <div className={`search-input ${className}`.trim()}>
+      <SearchIcon className="search-input__icon" size={15} />
       <input
         type="text"
-        className="choose-doll-compact-search__input"
+        className="search-input__field"
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        autoFocus={autoFocus}
       />
       {value && (
         <button
           type="button"
-          className="choose-doll-compact-search__clear"
+          className="search-input__clear"
           onClick={() => onChange("")}
           title="Очистить поиск"
           aria-label="Очистить поиск"
@@ -39,4 +43,4 @@ export const ChooseDollSearch: React.FC<ChooseDollSearchProps> = ({
   );
 };
 
-export default ChooseDollSearch;
+export default SearchInput;
