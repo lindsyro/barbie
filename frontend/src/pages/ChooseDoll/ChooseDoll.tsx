@@ -1,15 +1,13 @@
 import React, { useState, useMemo } from "react";
-import { Breadcrumbs } from "@/components/Breadcrumbs/Breadcrumbs.tsx";
-import { PageHeader } from "@/components/PageHeader/PageHeader.tsx";
-import { DOLLS_DATA, type DollItem } from "./dollsData.ts";
-import { searchDolls } from "./searchDolls.ts";
+import { Breadcrumbs, PageHeader } from "@/components/index.ts";
 import {
+  ChooseDollSearch,
   DollCard,
   DollMeasurementsModal,
-  ChooseDollSearch,
 } from "./components/index.ts";
+import { DOLLS_DATA, type DollItem } from "./dollsData.ts";
+import { searchDolls } from "./searchDolls.ts";
 import "./chooseDoll.css";
-import "@/pages/pages.css";
 
 export interface ChooseDollProps {
   onBackToMain?: () => void;
@@ -55,7 +53,8 @@ export const ChooseDoll: React.FC<ChooseDollProps> = ({
         <div className="dolls-empty">
           <h3 className="dolls-empty__title">Куклы не найдены</h3>
           <p className="dolls-empty__desc">
-            По запросу «{searchQuery}» ничего не найдено. Попробуйте изменить параметры поиска или сбросить фильтры.
+            По запросу «{searchQuery}» ничего не найдено. Попробуйте изменить
+            параметры поиска или сбросить фильтры.
           </p>
         </div>
       ) : (
