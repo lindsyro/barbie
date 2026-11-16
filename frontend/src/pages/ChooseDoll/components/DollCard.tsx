@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowRightIcon } from "../../../components/icons/index.ts";
+import { ArrowRightIcon } from "@/components/icons/index.ts";
 import type { DollItem } from "../dollsData.ts";
 
 export interface DollCardProps {

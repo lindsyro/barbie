@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
-import { Breadcrumbs } from "../../components/Breadcrumbs/Breadcrumbs.tsx";
-import { PageHeader } from "../../components/PageHeader/PageHeader.tsx";
+import { Breadcrumbs } from "@/components/Breadcrumbs/Breadcrumbs.tsx";
+import { PageHeader } from "@/components/PageHeader/PageHeader.tsx";
 import { DOLLS_DATA, type DollItem } from "./dollsData.ts";
 import { searchDolls } from "./searchDolls.ts";
 import {
@@ -9,7 +9,7 @@ import {
   ChooseDollSearch,
 } from "./components/index.ts";
 import "./chooseDoll.css";
-import "../pages.css";
+import "@/pages/pages.css";
 
 export interface ChooseDollProps {
   onBackToMain?: () => void;
