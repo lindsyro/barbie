@@ -220,3 +220,6 @@ export const DOLLS_DATA: DollItem[] = [
     measurementsFileName: "nekotDoll.png",
   },
 ];
+
+export { searchDolls, matchesDollSearch } from "./searchDolls.ts";
+

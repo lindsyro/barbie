@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import { Breadcrumbs } from "../../components/Breadcrumbs/Breadcrumbs.tsx";
 import { PageHeader } from "../../components/PageHeader/PageHeader.tsx";
 import { DOLLS_DATA, type DollItem } from "./dollsData.ts";
+import { searchDolls } from "./searchDolls.ts";
 import "./chooseDoll.css";
 import "../pages.css";
 
@@ -21,16 +22,7 @@ export const ChooseDoll: React.FC<ChooseDollProps> = ({
 
   // Фильтрация и поиск
   const filteredDolls = useMemo(() => {
-    return DOLLS_DATA.filter((doll) => {
-      if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase().trim();
-        const inName = doll.name.toLowerCase().includes(query);
-        const inCategory = doll.category.toLowerCase().includes(query);
-        const inHeight = doll.height.toLowerCase().includes(query);
-        return inName || inCategory || inHeight;
-      }
-      return true;
-    });
+    return searchDolls(DOLLS_DATA, searchQuery);
   }, [searchQuery]);
 
   const handleSelectDollPatterns = (doll: DollItem) => {
