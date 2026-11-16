@@ -26,5 +26,5 @@ export type { LoginModalProps } from "./Auth/LoginModal.tsx";
 export { RegisterModal } from "./Auth/RegisterModal.tsx";
 export type { RegisterModalProps } from "./Auth/RegisterModal.tsx";
 
-export { SearchIcon, ArrowRightIcon } from "./icons/index.ts";
+export { SearchIcon, ArrowRightIcon, CloseIcon } from "./icons/index.ts";
 export type { IconProps } from "./icons/index.ts";

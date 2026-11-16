@@ -347,19 +347,6 @@
 }
 
 /* Модальное окно куклы: только фото мерок и кнопка выкроек */
-.doll-modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(40, 30, 24, 0.35);
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1.5rem;
-  z-index: 1000;
-  animation: fadeIn 0.2s ease;
-}
-
 .doll-modal {
   background: #ffffff;
   border-radius: 16px;
@@ -373,32 +360,22 @@
   padding: 1.5rem;
   gap: 1.25rem;
   position: relative;
-  animation: scaleUp 0.25s ease;
 }
 
-.doll-modal__close-btn {
-  position: absolute;
+.doll-modal .modal-close-btn {
   top: 1rem;
   right: 1rem;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
   background: rgba(255, 255, 255, 0.95);
   border: 1px solid var(--color-cappuccino);
   color: var(--color-chocolate);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.25rem;
-  transition: all 0.2s ease;
-  z-index: 10;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 10;
 }
 
-.doll-modal__close-btn:hover {
+.doll-modal .modal-close-btn:hover {
   background: var(--color-chocolate);
   color: #ffffff;
+  transform: rotate(90deg);
 }
 
 .doll-modal__measurements-box {

@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { Breadcrumbs } from "../../components/Breadcrumbs/Breadcrumbs.tsx";
 import { PageHeader } from "../../components/PageHeader/PageHeader.tsx";
+import { Modal } from "../../components/Modal/Modal.tsx";
 import { SearchIcon, ArrowRightIcon } from "../../components/icons/index.ts";
 import { DOLLS_DATA, type DollItem } from "./dollsData.ts";
 import { searchDolls } from "./searchDolls.ts";
@@ -135,19 +136,16 @@ export const ChooseDoll: React.FC<ChooseDollProps> = ({
         </div>
       )}
 
-      {/* Модальное окно: только фото мерок и кнопка смотреть выкройки */}
-      {selectedDoll && (
-        <div className="doll-modal-overlay" onClick={() => setSelectedDoll(null)}>
-          <div className="doll-modal" onClick={(e) => e.stopPropagation()}>
-            <button
-              type="button"
-              className="doll-modal__close-btn"
-              onClick={() => setSelectedDoll(null)}
-              aria-label="Закрыть"
-            >
-              ×
-            </button>
-
+      {/* Модальное окно мерок куклы */}
+      <Modal
+        isOpen={Boolean(selectedDoll)}
+        onClose={() => setSelectedDoll(null)}
+        title={selectedDoll ? `Мерки куклы ${selectedDoll.name}` : "Мерки куклы"}
+        className="doll-modal"
+        maxWidth="540px"
+      >
+        {selectedDoll && (
+          <>
             {/* Фото мерок */}
             <div className="doll-modal__measurements-box">
               {selectedDoll.measurementsFileName ? (
@@ -177,9 +175,9 @@ export const ChooseDoll: React.FC<ChooseDollProps> = ({
                 <ArrowRightIcon size={16} />
               </button>
             </div>
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </Modal>
     </div>
   );
 };
