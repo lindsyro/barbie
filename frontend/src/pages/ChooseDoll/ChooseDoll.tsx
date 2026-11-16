@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { Breadcrumbs } from "../../components/Breadcrumbs/Breadcrumbs.tsx";
 import { PageHeader } from "../../components/PageHeader/PageHeader.tsx";
+import { SearchIcon, ArrowRightIcon } from "../../components/icons/index.ts";
 import { DOLLS_DATA, type DollItem } from "./dollsData.ts";
 import { searchDolls } from "./searchDolls.ts";
 import "./chooseDoll.css";
@@ -40,18 +41,7 @@ export const ChooseDoll: React.FC<ChooseDollProps> = ({
         <Breadcrumbs current="Выбрать куклу" onBackToMain={onBackToMain} />
 
         <div className="choose-doll-compact-search">
-          <svg
-            className="choose-doll-compact-search__icon"
-            width="15"
-            height="15"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <circle cx="11" cy="11" r="8" />
-            <line x1="21" y1="21" x2="16.65" y2="16.65" />
-          </svg>
+          <SearchIcon className="choose-doll-compact-search__icon" size={15} />
           <input
             type="text"
             className="choose-doll-compact-search__input"
@@ -127,10 +117,7 @@ export const ChooseDoll: React.FC<ChooseDollProps> = ({
                     onClick={() => handleSelectDollPatterns(doll)}
                   >
                     <span>Выкройки</span>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <line x1="5" y1="12" x2="19" y2="12" />
-                      <polyline points="12 5 19 12 12 19" />
-                    </svg>
+                    <ArrowRightIcon size={14} />
                   </button>
 
                   <button
@@ -187,10 +174,7 @@ export const ChooseDoll: React.FC<ChooseDollProps> = ({
                 }}
               >
                 <span>Смотреть выкройки</span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                  <polyline points="12 5 19 12 12 19" />
-                </svg>
+                <ArrowRightIcon size={16} />
               </button>
             </div>
           </div>
