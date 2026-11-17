@@ -19,6 +19,12 @@ import {
   type WishlistPattern,
 } from "./api/wishlist.ts";
 import {
+  fetchPatterns,
+  findCachedPatternById,
+  findCachedPatternByTitle,
+} from "./api/patterns.ts";
+import { useAsyncData } from "./hooks/index.ts";
+import {
   Main,
   Catalog,
   Tutorials,
@@ -176,6 +182,12 @@ function App() {
   const [currentPage, setCurrentPage] = useState<string>("main");
   const [catalogCategory, setCatalogCategory] = useState<string>("all");
   const [catalogSubcategory, setCatalogSubcategory] = useState<string>("all");
+
+  // Загрузка всех выкроек из базы данных PostgreSQL
+  const { data: patterns = [], isLoading: isPatternsLoading } = useAsyncData(fetchPatterns, {
+    initialData: [],
+  });
+
   const [cart, setCart] = useState<CartItemType[]>(INITIAL_CART);
   const cartCount = cart.length;
   const [currentUser, setCurrentUser] = useState<User | null>(() => getStoredUser());
@@ -287,7 +299,10 @@ function App() {
       return;
     }
 
-    const foundCatalog = CATALOG_PATTERNS.find((p) => p.title === title);
+    const foundCatalog =
+      patterns.find((p) => p.title === title) ||
+      findCachedPatternByTitle(title) ||
+      CATALOG_PATTERNS.find((p) => p.title === title);
     const foundFeatured = FEATURED_PATTERNS.find((p) => p.title === title);
     const found = foundCatalog || foundFeatured;
 
@@ -342,7 +357,10 @@ function App() {
   };
 
   const handleToggleWishlist = async (patternId: number) => {
-    const foundCatalog = CATALOG_PATTERNS.find((p) => p.id === patternId);
+    const foundCatalog =
+      patterns.find((p) => p.id === patternId) ||
+      findCachedPatternById(patternId) ||
+      CATALOG_PATTERNS.find((p) => p.id === patternId);
     const foundFeatured = FEATURED_PATTERNS.find((p) => p.id === patternId);
     const found = foundCatalog || foundFeatured;
     const numPrice = found
@@ -520,6 +538,8 @@ function App() {
         return (
           <Catalog
             key={`${catalogCategory}_${catalogSubcategory}`}
+            patterns={patterns}
+            isLoading={isPatternsLoading}
             initialCategory={catalogCategory}
             initialSubcategory={catalogSubcategory}
             onBackToMain={() => navigateTo("main")}
@@ -595,6 +615,7 @@ function App() {
       default:
         return (
           <Main
+            patterns={patterns}
             onAddToCart={handleAddToCart}
             onSelectCategory={handleSelectCategory}
             onToggleWishlist={handleToggleWishlist}

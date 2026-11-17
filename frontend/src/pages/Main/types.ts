@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import type { CatalogPatternItem } from "../Catalog/catalogData.ts";
 
 export interface PatternItem {
   id: number;
@@ -23,6 +24,7 @@ export interface QuickCategoryItem {
 }
 
 export interface MainProps {
+  patterns?: CatalogPatternItem[];
   onAddToCart?: (title: string) => void;
   onSelectCategory?: (category: string) => void;
   onToggleWishlist?: (patternId: number) => void;

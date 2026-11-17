@@ -1,17 +1,51 @@
-import React from "react";
+import React, { useMemo } from "react";
 import type { MainProps } from "./types.ts";
-import { FEATURED_PATTERNS, CATEGORIES_QUICK } from "./mainData.tsx";
+import { useAsyncData } from "@/hooks/index.ts";
+import { fetchFeaturedPatterns } from "@/api/patterns.ts";
+import {
+  CATEGORIES_QUICK,
+  getQuickCategories,
+  mapPatternsToFeatured,
+} from "./mainData.tsx";
 import "./main.css";
 
 const BASE = import.meta.env.BASE_URL;
 
 export const Main: React.FC<MainProps> = ({
+  patterns = [],
   onAddToCart,
   onSelectCategory,
   onToggleWishlist,
   wishlistIds = [],
 }) => {
   const wishlistSet = new Set(wishlistIds);
+
+  // Загружаем популярные выкройки из базы данных PostgreSQL
+  const { data: dbFeatured = [] } = useAsyncData(fetchFeaturedPatterns, {
+    initialData: [],
+    enabled: patterns.length === 0,
+  });
+
+  const featuredList = useMemo(() => {
+    if (patterns.length > 0) {
+      return mapPatternsToFeatured(patterns);
+    }
+    return dbFeatured.map((item) => ({
+      id: item.id,
+      title: item.title,
+      tag: "Выкройка",
+      doll: item.doll,
+      price: `${item.price} ₽`,
+      image: item.image,
+    }));
+  }, [patterns, dbFeatured]);
+
+  const categories = useMemo(() => {
+    if (patterns.length > 0) {
+      return getQuickCategories(patterns);
+    }
+    return CATEGORIES_QUICK;
+  }, [patterns]);
   return (
     <div className="page-main">
       {/* 1. Главный баннер */}
@@ -54,7 +88,7 @@ export const Main: React.FC<MainProps> = ({
 
           {/* Быстрые категории/фильтры */}
           <div className="main-categories-nav">
-            {CATEGORIES_QUICK.map((cat) => (
+            {categories.map((cat) => (
               <button
                 key={cat.id}
                 type="button"
@@ -69,7 +103,7 @@ export const Main: React.FC<MainProps> = ({
 
           {/* Сетка карточек выкроек */}
           <div className="main-patterns-grid">
-            {FEATURED_PATTERNS.map((item) => {
+            {featuredList.map((item) => {
               const isLiked = wishlistSet.has(item.id);
               return (
                 <article key={item.id} className="main-pattern-card">

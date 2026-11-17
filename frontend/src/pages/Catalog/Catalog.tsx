@@ -1,10 +1,14 @@
 import React, { useState, useMemo } from "react";
 import { Breadcrumbs, PageHeader, SearchInput, UserIcon } from "@/components/index.ts";
-import { CATALOG_PATTERNS, type CatalogPatternItem } from "./catalogData.ts";
+import { useAsyncData } from "@/hooks/index.ts";
+import { fetchPatterns } from "@/api/patterns.ts";
+import type { CatalogPatternItem } from "./catalogData.ts";
 import { PatternCard, PatternModal } from "./components/index.ts";
 import "./catalog.css";
 
 export interface CatalogProps {
+  patterns?: CatalogPatternItem[];
+  isLoading?: boolean;
   initialCategory?: string;
   initialSubcategory?: string;
   onBackToMain?: () => void;
@@ -46,6 +50,8 @@ const CATEGORY_INFO: Record<MainCategoryId, { title: string; subtitle: string; b
 };
 
 export const Catalog: React.FC<CatalogProps> = ({
+  patterns: propPatterns,
+  isLoading: propIsLoading,
   initialCategory = "all",
   initialSubcategory: _initialSubcategory = "all",
   onBackToMain,
@@ -55,6 +61,18 @@ export const Catalog: React.FC<CatalogProps> = ({
   cartItems = [],
   onNavigateToChooseDoll,
 }) => {
+  // Универсальная загрузка выкроек из базы данных PostgreSQL
+  const { data: fetchedPatterns = [], isLoading: internalLoading } = useAsyncData(
+    fetchPatterns,
+    {
+      initialData: [],
+      enabled: !propPatterns || propPatterns.length === 0,
+    }
+  );
+
+  const patterns = propPatterns && propPatterns.length > 0 ? propPatterns : fetchedPatterns;
+  const isLoading = propIsLoading ?? internalLoading;
+
   // Выбранная категория
   const [activeCategory, setActiveCategory] = useState<MainCategoryId>(() => {
     const validIds: MainCategoryId[] = ["all", "girls-1-6", "girls-1-4", "guys", "kids"];
@@ -81,10 +99,18 @@ export const Catalog: React.FC<CatalogProps> = ({
 
   // Фильтрация и сортировка выкроек
   const filteredPatterns = useMemo(() => {
-    let result = CATALOG_PATTERNS.filter((item) => {
+    let result = patterns.filter((item) => {
       // 1. Фильтр по категории
-      if (activeCategory !== "all" && item.category !== activeCategory) {
-        return false;
+      if (activeCategory !== "all") {
+        const matchesCategory =
+          item.category === activeCategory ||
+          item.dolls?.some(
+            (d) =>
+              (d as unknown as { category?: { slug: string } })?.category?.slug === activeCategory
+          );
+        if (!matchesCategory) {
+          return false;
+        }
       }
       // 2. Поиск
       if (searchQuery.trim()) {
@@ -104,7 +130,7 @@ export const Catalog: React.FC<CatalogProps> = ({
     }
 
     return result;
-  }, [activeCategory, searchQuery, sortBy]);
+  }, [patterns, activeCategory, searchQuery, sortBy]);
 
   const handleResetFilters = () => {
     setActiveCategory("all");
@@ -134,8 +160,12 @@ export const Catalog: React.FC<CatalogProps> = ({
         subtitle={currentCategoryMeta.subtitle}
       />
 
-      {/* 2. Сетка выкроек */}
-      {filteredPatterns.length === 0 ? (
+      {/* 2. Сетка выкроек или статус загрузки */}
+      {isLoading && patterns.length === 0 ? (
+        <div className="catalog-empty">
+          <p className="catalog-empty__desc">Загрузка выкроек из базы данных...</p>
+        </div>
+      ) : filteredPatterns.length === 0 ? (
         <div className="catalog-empty">
           <h3 className="catalog-empty__title">Выкройки не найдены</h3>
           <p className="catalog-empty__desc">

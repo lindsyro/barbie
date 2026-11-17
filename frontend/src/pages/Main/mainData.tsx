@@ -1,31 +1,22 @@
-import { CATALOG_PATTERNS } from "../Catalog/catalogData.ts";
+import type { CatalogPatternItem } from "../Catalog/catalogData.ts";
 import type { PatternItem, AdvantageItem, QuickCategoryItem } from "./types.ts";
 
-/**
- * Подборка популярных выкроек на главной странице — формируется напрямую из CATALOG_PATTERNS.
- * ID соответствуют реальным позициям каталога:
- *  - 27: Водолазка-боди для Барби стандарт
- *  - 19: Боди-бюстье «Афродита» (Барби пышка МТМ)
- *  - 1:  Платье с корсетом (Mizi Katie Girl / Barbie Standard MTM)
- *  - 22: Водолазка-боди для Ken
- *  - 8:  Парка для Integrity FR6 и NU.Face
- *  - 21: Кофточка и брюки клёш для MiniFee
- *  - 34: Платье «Аргентина» (Integrity FR6)
- *  - 25: Водолазка-боди для Blythe
- */
 export const POPULAR_PATTERN_IDS = [27, 19, 1, 22, 8, 21, 34, 25];
 
-export const FEATURED_PATTERNS: PatternItem[] = POPULAR_PATTERN_IDS
-  .map((id) => CATALOG_PATTERNS.find((item) => item.id === id))
-  .filter((item): item is NonNullable<typeof item> => Boolean(item))
-  .map((item) => ({
-    id: item.id,
-    title: item.title,
-    tag: "Выкройка",
-    doll: item.doll,
-    price: `${item.price} ₽`,
-    image: item.image,
-  }));
+export function mapPatternsToFeatured(patterns: CatalogPatternItem[]): PatternItem[] {
+  return POPULAR_PATTERN_IDS.map((id) => patterns.find((item) => item.id === id))
+    .filter((item): item is NonNullable<typeof item> => Boolean(item))
+    .map((item) => ({
+      id: item.id,
+      title: item.title,
+      tag: "Выкройка",
+      doll: item.doll,
+      price: `${item.price} ₽`,
+      image: item.image,
+    }));
+}
+
+export const FEATURED_PATTERNS: PatternItem[] = [];
 
 export const ADVANTAGES: AdvantageItem[] = [
   {
@@ -73,30 +64,74 @@ export const ADVANTAGES: AdvantageItem[] = [
   },
 ];
 
+export function getQuickCategories(patterns: CatalogPatternItem[]): QuickCategoryItem[] {
+  return [
+    {
+      name: "Все выкройки",
+      id: "all",
+      count: String(patterns.length),
+    },
+    {
+      name: "Девушки 1/6",
+      id: "girls-1-6",
+      count: String(
+        patterns.filter(
+          (p) =>
+            p.category === "girls-1-6" ||
+            p.dolls?.some(
+              (d) =>
+                (d as unknown as { category?: { slug: string } })?.category?.slug === "girls-1-6"
+            )
+        ).length
+      ),
+    },
+    {
+      name: "Мужчины (Ken / Adonis)",
+      id: "guys",
+      count: String(
+        patterns.filter(
+          (p) =>
+            p.category === "guys" ||
+            p.dolls?.some(
+              (d) => (d as unknown as { category?: { slug: string } })?.category?.slug === "guys"
+            )
+        ).length
+      ),
+    },
+    {
+      name: "Девушки 1/4 (MiniFee)",
+      id: "girls-1-4",
+      count: String(
+        patterns.filter(
+          (p) =>
+            p.category === "girls-1-4" ||
+            p.dolls?.some(
+              (d) =>
+                (d as unknown as { category?: { slug: string } })?.category?.slug === "girls-1-4"
+            )
+        ).length
+      ),
+    },
+    {
+      name: "Дети и мини (Kelly)",
+      id: "kids",
+      count: String(
+        patterns.filter(
+          (p) =>
+            p.category === "kids" ||
+            p.dolls?.some(
+              (d) => (d as unknown as { category?: { slug: string } })?.category?.slug === "kids"
+            )
+        ).length
+      ),
+    },
+  ];
+}
+
 export const CATEGORIES_QUICK: QuickCategoryItem[] = [
-  {
-    name: "Все выкройки",
-    id: "all",
-    count: String(CATALOG_PATTERNS.length),
-  },
-  {
-    name: "Девушки 1/6",
-    id: "girls-1-6",
-    count: String(CATALOG_PATTERNS.filter((p) => p.category === "girls-1-6").length),
-  },
-  {
-    name: "Мужчины (Ken / Adonis)",
-    id: "guys",
-    count: String(CATALOG_PATTERNS.filter((p) => p.category === "guys").length),
-  },
-  {
-    name: "Девушки 1/4 (MiniFee)",
-    id: "girls-1-4",
-    count: String(CATALOG_PATTERNS.filter((p) => p.category === "girls-1-4").length),
-  },
-  {
-    name: "Дети и мини (Kelly)",
-    id: "kids",
-    count: String(CATALOG_PATTERNS.filter((p) => p.category === "kids").length),
-  },
+  { name: "Все выкройки", id: "all", count: "41" },
+  { name: "Девушки 1/6", id: "girls-1-6", count: "34" },
+  { name: "Мужчины (Ken / Adonis)", id: "guys", count: "4" },
+  { name: "Девушки 1/4 (MiniFee)", id: "girls-1-4", count: "1" },
+  { name: "Дети и мини (Kelly)", id: "kids", count: "2" },
 ];

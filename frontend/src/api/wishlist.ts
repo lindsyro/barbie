@@ -5,6 +5,7 @@
 
 import { getStoredToken, getStoredUser } from "./auth.ts";
 import { CATALOG_PATTERNS } from "../pages/Catalog/catalogData.ts";
+import { findCachedPatternById } from "./patterns.ts";
 
 export interface WishlistPattern {
   id: number;
@@ -24,7 +25,7 @@ export interface WishlistPattern {
 }
 
 export function enrichWishlistItem(it: Partial<WishlistPattern> & { id: number }): WishlistPattern {
-  const cat = CATALOG_PATTERNS.find((p) => p.id === it.id);
+  const cat = findCachedPatternById(it.id) || CATALOG_PATTERNS.find((p) => p.id === it.id);
   if (cat) {
     return {
       id: cat.id,
