@@ -7,8 +7,6 @@ export interface MenuItem {
   children?: MenuItem[];
 }
 
-export type SubMenuItem = MenuItem;
-
 export interface MenuProps {
   variant?: "horizontal" | "vertical" | "drawer";
   isOpen?: boolean;

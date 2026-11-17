@@ -1,7 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import type { MenuItem, MenuProps } from "./types.ts";
 import { DEFAULT_MENU_ITEMS } from "./menuData.ts";
-import { ChevronDownIcon, ChevronRightIcon, CloseIcon } from "../icons/index.ts";
+import {
+  ChevronDownIcon,
+  ChevronRightIcon,
+  CloseIcon,
+} from "../icons/index.ts";
 import "./menu.css";
 
 export const Menu: React.FC<MenuProps> = ({

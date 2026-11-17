@@ -3,7 +3,7 @@ export type { HeaderProps } from "./Header/Header.tsx";
 
 export { Menu } from "./Menu/Menu.tsx";
 export { DEFAULT_MENU_ITEMS, buildMenuItems } from "./Menu/menuData.ts";
-export type { MenuProps, MenuItem, SubMenuItem } from "./Menu/types.ts";
+export type { MenuProps, MenuItem } from "./Menu/types.ts";
 
 export { Footer } from "./Footer/Footer.tsx";
 export type { FooterProps } from "./Footer/Footer.tsx";
