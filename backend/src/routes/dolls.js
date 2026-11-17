@@ -67,6 +67,9 @@ router.get("/:id", async (req, res, next) => {
       where: { id },
       include: {
         category: true,
+        patterns: {
+          orderBy: { id: "asc" },
+        },
       },
     });
 

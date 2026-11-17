@@ -26,3 +26,4 @@ CREATE TABLE "dolls" (
 
 -- AddForeignKey
 ALTER TABLE "dolls" ADD CONSTRAINT "dolls_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "doll_categories"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+

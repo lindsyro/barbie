@@ -397,6 +397,77 @@ async function main() {
   );
   console.log(`✓ Таблица dolls заполнена (${DOLLS_DATA.length} кукол)`);
 
+  console.log("Добавление выкроек в patterns и связей со связанными куклами...");
+  const PATTERNS_DATA = [
+    { id: 1, title: "Платье с корсетом", price: 690, dollIds: [14, 2, 10, 7, 8] },
+    { id: 2, title: "Водолазка-боди с вырезом", price: 450, dollIds: [8, 7] },
+    { id: 3, title: "Нижнее белье", price: 490, dollIds: [7] },
+    { id: 4, title: "Летнее платье с запахом и рюшами", price: 550, dollIds: [2] },
+    { id: 5, title: "Юбка в складку", price: 390, dollIds: [7, 8] },
+    { id: 6, title: "Нижнее белье", price: 450, dollIds: [16] },
+    { id: 7, title: "Образ: комбинезон, гольфики, футболка-боди", price: 490, dollIds: [6] },
+    { id: 8, title: "Парка", price: 850, dollIds: [7, 8] },
+    { id: 9, title: "Парка", price: 850, dollIds: [21] },
+    { id: 10, title: "Платье № 2", price: 550, dollIds: [10] },
+    { id: 11, title: "Платье «Сияние»", price: 590, dollIds: [7] },
+    { id: 12, title: "Футболка «Эксклюзив»", price: 350, dollIds: [7, 8, 2, 14, 10] },
+    { id: 13, title: "Блузка «Афелия»", price: 490, dollIds: [7, 8] },
+    { id: 14, title: "Брюки клёш", price: 450, dollIds: [14] },
+    { id: 15, title: "Брюки клёш", price: 450, dollIds: [15] },
+    { id: 16, title: "Брюки клёш", price: 450, dollIds: [4] },
+    { id: 17, title: "Брюки", price: 450, dollIds: [3] },
+    { id: 18, title: "Футболка-боди", price: 390, dollIds: [15] },
+    { id: 19, title: "Боди-бюстье «Афродита»", price: 590, dollIds: [4] },
+    { id: 20, title: "Боди-бюстье «Миранда»", price: 590, dollIds: [2, 10] },
+    { id: 21, title: "Кофточка и брюки клёш", price: 790, dollIds: [13] },
+    { id: 22, title: "Водолазка-боди", price: 450, dollIds: [19, 20] },
+    { id: 23, title: "Рубашка", price: 490, dollIds: [19, 20] },
+    { id: 24, title: "Водолазка-боди", price: 490, dollIds: [23] },
+    { id: 25, title: "Водолазка-боди", price: 450, dollIds: [17] },
+    { id: 26, title: "Жилетка", price: 650, dollIds: [10, 7, 8, 2, 14] },
+    { id: 27, title: "Водолазка-боди", price: 450, dollIds: [2] },
+    { id: 28, title: "Водолазка-боди", price: 450, dollIds: [5] },
+    { id: 29, title: "Водолазка-боди для хлопковой ткани", price: 450, dollIds: [2] },
+    { id: 30, title: "Водолазка-боди", price: 450, dollIds: [7, 8] },
+    { id: 31, title: "Водолазка-боди", price: 450, dollIds: [3] },
+    { id: 32, title: "Боди-бюстье «Миранда»", price: 590, dollIds: [10] },
+    { id: 33, title: "Нижнее белье", price: 490, dollIds: [3, 2] },
+    { id: 34, title: "Платье «Аргентина»", price: 650, dollIds: [7] },
+    { id: 35, title: "Нижнее белье", price: 490, dollIds: [17] },
+    { id: 36, title: "Колготки и чулки", price: 390, dollIds: [17] },
+    { id: 37, title: "Нижнее белье", price: 490, dollIds: [4] },
+    { id: 38, title: "Нижнее белье", price: 490, dollIds: [1] },
+    { id: 39, title: "Летнее платье с запахом", price: 550, dollIds: [8] },
+    { id: 40, title: "Платье «Колокольчик»", price: 450, dollIds: [6] },
+    { id: 41, title: "Платье «Рыбка»", price: 590, dollIds: [4] },
+  ];
+
+  for (const p of PATTERNS_DATA) {
+    await prisma.pattern.upsert({
+      where: { id: p.id },
+      update: {
+        title: p.title,
+        price: p.price,
+        dolls: {
+          set: p.dollIds.map((id) => ({ id })),
+        },
+      },
+      create: {
+        id: p.id,
+        title: p.title,
+        price: p.price,
+        dolls: {
+          connect: p.dollIds.map((id) => ({ id })),
+        },
+      },
+    });
+  }
+
+  await prisma.$executeRawUnsafe(
+    `SELECT setval(pg_get_serial_sequence('patterns', 'id'), coalesce(max(id), 1)) FROM "patterns";`
+  );
+  console.log(`✓ Таблица patterns заполнена (${PATTERNS_DATA.length} выкроек со связями)`);
+
   console.log("🎉 База данных goose успешно наполнена!");
 }
 
