@@ -30,7 +30,7 @@ export const DollCard: React.FC<DollCardProps> = React.memo(({
       {/* Информация о кукле */}
       <div className="doll-card__body">
         <div className="doll-card__cat-row">
-          <span>{doll.category}</span>
+          <span>{doll.category?.name || ""}</span>
           <span>{doll.height} см</span>
         </div>
 

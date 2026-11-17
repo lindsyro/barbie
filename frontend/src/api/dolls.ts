@@ -2,11 +2,16 @@
  * API-клиент для получения списка кукол из базы данных PostgreSQL
  */
 
-import { type DollItem } from "../pages/ChooseDoll/types.ts";
+import { type DollItem, type DollCategory } from "../pages/ChooseDoll/types.ts";
 
 export interface DollsResponse {
   total: number;
   items: DollItem[];
+}
+
+export interface DollCategoriesResponse {
+  total: number;
+  items: DollCategory[];
 }
 
 const API_BASE =
@@ -46,5 +51,22 @@ export async function fetchDollById(id: number): Promise<DollItem | null> {
   } catch (err) {
     console.error(`Не удалось загрузить куклу #${id} из базы данных:`, err);
     return null;
+  }
+}
+
+/**
+ * Загружает категории кукол со списком привязанных к ним кукол из базы данных (для меню)
+ */
+export async function fetchDollCategories(): Promise<DollCategory[]> {
+  try {
+    const res = await fetch(`${API_BASE}/api/dolls/categories`);
+    if (!res.ok) {
+      throw new Error(`Ошибка загрузки категорий кукол: ${res.status}`);
+    }
+    const data: DollCategoriesResponse = await res.json();
+    return Array.isArray(data.items) ? data.items : [];
+  } catch (err) {
+    console.error("Не удалось получить категории кукол из базы данных:", err);
+    return [];
   }
 }

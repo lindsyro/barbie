@@ -11,7 +11,9 @@ export function matchesDollSearch(doll: DollItem, query: string): boolean {
   }
   const inNameEn = doll.nameEn.toLowerCase().includes(trimmed);
   const inNameRu = doll.nameRu.toLowerCase().includes(trimmed);
-  const inCategory = doll.category.toLowerCase().includes(trimmed);
+  const inCategory = doll.category?.name
+    ? doll.category.name.toLowerCase().includes(trimmed)
+    : false;
   const inHeight = String(doll.height).includes(trimmed);
   return inNameEn || inNameRu || inCategory || inHeight;
 }
