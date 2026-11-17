@@ -189,7 +189,6 @@ export const Catalog: React.FC<CatalogProps> = ({
       <PatternModal
         pattern={selectedPattern}
         onClose={() => setSelectedPattern(null)}
-        onAddToCart={onAddToCart}
       />
     </div>
   );

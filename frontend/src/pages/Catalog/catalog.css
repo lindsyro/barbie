@@ -469,33 +469,28 @@
   cursor: pointer;
 }
 
-/* 5. Модальное окно быстрого просмотра выкройки */
+/* 5. Модальное окно быстрого просмотра выкройки (Lightbox крупного фото) */
 .modal-dialog.catalog-modal {
   padding: 0;
-  max-width: 860px;
-  width: 100%;
+  width: auto;
+  max-width: 90vw;
   max-height: 90vh;
+  background: #ffffff;
+  border-radius: 16px;
   overflow: hidden;
-  display: grid;
-  grid-template-columns: 360px 1fr;
+  display: flex;
+  flex-direction: column;
   position: relative;
-}
-
-@media (max-width: 768px) {
-  .modal-dialog.catalog-modal {
-    grid-template-columns: 1fr;
-    max-width: 95%;
-    overflow-y: auto;
-  }
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
 }
 
 .catalog-modal .modal-close-btn {
-  top: 1rem;
-  right: 1rem;
+  top: 0.85rem;
+  right: 0.85rem;
   background: rgba(255, 255, 255, 0.95);
   border: 1px solid var(--color-cappuccino);
   color: var(--color-chocolate);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   z-index: 10;
 }
 
@@ -505,50 +500,55 @@
   transform: rotate(90deg);
 }
 
-.catalog-modal__gallery-col {
+.catalog-modal__gallery {
   display: flex;
   flex-direction: column;
   background: var(--bg-soft);
-  border-right: 1px solid var(--color-ivory);
-}
-
-@media (max-width: 768px) {
-  .catalog-modal__gallery-col {
-    border-right: none;
-    border-bottom: 1px solid var(--color-ivory);
-  }
+  max-height: 88vh;
+  overflow: hidden;
 }
 
 .catalog-modal__img-box {
   position: relative;
-  width: 100%;
-  aspect-ratio: 4 / 5;
-  background: var(--bg-soft);
   display: flex;
   align-items: center;
   justify-content: center;
+  background: var(--bg-soft);
   overflow: hidden;
+  max-height: 78vh;
 }
 
 .catalog-modal__img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
   display: block;
+  max-width: 85vw;
+  max-height: 78vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+@media (max-width: 560px) {
+  .catalog-modal__img-box {
+    max-height: 70vh;
+  }
+  .catalog-modal__img {
+    max-width: 92vw;
+    max-height: 70vh;
+  }
 }
 
 .catalog-modal__nav-btn {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(4px);
   border: 1px solid var(--color-cappuccino);
   color: var(--color-chocolate);
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   line-height: 1;
   display: flex;
   align-items: center;
@@ -565,11 +565,11 @@
 }
 
 .catalog-modal__nav-btn--prev {
-  left: 0.75rem;
+  left: 0.85rem;
 }
 
 .catalog-modal__nav-btn--next {
-  right: 0.75rem;
+  right: 0.85rem;
 }
 
 .catalog-modal__counter {
@@ -581,7 +581,7 @@
   color: #ffffff;
   font-size: 0.75rem;
   font-weight: 600;
-  padding: 0.2rem 0.6rem;
+  padding: 0.25rem 0.65rem;
   border-radius: 12px;
   z-index: 3;
 }
@@ -589,10 +589,11 @@
 .catalog-modal__thumbs {
   display: flex;
   gap: 0.5rem;
-  padding: 0.75rem 1rem;
+  padding: 0.65rem 1rem;
   background: #ffffff;
   border-top: 1px solid var(--color-ivory);
   overflow-x: auto;
+  justify-content: center;
   scrollbar-width: thin;
 }
 
@@ -632,92 +633,4 @@
 .catalog-modal__thumb--active {
   border-color: var(--color-gold-site);
   box-shadow: 0 0 0 1px var(--color-gold-site);
-}
-
-.catalog-modal__body {
-  padding: 2rem 2.25rem;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  max-height: 90vh;
-}
-
-.catalog-modal__badge {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--color-gold-site);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 0.5rem;
-}
-
-.catalog-modal__title {
-  font-family: "Cormorant Garamond", Georgia, serif;
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--color-chocolate);
-  margin: 0 0 0.5rem 0;
-  line-height: 1.2;
-}
-
-.catalog-modal__doll {
-  font-size: 0.875rem;
-  color: var(--color-taupe);
-  margin: 0 0 1rem 0;
-}
-
-.catalog-modal__desc {
-  font-size: 0.875rem;
-  color: var(--color-taupe);
-  line-height: 1.55;
-  margin: 0 0 1rem 0;
-}
-
-.catalog-modal__fabrics {
-  background: var(--bg-soft);
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
-  font-size: 0.8125rem;
-  color: var(--color-chocolate);
-  margin-bottom: 1.25rem;
-}
-
-.catalog-modal__fabrics strong {
-  color: var(--color-gold-site);
-}
-
-.catalog-modal__footer {
-  margin-top: auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--color-ivory);
-}
-
-.catalog-modal__price {
-  font-family: "Cormorant Garamond", Georgia, serif;
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--color-chocolate);
-}
-
-.catalog-modal__btn-add {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  background: var(--color-chocolate);
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.catalog-modal__btn-add:hover {
-  background: var(--color-gold-site);
 }
