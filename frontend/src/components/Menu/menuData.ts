@@ -16,7 +16,13 @@ export function buildMenuItems(
 
   const sortedCats = [...categories].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
-  const catalogChildren: MenuItem[] = sortedCats.map((cat) => {
+  const allPatternsItem: MenuItem = {
+    id: "all-patterns",
+    label: "Все выкройки каталога",
+    href: "#catalog",
+  };
+
+  const categoryItems: MenuItem[] = sortedCats.map((cat) => {
     const dolls = cat.dolls || [];
     return {
       id: cat.slug || `category-${cat.id}`,
@@ -30,6 +36,8 @@ export function buildMenuItems(
       })),
     };
   });
+
+  const catalogChildren: MenuItem[] = [allPatternsItem, ...categoryItems];
 
   return baseItems.map((item) => {
     if (item.id === "catalog") {
@@ -48,6 +56,11 @@ export const DEFAULT_MENU_ITEMS: MenuItem[] = [
     label: "Каталог выкроек",
     href: "#catalog",
     children: [
+      {
+        id: "all-patterns",
+        label: "Все выкройки каталога",
+        href: "#catalog",
+      },
       {
         id: "girls-1-6",
         label: "Для девушек 1/6",

@@ -38,5 +38,7 @@ export {
   CheckIcon,
   ImageIcon,
   UserIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
 } from "./icons/index.ts";
 export type { IconProps, HeartIconProps } from "./icons/index.ts";

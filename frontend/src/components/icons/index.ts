@@ -6,4 +6,6 @@ export { CartIcon } from "./CartIcon.tsx";
 export { CheckIcon } from "./CheckIcon.tsx";
 export { ImageIcon } from "./ImageIcon.tsx";
 export { UserIcon } from "./UserIcon.tsx";
+export { ChevronDownIcon } from "./ChevronDownIcon.tsx";
+export { ChevronRightIcon } from "./ChevronRightIcon.tsx";
 export type { IconProps } from "./types.ts";
