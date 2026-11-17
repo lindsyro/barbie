@@ -21,7 +21,7 @@ export const DollCard: React.FC<DollCardProps> = React.memo(({
       <div className="doll-card__img-box">
         <img
           src={`${BASE}dolls/${encodeURI(doll.fileName.normalize("NFC"))}`}
-          alt={doll.name}
+          alt={`${doll.nameEn} (${doll.nameRu})`}
           className="doll-card__img"
           loading="lazy"
         />
@@ -31,10 +31,11 @@ export const DollCard: React.FC<DollCardProps> = React.memo(({
       <div className="doll-card__body">
         <div className="doll-card__cat-row">
           <span>{doll.category}</span>
-          <span>{doll.height}</span>
+          <span>{doll.height} см</span>
         </div>
 
-        <h3 className="doll-card__title">{doll.name}</h3>
+        <h3 className="doll-card__title">{doll.nameEn}</h3>
+        <p className="doll-card__subtitle">{doll.nameRu}</p>
 
         {/* Кнопки действий */}
         <div className="doll-card__footer">

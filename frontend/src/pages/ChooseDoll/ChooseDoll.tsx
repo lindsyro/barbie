@@ -22,11 +22,12 @@ export const ChooseDoll: React.FC<ChooseDollProps> = ({
     return searchDolls(DOLLS_DATA, searchQuery);
   }, [searchQuery]);
 
-  const handleSelectDollPatterns = (doll: DollItem) => {
+  const handleSelectDollPatterns = (_doll: DollItem) => {
+    // Временная заглушка: переход ко всем выкройкам каталога
     if (onNavigateToCatalog) {
-      onNavigateToCatalog(doll.catalogHash);
+      onNavigateToCatalog("catalog");
     } else {
-      window.location.hash = doll.catalogHash;
+      window.location.hash = "catalog";
     }
   };
 

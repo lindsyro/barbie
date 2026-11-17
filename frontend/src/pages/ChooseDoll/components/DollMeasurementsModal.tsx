@@ -20,7 +20,7 @@ export const DollMeasurementsModal: React.FC<DollMeasurementsModalProps> = ({
     <Modal
       isOpen={Boolean(doll)}
       onClose={onClose}
-      title={doll ? `Мерки куклы ${doll.name}` : "Мерки куклы"}
+      title={doll ? `Мерки куклы ${doll.nameEn} (${doll.nameRu})` : "Мерки куклы"}
       className="doll-modal"
       maxWidth="540px"
     >
@@ -31,7 +31,7 @@ export const DollMeasurementsModal: React.FC<DollMeasurementsModalProps> = ({
             {doll.measurementsFileName ? (
               <img
                 src={`${BASE}measurements/${encodeURI(doll.measurementsFileName)}`}
-                alt={`Мерки ${doll.name}`}
+                alt={`Мерки ${doll.nameEn}`}
                 className="doll-modal__measurements-img"
               />
             ) : (

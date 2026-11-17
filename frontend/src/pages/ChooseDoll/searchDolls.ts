@@ -9,10 +9,11 @@ export function matchesDollSearch(doll: DollItem, query: string): boolean {
   if (!trimmed) {
     return true;
   }
-  const inName = doll.name.toLowerCase().includes(trimmed);
+  const inNameEn = doll.nameEn.toLowerCase().includes(trimmed);
+  const inNameRu = doll.nameRu.toLowerCase().includes(trimmed);
   const inCategory = doll.category.toLowerCase().includes(trimmed);
-  const inHeight = doll.height.toLowerCase().includes(trimmed);
-  return inName || inCategory || inHeight;
+  const inHeight = String(doll.height).includes(trimmed);
+  return inNameEn || inNameRu || inCategory || inHeight;
 }
 
 /**
