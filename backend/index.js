@@ -11,6 +11,7 @@ import wishlistRouter from "./src/routes/wishlist.js";
 import ordersRouter from "./src/routes/orders.js";
 import reviewsRouter from "./src/routes/reviews.js";
 import subscribeRouter from "./src/routes/subscribe.js";
+import dollsRouter from "./src/routes/dolls.js";
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3001;
@@ -81,6 +82,10 @@ app.get("/", (req, res) => {
         list: "GET /api/reviews",
         create: "POST /api/reviews",
       },
+      dolls: {
+        list: "GET /api/dolls",
+        detail: "GET /api/dolls/:id",
+      },
       subscribe: "POST /api/subscribe",
     },
   });
@@ -113,6 +118,7 @@ app.use("/api/wishlist", wishlistRouter);
 app.use("/api/orders", ordersRouter);
 app.use("/api/reviews", reviewsRouter);
 app.use("/api/subscribe", subscribeRouter);
+app.use("/api/dolls", dollsRouter);
 
 // 7. Обработка неизвестных маршрутов (404)
 app.use((req, res) => {

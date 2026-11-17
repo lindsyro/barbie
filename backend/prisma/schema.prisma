@@ -8,7 +8,7 @@ datasource db {
 }
 
 model User {
-  id           String         @id @default(uuid())
+  id      String         @id @default(uuid())
   email        String         @unique
   name         String
   passwordHash String
@@ -109,4 +109,16 @@ model Subscriber {
   createdAt DateTime @default(now())
 
   @@map("subscribers")
+}
+
+model Doll {
+  id                   Int     @id @default(autoincrement())
+  fileName             String
+  nameEn               String
+  nameRu               String
+  category             String
+  height               Float
+  measurementsFileName String?
+
+  @@map("dolls")
 }

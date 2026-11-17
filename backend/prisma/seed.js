@@ -95,6 +95,267 @@ async function main() {
     },
   });
 
+  // 4. Таблица dolls и наполнение данными DOLLS_DATA
+  await prisma.$executeRawUnsafe(`DROP TABLE IF EXISTS "dolls" CASCADE;`);
+  await prisma.$executeRawUnsafe(`
+    CREATE TABLE "dolls" (
+      "id" SERIAL NOT NULL,
+      "fileName" TEXT NOT NULL,
+      "nameEn" TEXT NOT NULL,
+      "nameRu" TEXT NOT NULL,
+      "category" TEXT NOT NULL,
+      "height" DOUBLE PRECISION NOT NULL,
+      "measurementsFileName" TEXT,
+      CONSTRAINT "dolls_pkey" PRIMARY KEY ("id")
+    );
+  `);
+
+  const DOLLS_DATA = [
+    {
+      id: 1,
+      fileName: "Кукла в матовом серо-синем купальнике-15.png",
+      nameEn: "Barbie MTM Petite",
+      nameRu: "Барби петит",
+      category: "Девушки 1/6",
+      height: 29.2,
+      measurementsFileName: "barbiePetit.png",
+    },
+    {
+      id: 2,
+      fileName: "Кукла в матовом сланцево-синем купальнике-16.png",
+      nameEn: "Barbie MTM Standart",
+      nameRu: "Барби стандарт",
+      category: "Девушки 1/6",
+      height: 29.5,
+      measurementsFileName: "barbieStandart.png",
+    },
+    {
+      id: 3,
+      fileName: "Барби Made to Move в синем купальнике.png",
+      nameEn: "Barbie MTM Tall",
+      nameRu: "Барби высокая",
+      category: "Девушки 1/6",
+      height: 29.0,
+      measurementsFileName: "tall.png",
+    },
+    {
+      id: 4,
+      fileName: "Кукла в матовом синем купальнике-8.png",
+      nameEn: "Barbie MTM Curvy",
+      nameRu: "Барби пышка",
+      category: "Девушки 1/6",
+      height: 29.5,
+      measurementsFileName: "barbieCurvy.png",
+    },
+    {
+      id: 5,
+      fileName: "Кукла в сланцево-синем купальнике-6.png",
+      nameEn: "Barbie 90s",
+      nameRu: "Барби 90-х",
+      category: "Девушки 1/6",
+      height: 29.0,
+      measurementsFileName: "barbie90.png",
+    },
+    {
+      id: 6,
+      fileName: "Кукла в матово-синем купальнике-3.png",
+      nameEn: "Barbie Kelly",
+      nameRu: "Барби Келли",
+      category: "Дети",
+      height: 31.5,
+      measurementsFileName: "barbieKelli.png",
+    },
+    {
+      id: 7,
+      fileName: "Каталожная кукла в сланцево-синем купальнике-5.png",
+      nameEn: "Integrity Toys Fashion Royalty 6",
+      nameRu: "Интегрити ФР6",
+      category: "Девушки 1/6",
+      height: 29.0,
+      measurementsFileName: "fashionRoyalty.png",
+    },
+    {
+      id: 8,
+      fileName: "Кукла в закрытом сланцево-синем купальнике-4.png",
+      nameEn: "Integrity Toys NU Face",
+      nameRu: "Интегрити ню фейс",
+      category: "Девушки 1/6",
+      height: 26.5,
+      measurementsFileName: "NuFace.png",
+    },
+    {
+      id: 9,
+      fileName: "Кукла в сланцево-синем купальнике-14.png",
+      nameEn: "Integrity Industry",
+      nameRu: "Интегрити индастри",
+      category: "Девушки 1/6",
+      height: 26.5,
+      measurementsFileName: null,
+    },
+    {
+      id: 10,
+      fileName: "Кукла в сланцево-синем купальнике-13.png",
+      nameEn: "Poppy Parker",
+      nameRu: "Поппи Паркер",
+      category: "Девушки 1/6",
+      height: 29.0,
+      measurementsFileName: "poppyParker.png",
+    },
+    {
+      id: 11,
+      fileName: "Коллекционная кукла в сланцево-синем купальнике-2.png",
+      nameEn: "Integrity Fashion Royalty 16",
+      nameRu: "Интегрити ФР16",
+      category: "Девушки 1/4",
+      height: 29.5,
+      measurementsFileName: null,
+    },
+    {
+      id: 12,
+      fileName: "Кукла в сланцево-синем купальнике-18.png",
+      nameEn: "Poppy Parker FR 16",
+      nameRu: "Поппи Паркер ФР16",
+      category: "Девушки 1/4",
+      height: 29.3,
+      measurementsFileName: null,
+    },
+    {
+      id: 13,
+      fileName: "Коллекционная кукла в серо-синем купальнике-1.png",
+      nameEn: "Minifi",
+      nameRu: "Минифи",
+      category: "Девушки 1/4",
+      height: 30.5,
+      measurementsFileName: "minifi.png",
+    },
+    {
+      id: 14,
+      fileName: "Кукла в матовом серо-синем купальнике-11.png",
+      nameEn: "Mizi Katie Girl",
+      nameRu: "Мизи Кети Герл",
+      category: "Девушки 1/6",
+      height: 30.0,
+      measurementsFileName: "miziKatieGirl.png",
+    },
+    {
+      id: 15,
+      fileName: "Кукла в матовом серо-синем купальнике-12.png",
+      nameEn: "Momoko",
+      nameRu: "Момоко",
+      category: "Девушки 1/6",
+      height: 29.0,
+      measurementsFileName: "momoko.png",
+    },
+    {
+      id: 16,
+      fileName: "Зелёноволосая кукла с розовыми узорами-8.png",
+      nameEn: "Rainbow High",
+      nameRu: "Рейнбоу хай",
+      category: "Девушки 1/6",
+      height: 28.0,
+      measurementsFileName: null,
+    },
+    {
+      id: 17,
+      fileName: "Кукла в серо-синем купальнике на светлом фоне-9.png",
+      nameEn: "Blythe",
+      nameRu: "Блайз",
+      category: "Девушки 1/6",
+      height: 29.0,
+      measurementsFileName: null,
+    },
+    {
+      id: 18,
+      fileName: "Рыжеволосая кукла в сланцево-синем купальнике-7.png",
+      nameEn: "Paola Reina / Berjuan",
+      nameRu: "Паола Рейна (Берджуан)",
+      category: "Дети",
+      height: 29.0,
+      measurementsFileName: null,
+    },
+    {
+      id: 19,
+      fileName: "Игрушечная кукла в синих плавках-1.png",
+      nameEn: "Ken MTM Standart",
+      nameRu: "Кен стандарт",
+      category: "Парни",
+      height: 30.5,
+      measurementsFileName: "kenStandart.png",
+    },
+    {
+      id: 20,
+      fileName: "Мужская кукла в матово-синих плавках-10.png",
+      nameEn: "Ken MTM",
+      nameRu: "Кен качок",
+      category: "Парни",
+      height: 31.5,
+      measurementsFileName: "kenBaff.png",
+    },
+    {
+      id: 21,
+      fileName: "Кукла в матовых синих плавках-2.png",
+      nameEn: "Integrity FR Homme",
+      nameRu: "Интегрити ФР хомм",
+      category: "Парни",
+      height: 30.5,
+      measurementsFileName: "homme.png",
+    },
+    {
+      id: 22,
+      fileName: "Мужская кукла в матовых синих плавках-4.png",
+      nameEn: "Integrity Monarch",
+      nameRu: "Интегрити монарх",
+      category: "Парни",
+      height: 30.5,
+      measurementsFileName: "monarch.png",
+    },
+    {
+      id: 23,
+      fileName: "Кукла в сланцево-синих плавках-5.png",
+      nameEn: "Adonis 2.0",
+      nameRu: "Адонис 2.0",
+      category: "Парни",
+      height: 30.0,
+      measurementsFileName: "adonis.png",
+    },
+    {
+      id: 24,
+      fileName: "Кукла в матовых синих плавках-7.png",
+      nameEn: "Necot Doll",
+      nameRu: "Некотт долл",
+      category: "Парни",
+      height: 30.5,
+      measurementsFileName: "nekotDoll.png",
+    },
+  ];
+
+  console.log("Добавление кукол в таблицу dolls...");
+  for (const doll of DOLLS_DATA) {
+    await prisma.$executeRawUnsafe(
+      `INSERT INTO "dolls" ("id", "fileName", "nameEn", "nameRu", "category", "height", "measurementsFileName")
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       ON CONFLICT ("id") DO UPDATE SET
+         "fileName" = EXCLUDED."fileName",
+         "nameEn" = EXCLUDED."nameEn",
+         "nameRu" = EXCLUDED."nameRu",
+         "category" = EXCLUDED."category",
+         "height" = EXCLUDED."height",
+         "measurementsFileName" = EXCLUDED."measurementsFileName";`,
+      doll.id,
+      doll.fileName,
+      doll.nameEn,
+      doll.nameRu,
+      doll.category,
+      doll.height,
+      doll.measurementsFileName || null
+    );
+  }
+
+  await prisma.$executeRawUnsafe(
+    `SELECT setval(pg_get_serial_sequence('dolls', 'id'), coalesce(max(id), 1)) FROM "dolls";`
+  );
+  console.log(`✓ Таблица dolls заполнена (${DOLLS_DATA.length} кукол)`);
+
   console.log("🎉 База данных goose успешно наполнена!");
 }
 
