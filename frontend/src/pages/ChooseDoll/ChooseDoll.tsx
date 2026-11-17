@@ -3,7 +3,7 @@ import { Breadcrumbs, PageHeader, SearchInput } from "@/components/index.ts";
 import { useAsyncData } from "@/hooks/index.ts";
 import { fetchDolls } from "@/api/dolls.ts";
 import { DollCard, DollMeasurementsModal } from "./components/index.ts";
-import type { DollItem } from "./dollsData.ts";
+import type { DollItem } from "./types.ts";
 import { searchDolls } from "./searchDolls.ts";
 import "./chooseDoll.css";
 

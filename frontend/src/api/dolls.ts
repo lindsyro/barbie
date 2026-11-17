@@ -2,7 +2,7 @@
  * API-клиент для получения списка кукол из базы данных PostgreSQL
  */
 
-import { DOLLS_DATA, type DollItem } from "../pages/ChooseDoll/dollsData.ts";
+import { type DollItem } from "../pages/ChooseDoll/types.ts";
 
 export interface DollsResponse {
   total: number;
@@ -27,8 +27,8 @@ export async function fetchDolls(): Promise<DollItem[]> {
     const data: DollsResponse = await res.json();
     return Array.isArray(data.items) ? data.items : [];
   } catch (err) {
-    console.warn("Не удалось получить кукол из базы данных, fallback на локальные данные:", err);
-    return DOLLS_DATA;
+    console.error("Не удалось получить кукол из базы данных:", err);
+    return [];
   }
 }
 
@@ -44,7 +44,7 @@ export async function fetchDollById(id: number): Promise<DollItem | null> {
     const doll: DollItem = await res.json();
     return doll;
   } catch (err) {
-    console.warn(`Не удалось загрузить куклу #${id} из базы данных:`, err);
-    return DOLLS_DATA.find((d) => d.id === id) || null;
+    console.error(`Не удалось загрузить куклу #${id} из базы данных:`, err);
+    return null;
   }
 }

@@ -1,4 +1,4 @@
-import { type DollItem } from "./dollsData.ts";
+import { type DollItem } from "./types.ts";
 
 /**
  * Проверяет, соответствует ли кукла поисковой строке.

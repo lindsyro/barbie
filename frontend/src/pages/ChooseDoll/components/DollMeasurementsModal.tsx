@@ -1,7 +1,7 @@
 import React from "react";
 import { Modal } from "@/components/Modal/Modal.tsx";
 import { ArrowRightIcon } from "@/components/icons/index.ts";
-import type { DollItem } from "../dollsData.ts";
+import type { DollItem } from "../types.ts";
 
 export interface DollMeasurementsModalProps {
   doll: DollItem | null;
