@@ -19,7 +19,9 @@ const PatternModalContent: React.FC<PatternModalContentProps> = ({
   const [activeImageIndex, setActiveImageIndex] = useState<number>(0);
 
   const images =
-    pattern.images && pattern.images.length > 0 ? pattern.images : [pattern.image];
+    pattern.images && pattern.images.length > 0
+      ? pattern.images
+      : [pattern.image];
   const currentImage = images[activeImageIndex] || pattern.image;
 
   // Управление галереей с клавиатуры (стрелки влево/вправо)
@@ -28,9 +30,13 @@ const PatternModalContent: React.FC<PatternModalContentProps> = ({
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") {
-        setActiveImageIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
+        setActiveImageIndex((prev) =>
+          prev > 0 ? prev - 1 : images.length - 1,
+        );
       } else if (e.key === "ArrowRight") {
-        setActiveImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
+        setActiveImageIndex((prev) =>
+          prev < images.length - 1 ? prev + 1 : 0,
+        );
       }
     };
 
@@ -55,7 +61,9 @@ const PatternModalContent: React.FC<PatternModalContentProps> = ({
               type="button"
               className="catalog-modal__nav-btn catalog-modal__nav-btn--prev"
               onClick={() =>
-                setActiveImageIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1))
+                setActiveImageIndex((prev) =>
+                  prev > 0 ? prev - 1 : images.length - 1,
+                )
               }
               aria-label="Предыдущее фото"
             >
@@ -65,7 +73,9 @@ const PatternModalContent: React.FC<PatternModalContentProps> = ({
               type="button"
               className="catalog-modal__nav-btn catalog-modal__nav-btn--next"
               onClick={() =>
-                setActiveImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0))
+                setActiveImageIndex((prev) =>
+                  prev < images.length - 1 ? prev + 1 : 0,
+                )
               }
               aria-label="Следующее фото"
             >
@@ -114,12 +124,7 @@ export const PatternModal: React.FC<PatternModalProps> = ({
       maxWidth="fit-content"
       showCloseButton={true}
     >
-      {pattern && (
-        <PatternModalContent
-          key={pattern.id}
-          pattern={pattern}
-        />
-      )}
+      {pattern && <PatternModalContent key={pattern.id} pattern={pattern} />}
     </Modal>
   );
 };

@@ -35,7 +35,7 @@ export const PatternCard: React.FC<PatternCardProps> = React.memo(
         <div
           className="catalog-card__img-box"
           onClick={handleOpen}
-          title="Нажмите для подробного описания и всех ракурсов"
+          title="Нажмите для просмотра фото в полном размере"
         >
           <img
             src={pattern.image}
@@ -85,9 +85,7 @@ export const PatternCard: React.FC<PatternCardProps> = React.memo(
 
           {/* Нижняя плашка: цена и корзина */}
           <div className="catalog-card__footer">
-            <span className="catalog-card__price">
-              {pattern.price} ₽
-            </span>
+            <span className="catalog-card__price">{pattern.price} ₽</span>
 
             <button
               type="button"
