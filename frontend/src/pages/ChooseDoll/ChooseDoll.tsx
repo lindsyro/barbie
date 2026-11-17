@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { Breadcrumbs, PageHeader, SearchInput } from "@/components/index.ts";
 import { useAsyncData } from "@/hooks/index.ts";
 import { fetchDolls } from "@/api/dolls.ts";
@@ -29,14 +29,21 @@ export const ChooseDoll: React.FC<ChooseDollProps> = ({
     return searchDolls(dolls, searchQuery);
   }, [dolls, searchQuery]);
 
-  const handleSelectDollPatterns = (_doll: DollItem) => {
-    // Временная заглушка: переход ко всем выкройкам каталога
-    if (onNavigateToCatalog) {
-      onNavigateToCatalog("catalog");
-    } else {
-      window.location.hash = "catalog";
-    }
-  };
+  const handleSelectDollPatterns = useCallback(
+    (_doll: DollItem) => {
+      // Временная заглушка: переход ко всем выкройкам каталога
+      if (onNavigateToCatalog) {
+        onNavigateToCatalog("catalog");
+      } else {
+        window.location.hash = "catalog";
+      }
+    },
+    [onNavigateToCatalog]
+  );
+
+  const handleCloseModal = useCallback(() => {
+    setSelectedDoll(null);
+  }, []);
 
   return (
     <div className="page-container choose-doll-page">
@@ -85,7 +92,7 @@ export const ChooseDoll: React.FC<ChooseDollProps> = ({
       {/* Модальное окно мерок куклы */}
       <DollMeasurementsModal
         doll={selectedDoll}
-        onClose={() => setSelectedDoll(null)}
+        onClose={handleCloseModal}
         onSelectPatterns={handleSelectDollPatterns}
       />
     </div>
