@@ -95,20 +95,61 @@ async function main() {
     },
   });
 
-  // 4. Таблица dolls и наполнение данными DOLLS_DATA
+  // 4. Таблица doll_categories и dolls с наполнением данными
   await prisma.$executeRawUnsafe(`DROP TABLE IF EXISTS "dolls" CASCADE;`);
+  await prisma.$executeRawUnsafe(`DROP TABLE IF EXISTS "doll_categories" CASCADE;`);
+
+  await prisma.$executeRawUnsafe(`
+    CREATE TABLE "doll_categories" (
+      "id" SERIAL NOT NULL,
+      "slug" TEXT NOT NULL,
+      "name" TEXT NOT NULL,
+      "order" INTEGER NOT NULL DEFAULT 0,
+      CONSTRAINT "doll_categories_pkey" PRIMARY KEY ("id")
+    );
+  `);
+  await prisma.$executeRawUnsafe(`CREATE UNIQUE INDEX "doll_categories_slug_key" ON "doll_categories"("slug");`);
+
   await prisma.$executeRawUnsafe(`
     CREATE TABLE "dolls" (
       "id" SERIAL NOT NULL,
       "fileName" TEXT NOT NULL,
       "nameEn" TEXT NOT NULL,
       "nameRu" TEXT NOT NULL,
-      "category" TEXT NOT NULL,
       "height" DOUBLE PRECISION NOT NULL,
       "measurementsFileName" TEXT,
-      CONSTRAINT "dolls_pkey" PRIMARY KEY ("id")
+      "categoryId" INTEGER NOT NULL,
+      CONSTRAINT "dolls_pkey" PRIMARY KEY ("id"),
+      CONSTRAINT "dolls_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "doll_categories"("id") ON DELETE RESTRICT ON UPDATE CASCADE
     );
   `);
+
+  const DOLL_CATEGORIES = [
+    { id: 1, name: "Для девушек 1/6", slug: "girls-1-6", order: 1 },
+    { id: 2, name: "Для девушек 1/4", slug: "girls-1-4", order: 2 },
+    { id: 3, name: "Для парней", slug: "guys", order: 3 },
+    { id: 4, name: "Для детей", slug: "kids", order: 4 },
+  ];
+
+  console.log("Добавление категорий в doll_categories...");
+  for (const cat of DOLL_CATEGORIES) {
+    await prisma.$executeRawUnsafe(
+      `INSERT INTO "doll_categories" ("id", "slug", "name", "order")
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT ("id") DO UPDATE SET
+         "slug" = EXCLUDED."slug",
+         "name" = EXCLUDED."name",
+         "order" = EXCLUDED."order";`,
+      cat.id,
+      cat.slug,
+      cat.name,
+      cat.order
+    );
+  }
+  await prisma.$executeRawUnsafe(
+    `SELECT setval(pg_get_serial_sequence('doll_categories', 'id'), coalesce(max(id), 1)) FROM "doll_categories";`
+  );
+  console.log(`✓ Категории кукол добавлены (${DOLL_CATEGORIES.length} категории)`);
 
   const DOLLS_DATA = [
     {
@@ -116,7 +157,7 @@ async function main() {
       fileName: "Кукла в матовом серо-синем купальнике-15.png",
       nameEn: "Barbie MTM Petite",
       nameRu: "Барби петит",
-      category: "Девушки 1/6",
+      categoryId: 1,
       height: 29.2,
       measurementsFileName: "barbiePetit.png",
     },
@@ -125,7 +166,7 @@ async function main() {
       fileName: "Кукла в матовом сланцево-синем купальнике-16.png",
       nameEn: "Barbie MTM Standart",
       nameRu: "Барби стандарт",
-      category: "Девушки 1/6",
+      categoryId: 1,
       height: 29.5,
       measurementsFileName: "barbieStandart.png",
     },
@@ -134,7 +175,7 @@ async function main() {
       fileName: "Барби Made to Move в синем купальнике.png",
       nameEn: "Barbie MTM Tall",
       nameRu: "Барби высокая",
-      category: "Девушки 1/6",
+      categoryId: 1,
       height: 29.0,
       measurementsFileName: "tall.png",
     },
@@ -143,7 +184,7 @@ async function main() {
       fileName: "Кукла в матовом синем купальнике-8.png",
       nameEn: "Barbie MTM Curvy",
       nameRu: "Барби пышка",
-      category: "Девушки 1/6",
+      categoryId: 1,
       height: 29.5,
       measurementsFileName: "barbieCurvy.png",
     },
@@ -152,7 +193,7 @@ async function main() {
       fileName: "Кукла в сланцево-синем купальнике-6.png",
       nameEn: "Barbie 90s",
       nameRu: "Барби 90-х",
-      category: "Девушки 1/6",
+      categoryId: 1,
       height: 29.0,
       measurementsFileName: "barbie90.png",
     },
@@ -161,7 +202,7 @@ async function main() {
       fileName: "Кукла в матово-синем купальнике-3.png",
       nameEn: "Barbie Kelly",
       nameRu: "Барби Келли",
-      category: "Дети",
+      categoryId: 4,
       height: 31.5,
       measurementsFileName: "barbieKelli.png",
     },
@@ -170,7 +211,7 @@ async function main() {
       fileName: "Каталожная кукла в сланцево-синем купальнике-5.png",
       nameEn: "Integrity Toys Fashion Royalty 6",
       nameRu: "Интегрити ФР6",
-      category: "Девушки 1/6",
+      categoryId: 1,
       height: 29.0,
       measurementsFileName: "fashionRoyalty.png",
     },
@@ -179,7 +220,7 @@ async function main() {
       fileName: "Кукла в закрытом сланцево-синем купальнике-4.png",
       nameEn: "Integrity Toys NU Face",
       nameRu: "Интегрити ню фейс",
-      category: "Девушки 1/6",
+      categoryId: 1,
       height: 26.5,
       measurementsFileName: "NuFace.png",
     },
@@ -188,7 +229,7 @@ async function main() {
       fileName: "Кукла в сланцево-синем купальнике-14.png",
       nameEn: "Integrity Industry",
       nameRu: "Интегрити индастри",
-      category: "Девушки 1/6",
+      categoryId: 1,
       height: 26.5,
       measurementsFileName: null,
     },
@@ -197,7 +238,7 @@ async function main() {
       fileName: "Кукла в сланцево-синем купальнике-13.png",
       nameEn: "Poppy Parker",
       nameRu: "Поппи Паркер",
-      category: "Девушки 1/6",
+      categoryId: 1,
       height: 29.0,
       measurementsFileName: "poppyParker.png",
     },
@@ -206,7 +247,7 @@ async function main() {
       fileName: "Коллекционная кукла в сланцево-синем купальнике-2.png",
       nameEn: "Integrity Fashion Royalty 16",
       nameRu: "Интегрити ФР16",
-      category: "Девушки 1/4",
+      categoryId: 2,
       height: 29.5,
       measurementsFileName: null,
     },
@@ -215,7 +256,7 @@ async function main() {
       fileName: "Кукла в сланцево-синем купальнике-18.png",
       nameEn: "Poppy Parker FR 16",
       nameRu: "Поппи Паркер ФР16",
-      category: "Девушки 1/4",
+      categoryId: 2,
       height: 29.3,
       measurementsFileName: null,
     },
@@ -224,7 +265,7 @@ async function main() {
       fileName: "Коллекционная кукла в серо-синем купальнике-1.png",
       nameEn: "Minifi",
       nameRu: "Минифи",
-      category: "Девушки 1/4",
+      categoryId: 2,
       height: 30.5,
       measurementsFileName: "minifi.png",
     },
@@ -233,7 +274,7 @@ async function main() {
       fileName: "Кукла в матовом серо-синем купальнике-11.png",
       nameEn: "Mizi Katie Girl",
       nameRu: "Мизи Кети Герл",
-      category: "Девушки 1/6",
+      categoryId: 1,
       height: 30.0,
       measurementsFileName: "miziKatieGirl.png",
     },
@@ -242,7 +283,7 @@ async function main() {
       fileName: "Кукла в матовом серо-синем купальнике-12.png",
       nameEn: "Momoko",
       nameRu: "Момоко",
-      category: "Девушки 1/6",
+      categoryId: 1,
       height: 29.0,
       measurementsFileName: "momoko.png",
     },
@@ -251,7 +292,7 @@ async function main() {
       fileName: "Зелёноволосая кукла с розовыми узорами-8.png",
       nameEn: "Rainbow High",
       nameRu: "Рейнбоу хай",
-      category: "Девушки 1/6",
+      categoryId: 1,
       height: 28.0,
       measurementsFileName: null,
     },
@@ -260,7 +301,7 @@ async function main() {
       fileName: "Кукла в серо-синем купальнике на светлом фоне-9.png",
       nameEn: "Blythe",
       nameRu: "Блайз",
-      category: "Девушки 1/6",
+      categoryId: 1,
       height: 29.0,
       measurementsFileName: null,
     },
@@ -269,7 +310,7 @@ async function main() {
       fileName: "Рыжеволосая кукла в сланцево-синем купальнике-7.png",
       nameEn: "Paola Reina / Berjuan",
       nameRu: "Паола Рейна (Берджуан)",
-      category: "Дети",
+      categoryId: 4,
       height: 29.0,
       measurementsFileName: null,
     },
@@ -278,7 +319,7 @@ async function main() {
       fileName: "Игрушечная кукла в синих плавках-1.png",
       nameEn: "Ken MTM Standart",
       nameRu: "Кен стандарт",
-      category: "Парни",
+      categoryId: 3,
       height: 30.5,
       measurementsFileName: "kenStandart.png",
     },
@@ -287,7 +328,7 @@ async function main() {
       fileName: "Мужская кукла в матово-синих плавках-10.png",
       nameEn: "Ken MTM",
       nameRu: "Кен качок",
-      category: "Парни",
+      categoryId: 3,
       height: 31.5,
       measurementsFileName: "kenBaff.png",
     },
@@ -296,7 +337,7 @@ async function main() {
       fileName: "Кукла в матовых синих плавках-2.png",
       nameEn: "Integrity FR Homme",
       nameRu: "Интегрити ФР хомм",
-      category: "Парни",
+      categoryId: 3,
       height: 30.5,
       measurementsFileName: "homme.png",
     },
@@ -305,7 +346,7 @@ async function main() {
       fileName: "Мужская кукла в матовых синих плавках-4.png",
       nameEn: "Integrity Monarch",
       nameRu: "Интегрити монарх",
-      category: "Парни",
+      categoryId: 3,
       height: 30.5,
       measurementsFileName: "monarch.png",
     },
@@ -314,7 +355,7 @@ async function main() {
       fileName: "Кукла в сланцево-синих плавках-5.png",
       nameEn: "Adonis 2.0",
       nameRu: "Адонис 2.0",
-      category: "Парни",
+      categoryId: 3,
       height: 30.0,
       measurementsFileName: "adonis.png",
     },
@@ -323,7 +364,7 @@ async function main() {
       fileName: "Кукла в матовых синих плавках-7.png",
       nameEn: "Necot Doll",
       nameRu: "Некотт долл",
-      category: "Парни",
+      categoryId: 3,
       height: 30.5,
       measurementsFileName: "nekotDoll.png",
     },
@@ -332,21 +373,21 @@ async function main() {
   console.log("Добавление кукол в таблицу dolls...");
   for (const doll of DOLLS_DATA) {
     await prisma.$executeRawUnsafe(
-      `INSERT INTO "dolls" ("id", "fileName", "nameEn", "nameRu", "category", "height", "measurementsFileName")
+      `INSERT INTO "dolls" ("id", "fileName", "nameEn", "nameRu", "height", "categoryId", "measurementsFileName")
        VALUES ($1, $2, $3, $4, $5, $6, $7)
        ON CONFLICT ("id") DO UPDATE SET
          "fileName" = EXCLUDED."fileName",
          "nameEn" = EXCLUDED."nameEn",
          "nameRu" = EXCLUDED."nameRu",
-         "category" = EXCLUDED."category",
          "height" = EXCLUDED."height",
+         "categoryId" = EXCLUDED."categoryId",
          "measurementsFileName" = EXCLUDED."measurementsFileName";`,
       doll.id,
       doll.fileName,
       doll.nameEn,
       doll.nameRu,
-      doll.category,
       doll.height,
+      doll.categoryId,
       doll.measurementsFileName || null
     );
   }

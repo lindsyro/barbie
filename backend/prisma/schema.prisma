@@ -111,14 +111,27 @@ model Subscriber {
   @@map("subscribers")
 }
 
+model DollCategory {
+  id    Int    @id @default(autoincrement())
+  slug  String @unique
+  name  String
+  order Int    @default(0)
+
+  dolls Doll[]
+
+  @@map("doll_categories")
+}
+
 model Doll {
-  id                   Int     @id @default(autoincrement())
+  id                   Int          @id @default(autoincrement())
   fileName             String
   nameEn               String
   nameRu               String
-  category             String
   height               Float
   measurementsFileName String?
+
+  categoryId           Int
+  category             DollCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
 
   @@map("dolls")
 }

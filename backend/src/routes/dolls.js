@@ -10,12 +10,39 @@ const router = Router();
 router.get("/", async (req, res, next) => {
   try {
     const dolls = await prisma.doll.findMany({
+      include: {
+        category: true,
+      },
       orderBy: { id: "asc" },
     });
 
     return res.json({
       total: dolls.length,
       items: dolls,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * GET /api/dolls/categories
+ * Возвращает список категорий кукол с вложенными куклами (для меню и фильтров)
+ */
+router.get("/categories", async (req, res, next) => {
+  try {
+    const categories = await prisma.dollCategory.findMany({
+      include: {
+        dolls: {
+          orderBy: { id: "asc" },
+        },
+      },
+      orderBy: { order: "asc" },
+    });
+
+    return res.json({
+      total: categories.length,
+      items: categories,
     });
   } catch (err) {
     next(err);
@@ -38,6 +65,9 @@ router.get("/:id", async (req, res, next) => {
 
     const doll = await prisma.doll.findUnique({
       where: { id },
+      include: {
+        category: true,
+      },
     });
 
     if (!doll) {
