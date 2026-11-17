@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Breadcrumbs } from "../../components/Breadcrumbs/Breadcrumbs.tsx";
 import { PageHeader } from "../../components/PageHeader/PageHeader.tsx";
 import { PagePlaceholder } from "../../components/PagePlaceholder/PagePlaceholder.tsx";
+import { useAsyncData } from "@/hooks/index.ts";
 import {
   fetchPurchasedPatterns,
   type PurchasedPattern,
@@ -24,32 +25,14 @@ export const Account: React.FC<AccountProps> = ({
   onOpenLogin,
   onNavigateToCatalog,
 }) => {
-  const [purchased, setPurchased] = useState<PurchasedPattern[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(() => Boolean(user));
-
-  useEffect(() => {
-    if (!user) return;
-    let ignore = false;
-
-    fetchPurchasedPatterns()
-      .then((res) => {
-        if (!ignore) {
-          setPurchased(res.items || []);
-        }
-      })
-      .catch((err) => {
-        console.error("Ошибка при получении купленных выкроек:", err);
-      })
-      .finally(() => {
-        if (!ignore) {
-          setIsLoading(false);
-        }
-      });
-
-    return () => {
-      ignore = true;
-    };
-  }, [user]);
+  const { data: purchasedData, isLoading } = useAsyncData(
+    fetchPurchasedPatterns,
+    {
+      deps: [user],
+      enabled: Boolean(user),
+    }
+  );
+  const purchased = purchasedData?.items || [];
 
   const handleDownload = (item: PurchasedPattern) => {
     // Скачивание файла выкройки

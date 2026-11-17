@@ -1,7 +1,9 @@
 import React, { useState, useMemo } from "react";
 import { Breadcrumbs, PageHeader, SearchInput } from "@/components/index.ts";
+import { useAsyncData } from "@/hooks/index.ts";
+import { fetchDolls } from "@/api/dolls.ts";
 import { DollCard, DollMeasurementsModal } from "./components/index.ts";
-import { DOLLS_DATA, type DollItem } from "./dollsData.ts";
+import type { DollItem } from "./dollsData.ts";
 import { searchDolls } from "./searchDolls.ts";
 import "./chooseDoll.css";
 
@@ -14,13 +16,18 @@ export const ChooseDoll: React.FC<ChooseDollProps> = ({
   onBackToMain,
   onNavigateToCatalog,
 }) => {
+  // Универсальная загрузка кукол из базы данных PostgreSQL
+  const { data: dolls = [], isLoading } = useAsyncData(fetchDolls, {
+    initialData: [],
+  });
+
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedDoll, setSelectedDoll] = useState<DollItem | null>(null);
 
   // Фильтрация и поиск
   const filteredDolls = useMemo(() => {
-    return searchDolls(DOLLS_DATA, searchQuery);
-  }, [searchQuery]);
+    return searchDolls(dolls, searchQuery);
+  }, [dolls, searchQuery]);
 
   const handleSelectDollPatterns = (_doll: DollItem) => {
     // Временная заглушка: переход ко всем выкройкам каталога
@@ -49,8 +56,12 @@ export const ChooseDoll: React.FC<ChooseDollProps> = ({
         subtitle="Анатомический справочник GOOSE"
       />
 
-      {/* Сетка кукол */}
-      {filteredDolls.length === 0 ? (
+      {/* Индикатор загрузки или сетка кукол */}
+      {isLoading ? (
+        <div className="dolls-empty">
+          <p className="dolls-empty__desc">Загрузка кукол из базы данных...</p>
+        </div>
+      ) : filteredDolls.length === 0 ? (
         <div className="dolls-empty">
           <h3 className="dolls-empty__title">Куклы не найдены</h3>
           <p className="dolls-empty__desc">
