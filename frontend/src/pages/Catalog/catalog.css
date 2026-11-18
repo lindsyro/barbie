@@ -172,30 +172,25 @@
 }
 
 .catalog-card__btn-cart {
-  background: var(--color-gold-site);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.95rem;
+  background: var(--color-chocolate);
   color: #ffffff;
   border: none;
-  padding: 0.55rem 1rem;
   font-family: inherit;
   font-size: 0.8125rem;
   font-weight: 600;
-  letter-spacing: 0.04em;
   border-radius: 6px;
   cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  transition:
-    background-color 0.2s ease,
-    transform 0.15s ease;
+  transition: all 0.2s ease;
 }
 
 .catalog-card__btn-cart:hover {
-  background: #8f6d33;
-}
-
-.catalog-card__btn-cart:active {
-  transform: scale(0.97);
+  background: var(--color-gold-site);
+  transform: translateY(-1px);
 }
 
 .catalog-card__btn-cart--added {
