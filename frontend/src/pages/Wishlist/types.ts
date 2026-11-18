@@ -1,4 +1,5 @@
 import type { WishlistPattern } from "../../api/wishlist.ts";
+import type { CartItemType } from "../Cart/types.ts";
 
 export type { WishlistPattern };
 
@@ -11,4 +12,5 @@ export interface WishlistProps {
   onAddAllToCart?: () => void;
   onBackToMain?: () => void;
   onOpenLogin?: () => void;
+  cartItems?: CartItemType[];
 }

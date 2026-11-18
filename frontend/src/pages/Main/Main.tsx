@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import type { MainProps } from "./types.ts";
 import { useAsyncData } from "@/hooks/index.ts";
 import { fetchFeaturedPatterns } from "@/api/patterns.ts";
+import { CartIcon, CheckIcon } from "@/components/icons/index.ts";
 import {
   CATEGORIES_QUICK,
   getQuickCategories,
@@ -17,8 +18,13 @@ export const Main: React.FC<MainProps> = ({
   onSelectCategory,
   onToggleWishlist,
   wishlistIds = [],
+  cartItems = [],
 }) => {
   const wishlistSet = new Set(wishlistIds);
+  const cartTitlesSet = useMemo(
+    () => new Set(cartItems.map((c) => c.title)),
+    [cartItems],
+  );
 
   // Загружаем популярные выкройки из базы данных PostgreSQL
   const { data: dbFeatured = [] } = useAsyncData(fetchFeaturedPatterns, {
@@ -105,6 +111,7 @@ export const Main: React.FC<MainProps> = ({
           <div className="main-patterns-grid">
             {featuredList.map((item) => {
               const isLiked = wishlistSet.has(item.id);
+              const isInCart = cartTitlesSet.has(item.title);
               return (
                 <article key={item.id} className="main-pattern-card">
                   <div
@@ -155,16 +162,22 @@ export const Main: React.FC<MainProps> = ({
                     <span className="main-pattern-card__price">{item.price}</span>
                     <button
                       type="button"
-                      className="main-pattern-card__btn"
+                      className={`main-pattern-card__btn ${isInCart ? "main-pattern-card__btn--added" : ""}`}
                       onClick={() => onAddToCart?.(item.title)}
-                      aria-label={`Добавить в корзину: ${item.title}`}
+                      aria-label={isInCart ? `Убрать из корзины: ${item.title}` : `Добавить в корзину: ${item.title}`}
+                      title={isInCart ? "Убрать из корзины" : "Добавить в корзину"}
                     >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <circle cx="9" cy="21" r="1" fill="currentColor" />
-                        <circle cx="20" cy="21" r="1" fill="currentColor" />
-                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-                      </svg>
-                      <span>В корзину</span>
+                      {isInCart ? (
+                        <>
+                          <CheckIcon size={14} strokeWidth={2.5} />
+                          <span>В корзине</span>
+                        </>
+                      ) : (
+                        <>
+                          <CartIcon size={14} />
+                          <span>В корзину</span>
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>

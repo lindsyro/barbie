@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Breadcrumbs } from "../../components/Breadcrumbs/Breadcrumbs.tsx";
 import { PageHeader } from "../../components/PageHeader/PageHeader.tsx";
+import { CartIcon, CheckIcon } from "@/components/icons/index.ts";
 import type { WishlistProps } from "./types.ts";
 import "./wishlist.css";
 import "../pages.css";
@@ -14,7 +15,12 @@ export const Wishlist: React.FC<WishlistProps> = ({
   onAddAllToCart,
   onBackToMain,
   onOpenLogin,
+  cartItems = [],
 }) => {
+  const cartTitlesSet = useMemo(
+    () => new Set(cartItems.map((c) => c.title)),
+    [cartItems],
+  );
   return (
     <div className="page-container">
       {/* Хлебные крошки */}
@@ -122,7 +128,9 @@ export const Wishlist: React.FC<WishlistProps> = ({
           </div>
 
           <div className="wishlist-grid">
-            {items.map((item) => (
+            {items.map((item) => {
+              const isInCart = cartTitlesSet.has(item.title);
+              return (
               <article key={item.id} className="wishlist-card">
                 <div className="wishlist-card__img-box">
                   <img src={item.image} alt={item.title} className="wishlist-card__img" />
@@ -155,20 +163,28 @@ export const Wishlist: React.FC<WishlistProps> = ({
                     <span className="wishlist-card__price">{item.price} ₽</span>
                     <button
                       type="button"
-                      className="wishlist-card__cart-btn"
+                      className={`wishlist-card__cart-btn ${isInCart ? "wishlist-card__cart-btn--added" : ""}`}
                       onClick={() => onAddToCart(item.title)}
+                      aria-label={isInCart ? `Убрать из корзины: ${item.title}` : `Добавить в корзину: ${item.title}`}
+                      title={isInCart ? "Убрать из корзины" : "Добавить в корзину"}
                     >
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <circle cx="9" cy="21" r="1" fill="currentColor" />
-                        <circle cx="20" cy="21" r="1" fill="currentColor" />
-                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-                      </svg>
-                      <span>В корзину</span>
+                      {isInCart ? (
+                        <>
+                          <CheckIcon size={14} strokeWidth={2.5} />
+                          <span>В корзине</span>
+                        </>
+                      ) : (
+                        <>
+                          <CartIcon size={14} />
+                          <span>В корзину</span>
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>
               </article>
-            ))}
+            );
+          })}
           </div>
         </div>
       )}

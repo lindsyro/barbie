@@ -321,6 +321,15 @@
   transform: scale(0.97);
 }
 
+.main-pattern-card__btn--added {
+  background: #2e7d32 !important;
+  color: #ffffff;
+}
+
+.main-pattern-card__btn--added:hover {
+  background: #236527 !important;
+}
+
 /* 4. Промо-блок "Бесплатная выкройка" */
 .main-freebie-banner {
   padding-bottom: 5rem;

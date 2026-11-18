@@ -197,6 +197,10 @@
   color: #ffffff;
 }
 
+.catalog-card__btn-cart--added:hover {
+  background: #236527 !important;
+}
+
 /* 3. Состояния загрузки и пустой выдачи */
 .catalog-empty {
   text-align: center;

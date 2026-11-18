@@ -283,6 +283,15 @@
   background: #8f6d33;
 }
 
+.wishlist-card__cart-btn--added {
+  background: #2e7d32 !important;
+  color: #ffffff;
+}
+
+.wishlist-card__cart-btn--added:hover {
+  background: #236527 !important;
+}
+
 /* Пустое избранное / неавторизованное состояние */
 .wishlist-empty {
   text-align: center;

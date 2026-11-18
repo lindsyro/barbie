@@ -266,7 +266,8 @@ function App() {
   const handleAddToCart = (title: string) => {
     const alreadyInCart = cart.some((it) => it.title === title);
     if (alreadyInCart) {
-      showNotification(`Выкройка «${title}» уже в вашей корзине`);
+      setCart((prev) => prev.filter((it) => it.title !== title));
+      showNotification(`Выкройка «${title}» удалена из корзины`);
       return;
     }
 
@@ -573,6 +574,7 @@ function App() {
             onAddToCart={handleAddToCart}
             onAddAllToCart={handleAddAllWishlistToCart}
             onBackToMain={() => navigateTo("main")}
+            cartItems={cart}
             onOpenLogin={() => {
               setPendingAction("wishlist");
               setAuthModal("login");
@@ -588,6 +590,7 @@ function App() {
             onSelectCategory={handleSelectCategory}
             onToggleWishlist={handleToggleWishlist}
             wishlistIds={wishlistIds}
+            cartItems={cart}
           />
         );
     }

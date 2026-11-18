@@ -91,6 +91,8 @@ export const PatternCard: React.FC<PatternCardProps> = React.memo(
               type="button"
               className={`catalog-card__btn-cart ${isInCart ? "catalog-card__btn-cart--added" : ""}`}
               onClick={() => onAddToCart?.(pattern.title)}
+              title={isInCart ? "Убрать из корзины" : "Добавить в корзину"}
+              aria-label={isInCart ? `Убрать из корзины: ${pattern.title}` : `Добавить в корзину: ${pattern.title}`}
             >
               {isInCart ? (
                 <>
