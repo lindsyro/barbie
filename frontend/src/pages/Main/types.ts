@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { CatalogPatternItem } from "../Catalog/catalogData.ts";
+import type { CatalogPatternItem } from "../Catalog/types.ts";
 
 export interface PatternItem {
   id: number;

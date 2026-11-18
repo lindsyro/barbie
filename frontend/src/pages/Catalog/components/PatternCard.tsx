@@ -5,7 +5,7 @@ import {
   CheckIcon,
   ImageIcon,
 } from "@/components/icons/index.ts";
-import type { CatalogPatternItem } from "../catalogData.ts";
+import type { CatalogPatternItem } from "../types.ts";
 
 export interface PatternCardProps {
   pattern: CatalogPatternItem;

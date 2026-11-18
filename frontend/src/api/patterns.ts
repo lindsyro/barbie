@@ -3,11 +3,8 @@
  */
 
 import type { DollItem } from "../pages/ChooseDoll/types.ts";
-import {
-  mapDbPatternToCatalogItem,
-  setCatalogPatterns,
-  type CatalogPatternItem,
-} from "../pages/Catalog/catalogData.ts";
+import type { CatalogPatternItem } from "../pages/Catalog/types.ts";
+import { getPatternImages } from "@/utils/patternImages.ts";
 
 export interface PatternItem {
   id: number;
@@ -21,6 +18,45 @@ export interface PatternItem {
 export interface PatternsResponse {
   total: number;
   items: PatternItem[];
+}
+
+const BASE = import.meta.env.BASE_URL;
+
+/**
+ * Форматирует список подходящих кукол для карточки выкройки
+ */
+export function formatPatternDolls(dolls?: DollItem[]): string {
+  if (!dolls || dolls.length === 0) return "Подходит для кукол";
+  return dolls.map((d) => d.nameRu || d.nameEn).join(" / ");
+}
+
+/**
+ * Маппит данные выкройки из базы данных в формат для каталога
+ */
+export function mapDbPatternToCatalogItem(item: {
+  id: number;
+  title: string;
+  price: number;
+  dolls?: DollItem[];
+}): CatalogPatternItem {
+  const autoImages = getPatternImages(item.id);
+  const mainImage = autoImages[0] || `${BASE}patterns/27/1.png`;
+  const allImages = autoImages.length > 0 ? autoImages : [mainImage];
+  const dollNames = formatPatternDolls(item.dolls);
+  const catSlug =
+    ((item.dolls?.[0] as unknown as { category?: { slug: string } })?.category?.slug as CatalogPatternItem["category"]) ||
+    "girls-1-6";
+
+  return {
+    id: item.id,
+    title: item.title,
+    doll: dollNames,
+    category: catSlug,
+    price: item.price,
+    image: mainImage,
+    images: allImages,
+    dolls: item.dolls,
+  };
 }
 
 const API_BASE =
@@ -83,10 +119,9 @@ export async function fetchPatterns(params?: {
     const rawItems = Array.isArray(data.items) ? data.items : [];
     const mapped = rawItems.map(mapDbPatternToCatalogItem);
 
-    // Если запрос без фильтров — обновляем глобальный кеш каталога
+    // Если запрос без фильтров — обновляем локальный кеш каталога
     if (!params || (!params.category && !params.dollId && !params.search)) {
       cachedPatterns = mapped;
-      setCatalogPatterns(mapped);
     }
 
     return mapped;

@@ -4,7 +4,7 @@ import {
   PageHeader,
   SearchInput,
 } from "@/components/index.ts";
-import type { CatalogPatternItem } from "./catalogData.ts";
+import type { CatalogPatternItem } from "./types.ts";
 import { useCatalog } from "./useCatalog.ts";
 import { PatternCard, PatternModal } from "./components/index.ts";
 import "./catalog.css";

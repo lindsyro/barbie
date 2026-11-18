@@ -1,4 +1,4 @@
-import type { CatalogPatternItem } from "./catalogData.ts";
+import type { CatalogPatternItem } from "./types.ts";
 import type { DollItem } from "../ChooseDoll/types.ts";
 import type { BreadcrumbItem } from "@/components/Breadcrumbs/Breadcrumbs.tsx";
 

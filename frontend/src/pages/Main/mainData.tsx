@@ -1,4 +1,4 @@
-import type { CatalogPatternItem } from "../Catalog/catalogData.ts";
+import type { CatalogPatternItem } from "../Catalog/types.ts";
 import type { PatternItem, AdvantageItem, QuickCategoryItem } from "./types.ts";
 
 export const POPULAR_PATTERN_IDS = [27, 19, 1, 22, 8, 21, 34, 25];

@@ -37,7 +37,6 @@ import {
   Measurements,
   ShoppingTerms,
   Reviews,
-  CATALOG_PATTERNS,
   Cart,
   type CartItemType,
   Wishlist,
@@ -273,8 +272,7 @@ function App() {
 
     const foundCatalog =
       patterns.find((p) => p.title === title) ||
-      findCachedPatternByTitle(title) ||
-      CATALOG_PATTERNS.find((p) => p.title === title);
+      findCachedPatternByTitle(title);
     const foundFeatured = FEATURED_PATTERNS.find((p) => p.title === title);
     const found = foundCatalog || foundFeatured;
 
@@ -331,8 +329,7 @@ function App() {
   const handleToggleWishlist = async (patternId: number) => {
     const foundCatalog =
       patterns.find((p) => p.id === patternId) ||
-      findCachedPatternById(patternId) ||
-      CATALOG_PATTERNS.find((p) => p.id === patternId);
+      findCachedPatternById(patternId);
     const foundFeatured = FEATURED_PATTERNS.find((p) => p.id === patternId);
     const found = foundCatalog || foundFeatured;
     const numPrice = found
