@@ -10,17 +10,10 @@ export interface WishlistPattern {
   id: number;
   title: string;
   doll: string;
-  scale?: string;
-  categoryId?: string | null;
   price: number;
   tag: string;
-  rating?: number;
-  reviewsCount?: number;
   image: string;
-  description?: string;
-  difficulty?: string;
   format?: string;
-  isFeatured?: boolean;
 }
 
 export function enrichWishlistItem(it: Partial<WishlistPattern> & { id: number }): WishlistPattern {
@@ -30,7 +23,6 @@ export function enrichWishlistItem(it: Partial<WishlistPattern> & { id: number }
       id: cat.id,
       title: cat.title,
       doll: cat.doll,
-      categoryId: cat.category,
       price: cat.price,
       tag: "Выкройка",
       image: cat.image,
@@ -79,31 +71,25 @@ const DEMO_FALLBACK_PATTERNS: WishlistPattern[] = [
     id: 27,
     title: "Водолазка-боди для Барби стандарт",
     doll: "Barbie Standard (Барби стандарт)",
-    scale: "1/6",
     price: 450,
     tag: "Топы и боди",
     image: `${BASE}patterns/27/1.png`,
-    description: "Электронная выкройка: Водолазка-боди для Барби стандарт в формате PDF с бесплатным видеоуроком по пошиву.",
   },
   {
     id: 21,
     title: "Кофточка и брюки клёш для MiniFee",
     doll: "MiniFee (Минифи)",
-    scale: "1/4",
     price: 790,
     tag: "Костюмы",
     image: `${BASE}patterns/21/3.png`,
-    description: "Бумажная выкройка: Кофточка и брюки клёш для куклы MiniFee.",
   },
   {
     id: 22,
     title: "Водолазка-боди для Ken",
     doll: "Ken (качок, Made to Move) / Ken MTM Standard",
-    scale: "1/6",
     price: 450,
     tag: "Базовый гардероб",
     image: `${BASE}patterns/22/4.png`,
-    description: "Электронная выкройка: Водолазка-боди для куклы Ken в формате PDF с кратким описанием пошива и бесплатным видеоуроком.",
   },
 ];
 

@@ -17,12 +17,9 @@ export function getCategoryName(
 ): string {
   if (activeCategory === "all") return "Все выкройки";
   for (const p of patterns) {
-    for (const d of p.dolls || []) {
-      const cat = (
-        d as unknown as { category?: { slug: string; name: string } }
-      ).category;
-      if (cat?.slug === activeCategory && cat?.name) {
-        return cat.name;
+    for (const d of p.dolls) {
+      if (d.category?.slug === activeCategory && d.category.name) {
+        return d.category.name;
       }
     }
   }
@@ -38,7 +35,7 @@ export function findDollById(
 ): DollItem | null {
   if (!dollId) return null;
   for (const p of patterns) {
-    const found = p.dolls?.find((d) => d.id === dollId);
+    const found = p.dolls.find((d) => d.id === dollId);
     if (found) return found;
   }
   return null;
@@ -56,13 +53,9 @@ export function filterPatterns(
   return patterns.filter((item) => {
     // 1. Фильтр по категории
     if (activeCategory !== "all") {
-      const matchesCategory =
-        item.category === activeCategory ||
-        item.dolls?.some(
-          (d) =>
-            (d as unknown as { category?: { slug: string } })?.category
-              ?.slug === activeCategory,
-        );
+      const matchesCategory = item.dolls.some(
+        (d) => d.category?.slug === activeCategory,
+      );
       if (!matchesCategory) {
         return false;
       }
@@ -70,7 +63,7 @@ export function filterPatterns(
 
     // 2. Фильтр по конкретной кукле
     if (activeDollId) {
-      const fitsDoll = item.dolls?.some((d) => d.id === activeDollId);
+      const fitsDoll = item.dolls.some((d) => d.id === activeDollId);
       if (!fitsDoll) {
         return false;
       }

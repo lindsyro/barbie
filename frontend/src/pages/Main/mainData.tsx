@@ -75,13 +75,8 @@ export function getQuickCategories(patterns: CatalogPatternItem[]): QuickCategor
       name: "Девушки 1/6",
       id: "girls-1-6",
       count: String(
-        patterns.filter(
-          (p) =>
-            p.category === "girls-1-6" ||
-            p.dolls?.some(
-              (d) =>
-                (d as unknown as { category?: { slug: string } })?.category?.slug === "girls-1-6"
-            )
+        patterns.filter((p) =>
+          p.dolls.some((d) => d.category?.slug === "girls-1-6")
         ).length
       ),
     },
@@ -89,12 +84,8 @@ export function getQuickCategories(patterns: CatalogPatternItem[]): QuickCategor
       name: "Мужчины (Ken / Adonis)",
       id: "guys",
       count: String(
-        patterns.filter(
-          (p) =>
-            p.category === "guys" ||
-            p.dolls?.some(
-              (d) => (d as unknown as { category?: { slug: string } })?.category?.slug === "guys"
-            )
+        patterns.filter((p) =>
+          p.dolls.some((d) => d.category?.slug === "guys")
         ).length
       ),
     },
@@ -102,13 +93,8 @@ export function getQuickCategories(patterns: CatalogPatternItem[]): QuickCategor
       name: "Девушки 1/4 (MiniFee)",
       id: "girls-1-4",
       count: String(
-        patterns.filter(
-          (p) =>
-            p.category === "girls-1-4" ||
-            p.dolls?.some(
-              (d) =>
-                (d as unknown as { category?: { slug: string } })?.category?.slug === "girls-1-4"
-            )
+        patterns.filter((p) =>
+          p.dolls.some((d) => d.category?.slug === "girls-1-4")
         ).length
       ),
     },
@@ -116,12 +102,8 @@ export function getQuickCategories(patterns: CatalogPatternItem[]): QuickCategor
       name: "Дети и мини (Kelly)",
       id: "kids",
       count: String(
-        patterns.filter(
-          (p) =>
-            p.category === "kids" ||
-            p.dolls?.some(
-              (d) => (d as unknown as { category?: { slug: string } })?.category?.slug === "kids"
-            )
+        patterns.filter((p) =>
+          p.dolls.some((d) => d.category?.slug === "kids")
         ).length
       ),
     },

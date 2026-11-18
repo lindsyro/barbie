@@ -15,11 +15,4 @@ export interface DollItem {
   measurementsFileName?: string;
   categoryId: number;
   category?: DollCategory;
-  patterns?: {
-    id: number;
-    title: string;
-    doll: string;
-    price: number;
-    categoryId: number;
-  }[]; // может импортировать интерфейс выкройки?
 }

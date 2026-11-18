@@ -20,8 +20,6 @@ export interface PatternsResponse {
   items: PatternItem[];
 }
 
-const BASE = import.meta.env.BASE_URL;
-
 /**
  * Форматирует список подходящих кукол для карточки выкройки
  */
@@ -40,22 +38,19 @@ export function mapDbPatternToCatalogItem(item: {
   dolls?: DollItem[];
 }): CatalogPatternItem {
   const autoImages = getPatternImages(item.id);
-  const mainImage = autoImages[0] || `${BASE}patterns/27/1.png`;
-  const allImages = autoImages.length > 0 ? autoImages : [mainImage];
-  const dollNames = formatPatternDolls(item.dolls);
-  const catSlug =
-    ((item.dolls?.[0] as unknown as { category?: { slug: string } })?.category?.slug as CatalogPatternItem["category"]) ||
-    "girls-1-6";
+  const mainImage = autoImages[0] || "";
+  const allImages = autoImages.length > 0 ? autoImages : (mainImage ? [mainImage] : []);
+  const dolls = item.dolls || [];
+  const dollNames = formatPatternDolls(dolls);
 
   return {
     id: item.id,
     title: item.title,
     doll: dollNames,
-    category: catSlug,
     price: item.price,
     image: mainImage,
     images: allImages,
-    dolls: item.dolls,
+    dolls,
   };
 }
 
