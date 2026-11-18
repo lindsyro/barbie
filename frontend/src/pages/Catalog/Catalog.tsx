@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import {
   Breadcrumbs,
   PageHeader,
@@ -8,6 +8,14 @@ import {
 import { useAsyncData } from "@/hooks/index.ts";
 import { fetchPatterns } from "@/api/patterns.ts";
 import type { CatalogPatternItem } from "./catalogData.ts";
+import {
+  getCategoryName,
+  getCategorySubtitle,
+  findDollById,
+  filterPatterns,
+  buildCatalogBreadcrumbs,
+  getCatalogHeaderTexts,
+} from "./catalogUtils.ts";
 import { PatternCard, PatternModal } from "./components/index.ts";
 import "./catalog.css";
 
@@ -47,29 +55,20 @@ export const Catalog: React.FC<CatalogProps> = ({
     propPatterns && propPatterns.length > 0 ? propPatterns : fetchedPatterns;
   const isLoading = propIsLoading ?? internalLoading;
 
-  // Выбранная категория (slug)
+  // Состояние фильтрации
   const [activeCategory, setActiveCategory] = useState<string>(
     initialCategory || "all",
   );
-
-  // Выбранная кукла (ID)
-  const [activeDollId, setActiveDollId] = useState<number | null>(
-    initialDollId,
-  );
-
-  // Поисковая строка и сортировка
+  const [activeDollId, setActiveDollId] = useState<number | null>(initialDollId);
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState<"popular" | "price_asc" | "price_desc">(
-    "popular",
-  );
 
   // Модальное окно быстрого просмотра
   const [selectedPattern, setSelectedPattern] =
     useState<CatalogPatternItem | null>(null);
 
-  const handleOpenPattern = (item: CatalogPatternItem) => {
+  const handleOpenPattern = useCallback((item: CatalogPatternItem) => {
     setSelectedPattern(item);
-  };
+  }, []);
 
   const wishlistSet = useMemo(() => new Set(wishlistIds), [wishlistIds]);
   const cartTitlesSet = useMemo(
@@ -77,145 +76,80 @@ export const Catalog: React.FC<CatalogProps> = ({
     [cartItems],
   );
 
-  // Находим название категории из реальных данных кукол и выкроек
-  const currentCategoryName = useMemo(() => {
-    if (activeCategory === "all") return "Все выкройки";
-    for (const p of patterns) {
-      for (const d of p.dolls || []) {
-        const cat = (
-          d as unknown as { category?: { slug: string; name: string } }
-        ).category;
-        if (cat?.slug === activeCategory && cat?.name) {
-          return cat.name;
-        }
-      }
-    }
-    return "Каталог";
-  }, [patterns, activeCategory]);
+  // Вспомогательные вычисления (вынесены в catalogUtils)
+  const currentCategoryName = useMemo(
+    () => getCategoryName(patterns, activeCategory),
+    [patterns, activeCategory],
+  );
 
-  // Список кукол категории для подзаголовка
-  const categorySubtitle = useMemo(() => {
-    if (activeCategory === "all") {
-      return "Авторские PDF-лекала GOOSE Fashion House";
-    }
-    const dollNames = new Set<string>();
-    for (const p of patterns) {
-      for (const d of p.dolls || []) {
-        const cat = (d as unknown as { category?: { slug: string } }).category;
-        if (cat?.slug === activeCategory) {
-          dollNames.add(d.nameRu || d.nameEn);
-        }
-      }
-    }
-    if (dollNames.size > 0) {
-      return Array.from(dollNames).join(", ");
-    }
-    return "Авторские PDF-лекала GOOSE Fashion House";
-  }, [patterns, activeCategory]);
+  const categorySubtitle = useMemo(
+    () => getCategorySubtitle(patterns, activeCategory),
+    [patterns, activeCategory],
+  );
 
-  // Находим данные выбранной куклы (для заголовка, крошек и фильтра)
-  const selectedDoll = useMemo(() => {
-    if (!activeDollId) return null;
-    for (const p of patterns) {
-      const found = p.dolls?.find((d) => d.id === activeDollId);
-      if (found) return found;
-    }
-    return null;
-  }, [patterns, activeDollId]);
+  const selectedDoll = useMemo(
+    () => findDollById(patterns, activeDollId),
+    [patterns, activeDollId],
+  );
 
-  // Фильтрация и сортировка выкроек
-  const filteredPatterns = useMemo(() => {
-    let result = patterns.filter((item) => {
-      // 1. Фильтр по категории
-      if (activeCategory !== "all") {
-        const matchesCategory =
-          item.category === activeCategory ||
-          item.dolls?.some(
-            (d) =>
-              (d as unknown as { category?: { slug: string } })?.category
-                ?.slug === activeCategory,
-          );
-        if (!matchesCategory) {
-          return false;
-        }
-      }
+  const filteredPatterns = useMemo(
+    () =>
+      filterPatterns(patterns, {
+        activeCategory,
+        activeDollId,
+        searchQuery,
+      }),
+    [patterns, activeCategory, activeDollId, searchQuery],
+  );
 
-      // 2. Фильтр по конкретной кукле
-      if (activeDollId) {
-        const fitsDoll = item.dolls?.some((d) => d.id === activeDollId);
-        if (!fitsDoll) {
-          return false;
-        }
-      }
+  const handleResetToCatalog = useCallback(() => {
+    setActiveCategory("all");
+    setActiveDollId(null);
+    window.location.hash = "catalog";
+  }, []);
 
-      // 3. Поиск
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase().trim();
-        const inTitle = item.title.toLowerCase().includes(q);
-        const inDoll = item.doll.toLowerCase().includes(q);
-        return inTitle || inDoll;
-      }
-      return true;
-    });
+  const handleResetDoll = useCallback(() => {
+    setActiveDollId(null);
+    window.location.hash = activeCategory;
+  }, [activeCategory]);
 
-    // Сортировка
-    if (sortBy === "price_asc") {
-      result = [...result].sort((a, b) => a.price - b.price);
-    } else if (sortBy === "price_desc") {
-      result = [...result].sort((a, b) => b.price - a.price);
-    }
-
-    return result;
-  }, [patterns, activeCategory, activeDollId, searchQuery, sortBy]);
-
-  const handleResetFilters = () => {
+  const handleResetFilters = useCallback(() => {
     setActiveCategory("all");
     setActiveDollId(null);
     setSearchQuery("");
-    setSortBy("popular");
     window.location.hash = "catalog";
-  };
+  }, []);
 
-  // Полноценная цепочка хлебных крошек
-  const breadcrumbsData = useMemo(() => {
-    const trail: { label: string; href?: string; onClick?: () => void }[] = [
-      { label: "Главная", href: "#main", onClick: onBackToMain },
-    ];
+  const breadcrumbsData = useMemo(
+    () =>
+      buildCatalogBreadcrumbs({
+        activeCategory,
+        selectedDoll,
+        categoryName: currentCategoryName,
+        onBackToMain,
+        onResetToCatalog: handleResetToCatalog,
+        onResetDoll: handleResetDoll,
+      }),
+    [
+      activeCategory,
+      selectedDoll,
+      currentCategoryName,
+      onBackToMain,
+      handleResetToCatalog,
+      handleResetDoll,
+    ],
+  );
 
-    if (activeCategory === "all" && !selectedDoll) {
-      return { trail, current: "Каталог выкроек" };
-    }
-
-    trail.push({
-      label: "Каталог",
-      href: "#catalog",
-      onClick: () => {
-        setActiveCategory("all");
-        setActiveDollId(null);
-        window.location.hash = "catalog";
-      },
-    });
-
-    if (selectedDoll) {
-      trail.push({
-        label: currentCategoryName,
-        href: `#${activeCategory}`,
-        onClick: () => {
-          setActiveDollId(null);
-          window.location.hash = activeCategory;
-        },
-      });
-      return {
-        trail,
-        current: selectedDoll.nameRu || selectedDoll.nameEn,
-      };
-    }
-
-    return {
-      trail,
-      current: currentCategoryName,
-    };
-  }, [activeCategory, selectedDoll, currentCategoryName, onBackToMain]);
+  const headerTexts = useMemo(
+    () =>
+      getCatalogHeaderTexts(
+        activeCategory,
+        selectedDoll,
+        currentCategoryName,
+        categorySubtitle,
+      ),
+    [activeCategory, selectedDoll, currentCategoryName, categorySubtitle],
+  );
 
   return (
     <div className="page-container catalog-page">
@@ -235,21 +169,28 @@ export const Catalog: React.FC<CatalogProps> = ({
 
       {/* Динамический заголовок страницы */}
       <PageHeader
-        title={
-          selectedDoll
-            ? `Выкройки`
-            : activeCategory === "all"
-              ? "Каталог выкроек"
-              : currentCategoryName
-        }
-        subtitle={
-          selectedDoll
-            ? `${selectedDoll.nameRu}${selectedDoll.nameEn && selectedDoll.nameEn !== selectedDoll.nameRu ? ` (${selectedDoll.nameEn})` : ""}`
-            : ""
-        }
+        title={headerTexts.title}
+        subtitle={headerTexts.subtitle}
       />
 
-      {/* 2. Сетка выкроек или статус загрузки */}
+      {/* Бейдж выбранной куклы с быстрой кнопкой сброса */}
+      {selectedDoll && (
+        <div className="catalog-doll-badge">
+          <span>
+            Показаны выкройки для: <strong>{selectedDoll.nameRu}</strong> (
+            {filteredPatterns.length})
+          </span>
+          <button
+            type="button"
+            className="catalog-doll-badge__clear"
+            onClick={handleResetDoll}
+          >
+            ✕ Показать все выкройки категории
+          </button>
+        </div>
+      )}
+
+      {/* Сетка выкроек или статус загрузки */}
       {isLoading && patterns.length === 0 ? (
         <div className="catalog-empty">
           <p className="catalog-empty__desc">
@@ -287,7 +228,7 @@ export const Catalog: React.FC<CatalogProps> = ({
         </div>
       )}
 
-      {/* 3. Баннер анатомического справочника кукол */}
+      {/* Баннер анатомического справочника кукол */}
       <div className="catalog-guide-banner">
         <div className="catalog-guide-banner__info">
           <h3 className="catalog-guide-banner__title">
@@ -315,7 +256,7 @@ export const Catalog: React.FC<CatalogProps> = ({
         </button>
       </div>
 
-      {/* 4. Модальное окно быстрого просмотра выкройки */}
+      {/* Модальное окно быстрого просмотра выкройки */}
       <PatternModal
         pattern={selectedPattern}
         onClose={() => setSelectedPattern(null)}
