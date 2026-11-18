@@ -3,10 +3,11 @@ import {
   Breadcrumbs,
   PageHeader,
   SearchInput,
+  PatternCard,
+  PatternModal,
 } from "@/components/index.ts";
 import type { CatalogPatternItem } from "./types.ts";
 import { useCatalog } from "./useCatalog.ts";
-import { PatternCard, PatternModal } from "./components/index.ts";
 import "./catalog.css";
 
 export interface CatalogProps {

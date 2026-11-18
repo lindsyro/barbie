@@ -1,0 +1,181 @@
+/* ==========================================================================
+   Pattern Card Component Styles
+   ========================================================================== */
+
+.catalog-card {
+  background: #ffffff;
+  border: 1px solid var(--color-ivory);
+  border-radius: 12px;
+  overflow: hidden;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.catalog-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px rgba(89, 72, 62, 0.1);
+}
+
+.catalog-card__img-box {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  background: var(--bg-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.catalog-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 0.4s ease;
+}
+
+.catalog-card:hover .catalog-card__img {
+  transform: scale(1.04);
+}
+
+.catalog-card__wishlist-btn {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(4px);
+  border: 1px solid var(--color-cappuccino);
+  color: var(--color-taupe);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  z-index: 2;
+}
+
+.catalog-card__wishlist-btn:hover {
+  transform: scale(1.1);
+  color: #c94a4a;
+  background: #ffffff;
+}
+
+.catalog-card__wishlist-btn--active {
+  color: #c94a4a;
+  background: #ffffff;
+  border-color: rgba(201, 74, 74, 0.4);
+}
+
+.catalog-card__wishlist-btn--active:hover {
+  color: #a63838;
+}
+
+/* Бейдж количества фото на карточке выкройки */
+.catalog-card__photos-count {
+  position: absolute;
+  bottom: 0.85rem;
+  right: 0.85rem;
+  background: rgba(43, 31, 24, 0.82);
+  backdrop-filter: blur(6px);
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.25rem 0.55rem;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  pointer-events: none;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 2;
+  transition: all 0.2s ease;
+}
+
+.catalog-card:hover .catalog-card__photos-count {
+  background: rgba(43, 31, 24, 0.95);
+  transform: scale(1.04);
+}
+
+.catalog-card__body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.catalog-card__doll-fit {
+  font-size: 0.75rem;
+  color: var(--color-taupe);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.35rem;
+}
+
+.catalog-card__title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--color-chocolate);
+  margin-bottom: 1rem;
+  line-height: 1.35;
+  flex: 1;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.catalog-card__title:hover {
+  color: var(--color-gold-site);
+}
+
+.catalog-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+}
+
+.catalog-card__price {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--color-chocolate);
+}
+
+.catalog-card__btn-cart {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.95rem;
+  background: var(--color-chocolate);
+  color: #ffffff;
+  border: none;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.catalog-card__btn-cart:hover {
+  background: var(--color-gold-site);
+  transform: translateY(-1px);
+}
+
+.catalog-card__btn-cart--added {
+  background: #2e7d32 !important;
+  color: #ffffff;
+}
+
+.catalog-card__btn-cart--added:hover {
+  background: #236527 !important;
+}

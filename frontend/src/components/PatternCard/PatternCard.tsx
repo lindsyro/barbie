@@ -5,7 +5,8 @@ import {
   CheckIcon,
   ImageIcon,
 } from "@/components/icons/index.ts";
-import type { CatalogPatternItem } from "../types.ts";
+import type { CatalogPatternItem } from "@/pages/Catalog/types.ts";
+import "./patternCard.css";
 
 export interface PatternCardProps {
   pattern: CatalogPatternItem;
@@ -29,13 +30,15 @@ export const PatternCard: React.FC<PatternCardProps> = React.memo(
       onOpenPattern?.(pattern);
     };
 
+    const photosCount = pattern.images?.length || 1;
+
     return (
       <article className="catalog-card">
-        {/* Фотография выкройки */}
+        {/* Блок изображения выкройки */}
         <div
           className="catalog-card__img-box"
           onClick={handleOpen}
-          title="Нажмите для просмотра фото в полном размере"
+          title="Нажмите для быстрого просмотра"
         >
           <img
             src={pattern.image}
@@ -44,18 +47,18 @@ export const PatternCard: React.FC<PatternCardProps> = React.memo(
             loading="lazy"
           />
 
-          {/* Бейдж количества фото (если их больше 1) */}
-          {pattern.images && pattern.images.length > 1 && (
+          {/* Счетчик дополнительных фото */}
+          {photosCount > 1 && (
             <span
               className="catalog-card__photos-count"
-              title={`Всего ${pattern.images.length} фото`}
+              title={`Всего ${photosCount} фото`}
             >
               <ImageIcon size={12} />
-              <span>{pattern.images.length} фото</span>
+              <span>{photosCount}</span>
             </span>
           )}
 
-          {/* Кнопка добавления в избранное */}
+          {/* Кнопка "В избранное" (лайк) */}
           <button
             type="button"
             className={`catalog-card__wishlist-btn ${isLiked ? "catalog-card__wishlist-btn--active" : ""}`}
@@ -63,10 +66,12 @@ export const PatternCard: React.FC<PatternCardProps> = React.memo(
               e.stopPropagation();
               onToggleWishlist?.(pattern.id);
             }}
-            title={isLiked ? "В избранном" : "Добавить в избранное"}
             aria-label={
-              isLiked ? "Удалить из избранного" : "Добавить в избранное"
+              isLiked
+                ? `Удалить ${pattern.title} из избранного`
+                : `Добавить ${pattern.title} в избранное`
             }
+            title={isLiked ? "В избранном" : "Добавить в избранное"}
           >
             <HeartIcon size={18} filled={isLiked} />
           </button>
@@ -92,7 +97,11 @@ export const PatternCard: React.FC<PatternCardProps> = React.memo(
               className={`catalog-card__btn-cart ${isInCart ? "catalog-card__btn-cart--added" : ""}`}
               onClick={() => onAddToCart?.(pattern.title)}
               title={isInCart ? "Убрать из корзины" : "Добавить в корзину"}
-              aria-label={isInCart ? `Убрать из корзины: ${pattern.title}` : `Добавить в корзину: ${pattern.title}`}
+              aria-label={
+                isInCart
+                  ? `Убрать из корзины: ${pattern.title}`
+                  : `Добавить в корзину: ${pattern.title}`
+              }
             >
               {isInCart ? (
                 <>

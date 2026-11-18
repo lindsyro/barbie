@@ -1,0 +1,116 @@
+/* ==========================================================================
+   Doll Card Component Styles
+   ========================================================================== */
+
+.doll-card {
+  background: #ffffff;
+  border: 1px solid var(--color-cappuccino);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 18px rgba(74, 52, 38, 0.04);
+}
+
+.doll-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(166, 129, 66, 0.45);
+  box-shadow: 0 10px 28px rgba(74, 52, 38, 0.09);
+}
+
+.doll-card__img-box {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: var(--bg-soft);
+}
+
+.doll-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.doll-card:hover .doll-card__img {
+  transform: scale(1.04);
+}
+
+.doll-card__body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.doll-card__cat-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--color-taupe);
+  margin-bottom: 0.35rem;
+}
+
+.doll-card__title {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--color-chocolate);
+  margin: 0 0 0.2rem 0;
+  line-height: 1.25;
+}
+
+.doll-card__subtitle {
+  font-size: 0.8125rem;
+  color: var(--color-taupe);
+  margin: 0 0 0.5rem 0;
+  line-height: 1.3;
+}
+
+.doll-card__footer {
+  margin-top: auto;
+  display: flex;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+}
+
+.doll-card__btn-patterns {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.6rem 0.85rem;
+  background: var(--color-chocolate);
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
+}
+
+.doll-card__btn-patterns:hover {
+  background: var(--color-gold-site);
+}
+
+.doll-card__btn-details {
+  padding: 0.6rem 0.85rem;
+  background: none;
+  border: 1px solid var(--color-cappuccino);
+  color: var(--color-chocolate);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.doll-card__btn-details:hover {
+  border-color: var(--color-gold-site);
+  color: var(--color-gold-site);
+}

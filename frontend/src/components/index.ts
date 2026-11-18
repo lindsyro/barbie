@@ -29,6 +29,18 @@ export type { RegisterModalProps } from "./Auth/RegisterModal.tsx";
 export { SearchInput } from "./SearchInput/SearchInput.tsx";
 export type { SearchInputProps } from "./SearchInput/SearchInput.tsx";
 
+export { PatternCard } from "./PatternCard/index.ts";
+export type { PatternCardProps } from "./PatternCard/index.ts";
+
+export { PatternModal } from "./PatternModal/index.ts";
+export type { PatternModalProps } from "./PatternModal/index.ts";
+
+export { DollCard } from "./DollCard/index.ts";
+export type { DollCardProps } from "./DollCard/index.ts";
+
+export { DollMeasurementsModal } from "./DollMeasurementsModal/index.ts";
+export type { DollMeasurementsModalProps } from "./DollMeasurementsModal/index.ts";
+
 export {
   SearchIcon,
   ArrowRightIcon,
