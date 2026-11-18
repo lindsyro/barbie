@@ -40,7 +40,6 @@ import {
   Cart,
   type CartItemType,
   Wishlist,
-  FEATURED_PATTERNS,
 } from "./pages/index.ts";
 import "./App.css";
 
@@ -271,11 +270,9 @@ function App() {
       return;
     }
 
-    const foundCatalog =
+    const found =
       patterns.find((p) => p.title === title) ||
       findCachedPatternByTitle(title);
-    const foundFeatured = FEATURED_PATTERNS.find((p) => p.title === title);
-    const found = foundCatalog || foundFeatured;
 
     const numPrice = found
       ? typeof found.price === "number"
@@ -328,11 +325,9 @@ function App() {
   };
 
   const handleToggleWishlist = async (patternId: number) => {
-    const foundCatalog =
+    const found =
       patterns.find((p) => p.id === patternId) ||
       findCachedPatternById(patternId);
-    const foundFeatured = FEATURED_PATTERNS.find((p) => p.id === patternId);
-    const found = foundCatalog || foundFeatured;
     const numPrice = found
       ? typeof found.price === "number"
         ? found.price

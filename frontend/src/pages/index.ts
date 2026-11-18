@@ -1,6 +1,5 @@
 export { Main, default } from "./Main/Main.tsx";
-export { FEATURED_PATTERNS, ADVANTAGES, CATEGORIES_QUICK } from "./Main/mainData.tsx";
-export type { PatternItem, AdvantageItem, QuickCategoryItem, MainProps } from "./Main/types.ts";
+export type { MainProps } from "./Main/Main.tsx";
 
 export { Catalog } from "./Catalog/Catalog.tsx";
 export type { CatalogProps } from "./Catalog/Catalog.tsx";
