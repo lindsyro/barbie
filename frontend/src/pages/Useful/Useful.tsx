@@ -13,7 +13,7 @@ export const Useful: React.FC<UsefulProps> = ({ onBackToMain }) => {
     <div className="page-container">
       <Breadcrumbs current="Полезное" onBackToMain={onBackToMain} />
 
-      <PageHeader title="Полезные материалы" subtitle="Статьи, таблицы и мерки" />
+      <PageHeader title="Полезные материалы" />
 
       <PagePlaceholder
         icon={

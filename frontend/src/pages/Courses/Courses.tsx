@@ -13,7 +13,7 @@ export const Courses: React.FC<CoursesProps> = ({ onBackToMain }) => {
     <div className="page-container">
       <Breadcrumbs current="Курсы" onBackToMain={onBackToMain} />
 
-      <PageHeader title="Курсы" subtitle="Обучение шитью кукольной одежды" />
+      <PageHeader title="Курсы" />
 
       <PagePlaceholder
         icon={

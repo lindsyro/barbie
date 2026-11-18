@@ -15,7 +15,7 @@ export const Measurements: React.FC<MeasurementsProps> = ({ onBackToMain }) => {
       <Breadcrumbs current="Мерки кукол" onBackToMain={onBackToMain} />
 
       {/* Заголовок страницы */}
-      <PageHeader title="Мерки кукол" subtitle="Таблицы параметров" />
+      <PageHeader title="Мерки кукол" />
 
       {/* Заглушка страницы */}
       <PagePlaceholder

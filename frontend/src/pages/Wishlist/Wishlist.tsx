@@ -21,10 +21,7 @@ export const Wishlist: React.FC<WishlistProps> = ({
       <Breadcrumbs current="Избранное" onBackToMain={onBackToMain} />
 
       {/* Заголовок страницы */}
-      <PageHeader
-        title="Избранные выкройки"
-        subtitle="Ваша персональная подборка"
-      />
+      <PageHeader title="Избранные выкройки" />
 
       {/* Содержимое страницы */}
       {isLoading ? (

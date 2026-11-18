@@ -58,10 +58,7 @@ export const ChooseDoll: React.FC<ChooseDollProps> = ({
       </div>
 
       {/* Заголовок страницы */}
-      <PageHeader
-        title="Выбрать куклу"
-        subtitle="Анатомический справочник GOOSE"
-      />
+      <PageHeader title="Выбрать куклу" />
 
       {/* Индикатор загрузки или сетка кукол */}
       {isLoading ? (

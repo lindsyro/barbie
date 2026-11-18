@@ -52,10 +52,7 @@ export const Cart: React.FC<CartProps> = ({
       <Breadcrumbs current="Корзина" onBackToMain={onBackToMain} />
 
       {/* Заголовок страницы */}
-      <PageHeader
-        title="Корзина покупок"
-        subtitle="Оформление заказа"
-      />
+      <PageHeader title="Корзина покупок" />
 
       {/* Контент: если корзина пуста */}
       {items.length === 0 ? (

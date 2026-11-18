@@ -64,14 +64,7 @@ export const Account: React.FC<AccountProps> = ({
       <Breadcrumbs current="Личный кабинет" onBackToMain={onBackToMain} />
 
       {/* Заголовок страницы */}
-      <PageHeader
-        title="Личный кабинет"
-        subtitle={
-          user
-            ? `Добро пожаловать, ${user.name || user.email}`
-            : "Персональный раздел"
-        }
-      />
+      <PageHeader title="Личный кабинет" />
 
       {/* Если пользователь не авторизован */}
       {!user ? (

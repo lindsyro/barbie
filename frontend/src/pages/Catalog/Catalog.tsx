@@ -33,7 +33,7 @@ export const Catalog: React.FC<CatalogProps> = (props) => {
     selectedPattern,
     handleOpenPattern,
     handleClosePattern,
-    headerTexts,
+    catalogTitle,
     breadcrumbsData,
     handleResetFilters,
   } = useCatalog(props);
@@ -55,7 +55,7 @@ export const Catalog: React.FC<CatalogProps> = (props) => {
       </div>
 
       {/* Динамический заголовок страницы */}
-      <PageHeader title={headerTexts.title} subtitle={headerTexts.subtitle} />
+      <PageHeader title={catalogTitle} />
 
       {/* Сетка выкроек или статус загрузки */}
       {isLoading && patterns.length === 0 ? (

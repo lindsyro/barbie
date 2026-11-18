@@ -13,7 +13,7 @@ export const Free: React.FC<FreeProps> = ({ onBackToMain }) => {
     <div className="page-container">
       <Breadcrumbs current="Бесплатно" onBackToMain={onBackToMain} />
 
-      <PageHeader title="Бесплатные материалы" subtitle="Подарки и пробные уроки" />
+      <PageHeader title="Бесплатные материалы" />
 
       <PagePlaceholder
         icon={

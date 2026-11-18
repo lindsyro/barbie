@@ -15,10 +15,7 @@ export const Reviews: React.FC<ReviewsProps> = ({ onBackToMain }) => {
       <Breadcrumbs current="Отзывы мастериц" onBackToMain={onBackToMain} />
 
       {/* Заголовок страницы */}
-      <PageHeader
-        title="Отзывы мастериц"
-        subtitle="Галерея готовых работ"
-      />
+      <PageHeader title="Отзывы мастериц" />
 
       {/* Заглушка страницы */}
       <PagePlaceholder

@@ -30,31 +30,6 @@ export function getCategoryName(
 }
 
 /**
- * Формирует подзаголовок со списком кукол выбранной категории
- */
-export function getCategorySubtitle(
-  patterns: CatalogPatternItem[],
-  activeCategory: string,
-): string {
-  if (activeCategory === "all") {
-    return "Авторские PDF-лекала GOOSE Fashion House";
-  }
-  const dollNames = new Set<string>();
-  for (const p of patterns) {
-    for (const d of p.dolls || []) {
-      const cat = (d as unknown as { category?: { slug: string } }).category;
-      if (cat?.slug === activeCategory) {
-        dollNames.add(d.nameRu || d.nameEn);
-      }
-    }
-  }
-  if (dollNames.size > 0) {
-    return Array.from(dollNames).join(", ");
-  }
-  return "Авторские PDF-лекала GOOSE Fashion House";
-}
-
-/**
  * Находит объект куклы по ID среди всех выкроек
  */
 export function findDollById(
@@ -174,27 +149,15 @@ export function buildCatalogBreadcrumbs(
 }
 
 /**
- * Формирует заголовок и подзаголовок для PageHeader
+ * Формирует заголовок для страницы каталога
  */
-export function getCatalogHeaderTexts(
+export function getCatalogTitle(
   activeCategory: string,
   selectedDoll: DollItem | null,
   categoryName: string,
-  categorySubtitle: string,
-): { title: string; subtitle: string } {
+): string {
   if (selectedDoll) {
-    const enName =
-      selectedDoll.nameEn && selectedDoll.nameEn !== selectedDoll.nameRu
-        ? ` (${selectedDoll.nameEn})`
-        : "";
-    return {
-      title: `Выкройки для ${selectedDoll.nameRu}`,
-      subtitle: `Авторские лекала GOOSE с точной посадкой на тело ${selectedDoll.nameRu}${enName} • Рост ${selectedDoll.height} см`,
-    };
+    return `Выкройки`;
   }
-
-  return {
-    title: activeCategory === "all" ? "Каталог выкроек" : categoryName,
-    subtitle: categorySubtitle,
-  };
+  return activeCategory === "all" ? "Каталог выкроек" : categoryName;
 }

@@ -13,7 +13,7 @@ export const About: React.FC<AboutProps> = ({ onBackToMain }) => {
     <div className="page-container">
       <Breadcrumbs current="О нас" onBackToMain={onBackToMain} />
 
-      <PageHeader title="О GOOSE Fashion House" subtitle="История бренда" />
+      <PageHeader title="О GOOSE Fashion House" />
 
       <PagePlaceholder
         icon={

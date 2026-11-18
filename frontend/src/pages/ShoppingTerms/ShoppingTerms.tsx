@@ -15,10 +15,7 @@ export const ShoppingTerms: React.FC<ShoppingTermsProps> = ({ onBackToMain }) =>
       <Breadcrumbs current="Условия покупки" onBackToMain={onBackToMain} />
 
       {/* Заголовок страницы */}
-      <PageHeader
-        title="Условия покупки"
-        subtitle="Порядок оформления и доставки"
-      />
+      <PageHeader title="Условия покупки" />
 
       {/* Заглушка страницы */}
       <PagePlaceholder

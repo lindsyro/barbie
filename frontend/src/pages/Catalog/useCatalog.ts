@@ -4,11 +4,10 @@ import { fetchPatterns } from "@/api/patterns.ts";
 import type { CatalogPatternItem } from "./catalogData.ts";
 import {
   getCategoryName,
-  getCategorySubtitle,
   findDollById,
   filterPatterns,
   buildCatalogBreadcrumbs,
-  getCatalogHeaderTexts,
+  getCatalogTitle,
 } from "./catalogUtils.ts";
 import type { CatalogProps } from "./Catalog.tsx";
 
@@ -65,11 +64,6 @@ export function useCatalog(props: CatalogProps) {
     [patterns, activeCategory],
   );
 
-  const categorySubtitle = useMemo(
-    () => getCategorySubtitle(patterns, activeCategory),
-    [patterns, activeCategory],
-  );
-
   const selectedDoll = useMemo(
     () => findDollById(patterns, activeDollId),
     [patterns, activeDollId],
@@ -123,15 +117,9 @@ export function useCatalog(props: CatalogProps) {
     ],
   );
 
-  const headerTexts = useMemo(
-    () =>
-      getCatalogHeaderTexts(
-        activeCategory,
-        selectedDoll,
-        currentCategoryName,
-        categorySubtitle,
-      ),
-    [activeCategory, selectedDoll, currentCategoryName, categorySubtitle],
+  const catalogTitle = useMemo(
+    () => getCatalogTitle(activeCategory, selectedDoll, currentCategoryName),
+    [activeCategory, selectedDoll, currentCategoryName],
   );
 
   return {
@@ -148,7 +136,7 @@ export function useCatalog(props: CatalogProps) {
     selectedPattern,
     handleOpenPattern,
     handleClosePattern,
-    headerTexts,
+    catalogTitle,
     breadcrumbsData,
     handleResetFilters,
     handleResetDoll,
