@@ -35,7 +35,6 @@ export const Catalog: React.FC<CatalogProps> = (props) => {
     handleClosePattern,
     catalogTitle,
     breadcrumbsData,
-    handleResetFilters,
   } = useCatalog(props);
 
   return (
