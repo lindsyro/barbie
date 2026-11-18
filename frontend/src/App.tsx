@@ -519,7 +519,6 @@ function App() {
             onToggleWishlist={handleToggleWishlist}
             wishlistIds={wishlistIds}
             cartItems={cart}
-            onNavigateToChooseDoll={() => navigateTo("choose-doll")}
           />
         );
       case "tutorials":
