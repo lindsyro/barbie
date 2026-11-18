@@ -286,7 +286,6 @@
   justify-content: space-between;
   gap: 0.75rem;
   padding-top: 0.75rem;
-  border-top: 1px solid var(--color-ivory);
 }
 
 .main-pattern-card__price {
