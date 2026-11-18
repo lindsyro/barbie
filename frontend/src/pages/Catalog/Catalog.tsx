@@ -1,5 +1,10 @@
 import React, { useState, useMemo } from "react";
-import { Breadcrumbs, PageHeader, SearchInput, UserIcon } from "@/components/index.ts";
+import {
+  Breadcrumbs,
+  PageHeader,
+  SearchInput,
+  UserIcon,
+} from "@/components/index.ts";
 import { useAsyncData } from "@/hooks/index.ts";
 import { fetchPatterns } from "@/api/patterns.ts";
 import type { CatalogPatternItem } from "./catalogData.ts";
@@ -10,7 +15,7 @@ export interface CatalogProps {
   patterns?: CatalogPatternItem[];
   isLoading?: boolean;
   initialCategory?: string;
-  initialSubcategory?: string;
+  initialDollId?: number | null;
   onBackToMain?: () => void;
   onAddToCart?: (title: string) => void;
   onToggleWishlist?: (patternId: number) => void;
@@ -19,41 +24,11 @@ export interface CatalogProps {
   onNavigateToChooseDoll?: () => void;
 }
 
-type MainCategoryId = "all" | "girls-1-6" | "girls-1-4" | "guys" | "kids";
-
-const CATEGORY_INFO: Record<MainCategoryId, { title: string; subtitle: string; breadcrumb: string }> = {
-  all: {
-    title: "Каталог выкроек",
-    subtitle: "Авторские PDF-лекала GOOSE Fashion House",
-    breadcrumb: "Все выкройки",
-  },
-  "girls-1-6": {
-    title: "Выкройки для девушек 1/6",
-    subtitle: "Барби Standard, Curvy, Tall, Mizi, Momoko, Poppy Parker, Блайз",
-    breadcrumb: "Для девушек 1/6",
-  },
-  "girls-1-4": {
-    title: "Выкройки для девушек 1/4",
-    subtitle: "Коллекции для шарнирных кукол BJD и MiniFee",
-    breadcrumb: "Для девушек 1/4",
-  },
-  guys: {
-    title: "Выкройки для парней",
-    subtitle: "Мужская кукольная мода: Кен, Adonis 2.0, FR Homme",
-    breadcrumb: "Для парней",
-  },
-  kids: {
-    title: "Выкройки для миниатюрных кукол",
-    subtitle: "Келли, Chelsea (Челси), Lati Yellow, Obitsu 11",
-    breadcrumb: "Для детей и миниатюр",
-  },
-};
-
 export const Catalog: React.FC<CatalogProps> = ({
   patterns: propPatterns,
   isLoading: propIsLoading,
   initialCategory = "all",
-  initialSubcategory: _initialSubcategory = "all",
+  initialDollId = null,
   onBackToMain,
   onAddToCart,
   onToggleWishlist,
@@ -62,40 +37,91 @@ export const Catalog: React.FC<CatalogProps> = ({
   onNavigateToChooseDoll,
 }) => {
   // Универсальная загрузка выкроек из базы данных PostgreSQL
-  const { data: fetchedPatterns = [], isLoading: internalLoading } = useAsyncData(
-    fetchPatterns,
-    {
+  const { data: fetchedPatterns = [], isLoading: internalLoading } =
+    useAsyncData(fetchPatterns, {
       initialData: [],
       enabled: !propPatterns || propPatterns.length === 0,
-    }
-  );
+    });
 
-  const patterns = propPatterns && propPatterns.length > 0 ? propPatterns : fetchedPatterns;
+  const patterns =
+    propPatterns && propPatterns.length > 0 ? propPatterns : fetchedPatterns;
   const isLoading = propIsLoading ?? internalLoading;
 
-  // Выбранная категория
-  const [activeCategory, setActiveCategory] = useState<MainCategoryId>(() => {
-    const validIds: MainCategoryId[] = ["all", "girls-1-6", "girls-1-4", "guys", "kids"];
-    return validIds.includes(initialCategory as MainCategoryId)
-      ? (initialCategory as MainCategoryId)
-      : "all";
-  });
+  // Выбранная категория (slug)
+  const [activeCategory, setActiveCategory] = useState<string>(
+    initialCategory || "all",
+  );
+
+  // Выбранная кукла (ID)
+  const [activeDollId, setActiveDollId] = useState<number | null>(
+    initialDollId,
+  );
 
   // Поисковая строка и сортировка
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState<"popular" | "price_asc" | "price_desc">("popular");
+  const [sortBy, setSortBy] = useState<"popular" | "price_asc" | "price_desc">(
+    "popular",
+  );
 
   // Модальное окно быстрого просмотра
-  const [selectedPattern, setSelectedPattern] = useState<CatalogPatternItem | null>(null);
+  const [selectedPattern, setSelectedPattern] =
+    useState<CatalogPatternItem | null>(null);
 
   const handleOpenPattern = (item: CatalogPatternItem) => {
     setSelectedPattern(item);
   };
 
   const wishlistSet = useMemo(() => new Set(wishlistIds), [wishlistIds]);
-  const cartTitlesSet = useMemo(() => new Set(cartItems.map((c) => c.title)), [cartItems]);
+  const cartTitlesSet = useMemo(
+    () => new Set(cartItems.map((c) => c.title)),
+    [cartItems],
+  );
 
-  const currentCategoryMeta = CATEGORY_INFO[activeCategory] || CATEGORY_INFO.all;
+  // Находим название категории из реальных данных кукол и выкроек
+  const currentCategoryName = useMemo(() => {
+    if (activeCategory === "all") return "Все выкройки";
+    for (const p of patterns) {
+      for (const d of p.dolls || []) {
+        const cat = (
+          d as unknown as { category?: { slug: string; name: string } }
+        ).category;
+        if (cat?.slug === activeCategory && cat?.name) {
+          return cat.name;
+        }
+      }
+    }
+    return "Каталог";
+  }, [patterns, activeCategory]);
+
+  // Список кукол категории для подзаголовка
+  const categorySubtitle = useMemo(() => {
+    if (activeCategory === "all") {
+      return "Авторские PDF-лекала GOOSE Fashion House";
+    }
+    const dollNames = new Set<string>();
+    for (const p of patterns) {
+      for (const d of p.dolls || []) {
+        const cat = (d as unknown as { category?: { slug: string } }).category;
+        if (cat?.slug === activeCategory) {
+          dollNames.add(d.nameRu || d.nameEn);
+        }
+      }
+    }
+    if (dollNames.size > 0) {
+      return Array.from(dollNames).join(", ");
+    }
+    return "Авторские PDF-лекала GOOSE Fashion House";
+  }, [patterns, activeCategory]);
+
+  // Находим данные выбранной куклы (для заголовка, крошек и фильтра)
+  const selectedDoll = useMemo(() => {
+    if (!activeDollId) return null;
+    for (const p of patterns) {
+      const found = p.dolls?.find((d) => d.id === activeDollId);
+      if (found) return found;
+    }
+    return null;
+  }, [patterns, activeDollId]);
 
   // Фильтрация и сортировка выкроек
   const filteredPatterns = useMemo(() => {
@@ -106,13 +132,23 @@ export const Catalog: React.FC<CatalogProps> = ({
           item.category === activeCategory ||
           item.dolls?.some(
             (d) =>
-              (d as unknown as { category?: { slug: string } })?.category?.slug === activeCategory
+              (d as unknown as { category?: { slug: string } })?.category
+                ?.slug === activeCategory,
           );
         if (!matchesCategory) {
           return false;
         }
       }
-      // 2. Поиск
+
+      // 2. Фильтр по конкретной кукле
+      if (activeDollId) {
+        const fitsDoll = item.dolls?.some((d) => d.id === activeDollId);
+        if (!fitsDoll) {
+          return false;
+        }
+      }
+
+      // 3. Поиск
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim();
         const inTitle = item.title.toLowerCase().includes(q);
@@ -130,21 +166,64 @@ export const Catalog: React.FC<CatalogProps> = ({
     }
 
     return result;
-  }, [patterns, activeCategory, searchQuery, sortBy]);
+  }, [patterns, activeCategory, activeDollId, searchQuery, sortBy]);
 
   const handleResetFilters = () => {
     setActiveCategory("all");
+    setActiveDollId(null);
     setSearchQuery("");
     setSortBy("popular");
     window.location.hash = "catalog";
   };
+
+  // Полноценная цепочка хлебных крошек
+  const breadcrumbsData = useMemo(() => {
+    const trail: { label: string; href?: string; onClick?: () => void }[] = [
+      { label: "Главная", href: "#main", onClick: onBackToMain },
+    ];
+
+    if (activeCategory === "all" && !selectedDoll) {
+      return { trail, current: "Каталог выкроек" };
+    }
+
+    trail.push({
+      label: "Каталог",
+      href: "#catalog",
+      onClick: () => {
+        setActiveCategory("all");
+        setActiveDollId(null);
+        window.location.hash = "catalog";
+      },
+    });
+
+    if (selectedDoll) {
+      trail.push({
+        label: currentCategoryName,
+        href: `#${activeCategory}`,
+        onClick: () => {
+          setActiveDollId(null);
+          window.location.hash = activeCategory;
+        },
+      });
+      return {
+        trail,
+        current: selectedDoll.nameRu || selectedDoll.nameEn,
+      };
+    }
+
+    return {
+      trail,
+      current: currentCategoryName,
+    };
+  }, [activeCategory, selectedDoll, currentCategoryName, onBackToMain]);
 
   return (
     <div className="page-container catalog-page">
       {/* Верхняя строка: хлебные крошки слева, компактный поиск справа */}
       <div className="page-top-bar">
         <Breadcrumbs
-          current={activeCategory === "all" ? "Каталог выкроек" : currentCategoryMeta.breadcrumb}
+          items={breadcrumbsData.trail}
+          current={breadcrumbsData.current}
           onBackToMain={onBackToMain}
         />
         <SearchInput
@@ -156,22 +235,39 @@ export const Catalog: React.FC<CatalogProps> = ({
 
       {/* Динамический заголовок страницы */}
       <PageHeader
-        title={currentCategoryMeta.title}
-        subtitle={currentCategoryMeta.subtitle}
+        title={
+          selectedDoll
+            ? `Выкройки`
+            : activeCategory === "all"
+              ? "Каталог выкроек"
+              : currentCategoryName
+        }
+        subtitle={
+          selectedDoll
+            ? `${selectedDoll.nameRu}${selectedDoll.nameEn && selectedDoll.nameEn !== selectedDoll.nameRu ? ` (${selectedDoll.nameEn})` : ""}`
+            : ""
+        }
       />
 
       {/* 2. Сетка выкроек или статус загрузки */}
       {isLoading && patterns.length === 0 ? (
         <div className="catalog-empty">
-          <p className="catalog-empty__desc">Загрузка выкроек из базы данных...</p>
+          <p className="catalog-empty__desc">
+            Загрузка выкроек из базы данных...
+          </p>
         </div>
       ) : filteredPatterns.length === 0 ? (
         <div className="catalog-empty">
           <h3 className="catalog-empty__title">Выкройки не найдены</h3>
           <p className="catalog-empty__desc">
-            По заданным фильтрам и поисковому запросу «{searchQuery}» пока ничего нет.
+            По заданным фильтрам и поисковому запросу «{searchQuery}» пока
+            ничего нет.
           </p>
-          <button type="button" className="catalog-empty__btn" onClick={handleResetFilters}>
+          <button
+            type="button"
+            className="catalog-empty__btn"
+            onClick={handleResetFilters}
+          >
             Сбросить фильтры
           </button>
         </div>
@@ -194,9 +290,13 @@ export const Catalog: React.FC<CatalogProps> = ({
       {/* 3. Баннер анатомического справочника кукол */}
       <div className="catalog-guide-banner">
         <div className="catalog-guide-banner__info">
-          <h3 className="catalog-guide-banner__title">Не уверены, подойдёт ли выкройка вашей кукле?</h3>
+          <h3 className="catalog-guide-banner__title">
+            Не уверены, подойдёт ли выкройка вашей кукле?
+          </h3>
           <p className="catalog-guide-banner__desc">
-            Используйте наш «Анатомический справочник GOOSE». В нём собраны 27 типов тел (Барби, Кен, MiniFee, Блайз) с точными мерками обхвата груди, талии и бёдер.
+            Используйте наш «Анатомический справочник GOOSE». В нём собраны 27
+            типов тел (Барби, Кен, MiniFee, Блайз) с точными мерками обхвата
+            груди, талии и бёдер.
           </p>
         </div>
         <button

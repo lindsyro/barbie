@@ -126,53 +126,25 @@ const INITIAL_CART: CartItemType[] = [
   },
 ];
 
-function parseCatalogCategoryFromHash(hash: string): { category: string; subcategory: string } | null {
-  const clean = hash.replace("#", "").trim().toLowerCase();
+function parseCatalogRoute(hash: string): { category: string; dollId: number | null } | null {
+  const raw = hash.replace("#", "").trim();
+  if (!raw) return null;
 
-  if (clean === "catalog") return { category: "all", subcategory: "all" };
+  const [pathPart, queryPart] = raw.split("?");
+  const cleanPath = pathPart.toLowerCase().trim();
 
-  // 1/6
-  if (clean === "girls-1-6" || clean === "barbie" || clean === "barbie1") {
-    return { category: "girls-1-6", subcategory: "all" };
-  }
-  if (
-    [
-      "barbie-standard",
-      "barbie-curvy",
-      "barbie-tall",
-      "barbie-90s",
-      "mizi",
-      "momoko",
-      "poppy-parker",
-      "blythe",
-      "rainbow-high",
-    ].includes(clean)
-  ) {
-    return { category: "girls-1-6", subcategory: clean };
+  const searchParams = new URLSearchParams(queryPart || "");
+  const dollParam = searchParams.get("doll");
+  const parsedDollId = dollParam ? parseInt(dollParam, 10) : null;
+  const dollId = parsedDollId !== null && !isNaN(parsedDollId) ? parsedDollId : null;
+
+  if (cleanPath === "catalog" || cleanPath === "all-patterns") {
+    return { category: "all", dollId };
   }
 
-  // 1/4
-  if (["girls-1-4", "barbie2", "girls-1", "girls-2", "girls-3"].includes(clean)) {
-    return { category: "girls-1-4", subcategory: "all" };
-  }
-  if (["minifee", "bjd-msd"].includes(clean)) {
-    return { category: "girls-1-4", subcategory: clean };
-  }
-
-  // Guys
-  if (["guys", "ken", "men"].includes(clean)) {
-    return { category: "guys", subcategory: "all" };
-  }
-  if (["ken-standard", "ken-broad", "adonis-2-0", "fr-homme"].includes(clean)) {
-    return { category: "guys", subcategory: clean };
-  }
-
-  // Kids
-  if (["kids", "children"].includes(clean)) {
-    return { category: "kids", subcategory: "all" };
-  }
-  if (["chelsea", "lati-yellow", "obitsu-11"].includes(clean)) {
-    return { category: "kids", subcategory: clean };
+  const validCategories = ["girls-1-6", "guys", "girls-1-4", "kids"];
+  if (validCategories.includes(cleanPath)) {
+    return { category: cleanPath, dollId };
   }
 
   return null;
@@ -181,7 +153,7 @@ function parseCatalogCategoryFromHash(hash: string): { category: string; subcate
 function App() {
   const [currentPage, setCurrentPage] = useState<string>("main");
   const [catalogCategory, setCatalogCategory] = useState<string>("all");
-  const [catalogSubcategory, setCatalogSubcategory] = useState<string>("all");
+  const [catalogDollId, setCatalogDollId] = useState<number | null>(null);
 
   // Загрузка всех выкроек из базы данных PostgreSQL
   const { data: patterns = [], isLoading: isPatternsLoading } = useAsyncData(fetchPatterns, {
@@ -227,11 +199,11 @@ function App() {
         return;
       }
 
-      const catalogMatch = parseCatalogCategoryFromHash(rawHash);
-      if (catalogMatch) {
+      const catalogRoute = parseCatalogRoute(rawHash);
+      if (catalogRoute) {
         setCurrentPage("catalog");
-        setCatalogCategory(catalogMatch.category);
-        setCatalogSubcategory(catalogMatch.subcategory);
+        setCatalogCategory(catalogRoute.category);
+        setCatalogDollId(catalogRoute.dollId);
         window.scrollTo({ top: 0, behavior: "smooth" });
         return;
       }
@@ -352,7 +324,7 @@ function App() {
 
   const handleSelectCategory = (categoryId: string) => {
     setCatalogCategory(categoryId);
-    setCatalogSubcategory("all");
+    setCatalogDollId(null);
     navigateTo(categoryId === "all" ? "catalog" : categoryId);
   };
 
@@ -537,11 +509,11 @@ function App() {
       case "kids":
         return (
           <Catalog
-            key={`${catalogCategory}_${catalogSubcategory}`}
+            key={`${catalogCategory}_${catalogDollId ?? "all"}`}
             patterns={patterns}
             isLoading={isPatternsLoading}
             initialCategory={catalogCategory}
-            initialSubcategory={catalogSubcategory}
+            initialDollId={catalogDollId}
             onBackToMain={() => navigateTo("main")}
             onAddToCart={handleAddToCart}
             onToggleWishlist={handleToggleWishlist}
