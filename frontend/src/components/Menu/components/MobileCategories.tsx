@@ -49,11 +49,12 @@ export const MobileCategories: React.FC<MobileCategoriesProps> = ({
               <ul className="mobile-cats__sub">
                 {cat.children.map((sub) => {
                   const subId = getItemId(sub);
+                  const isAllLink = subId.endsWith("-all");
                   return (
-                    <li key={subId}>
+                    <li key={subId} className={isAllLink ? "mobile-cats__sub-item--all" : ""}>
                       <a
                         href={sub.href}
-                        className="mobile-cats__sub-link"
+                        className={`mobile-cats__sub-link ${isAllLink ? "mobile-cats__sub-link--all" : ""}`}
                         onClick={onClose}
                       >
                         {sub.label}

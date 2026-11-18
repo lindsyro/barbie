@@ -67,17 +67,21 @@ export const MegaPanel: React.FC<MegaPanelProps> = ({
           <div className="mega__right-header">
             <span className="mega__right-title">{selectedCat.label}</span>
             <span className="mega__right-count">
-              {selectedCat.children.length}
+              {selectedCat.children.filter((s) => !getItemId(s).endsWith("-all")).length} кукол
             </span>
           </div>
           <ul className="mega__sub-list">
             {selectedCat.children.map((sub) => {
               const subId = getItemId(sub);
+              const isAllLink = subId.endsWith("-all");
               return (
-                <li key={subId} className="mega__sub-item">
+                <li
+                  key={subId}
+                  className={`mega__sub-item ${isAllLink ? "mega__sub-item--all" : ""}`}
+                >
                   <a
                     href={sub.href}
-                    className="mega__sub-link"
+                    className={`mega__sub-link ${isAllLink ? "mega__sub-link--all" : ""}`}
                     onClick={onClose}
                   >
                     <span className="mega__sub-label">{sub.label}</span>

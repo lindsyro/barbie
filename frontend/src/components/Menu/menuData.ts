@@ -26,17 +26,25 @@ export function buildMenuItems(
 
   const categoryItems: MenuItem[] = sortedCats.map((cat) => {
     const dolls = cat.dolls || [];
+    const allInCatItem: MenuItem = {
+      id: `${cat.slug}-all`,
+      label: "Все выкройки раздела",
+      href: `#${cat.slug}`,
+    };
+
+    const dollItems: MenuItem[] = dolls.map((doll) => ({
+      id: `doll-${doll.id}`,
+      label: doll.nameRu || doll.nameEn,
+      href: `#${cat.slug}?doll=${doll.id}`,
+      description:
+        doll.nameEn && doll.nameEn !== doll.nameRu ? doll.nameEn : undefined,
+    }));
+
     return {
       id: cat.slug || `category-${cat.id}`,
       label: cat.name,
       href: `#${cat.slug}`,
-      children: dolls.map((doll) => ({
-        id: `doll-${doll.id}`,
-        label: doll.nameRu || doll.nameEn,
-        href: `#${cat.slug}`,
-        description:
-          doll.nameEn && doll.nameEn !== doll.nameRu ? doll.nameEn : undefined,
-      })),
+      children: [allInCatItem, ...dollItems],
     };
   });
 
