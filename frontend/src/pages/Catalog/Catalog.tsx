@@ -67,17 +67,6 @@ export const Catalog: React.FC<CatalogProps> = (props) => {
       ) : filteredPatterns.length === 0 ? (
         <div className="catalog-empty">
           <h3 className="catalog-empty__title">Выкройки не найдены</h3>
-          <p className="catalog-empty__desc">
-            По заданным фильтрам и поисковому запросу «{searchQuery}» пока
-            ничего нет.
-          </p>
-          <button
-            type="button"
-            className="catalog-empty__btn"
-            onClick={handleResetFilters}
-          >
-            Сбросить фильтры
-          </button>
         </div>
       ) : (
         <div className="catalog-grid">
