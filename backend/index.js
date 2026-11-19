@@ -96,7 +96,7 @@ app.get("/api/health", async (req, res) => {
     await prisma.$queryRaw`SELECT 1`;
     res.json({
       status: "ok",
-      database: "connected (PostgreSQL / goose)",
+      database: "connected (SQLite / dev.db)",
       uptimeSeconds: Math.floor(process.uptime()),
       timestamp: new Date().toISOString(),
     });

@@ -7,7 +7,8 @@
     "start": "node index.js",
     "dev": "node --watch index.js",
     "seed": "node prisma/seed.js",
-    "db:migrate": "prisma migrate deploy",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma db push",
     "db:studio": "prisma studio",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

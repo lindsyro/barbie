@@ -46,13 +46,13 @@ router.get("/", async (req, res, next) => {
     if (search && String(search).trim()) {
       const q = String(search).trim();
       where.OR = [
-        { title: { contains: q, mode: "insensitive" } },
+        { title: { contains: q } },
         {
           dolls: {
             some: {
               OR: [
-                { nameRu: { contains: q, mode: "insensitive" } },
-                { nameEn: { contains: q, mode: "insensitive" } },
+                { nameRu: { contains: q } },
+                { nameEn: { contains: q } },
               ],
             },
           },

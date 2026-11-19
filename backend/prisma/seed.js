@@ -38,7 +38,6 @@ async function main() {
       { contextId: demoUser.id, userId: demoUser.id, patternId: 27 },
       { contextId: demoUser.id, userId: demoUser.id, patternId: 19 },
     ],
-    skipDuplicates: true,
   });
 
   // Предзаполненное избранное демо-пользователя (выкройки 27, 21, 22 из каталога)
@@ -49,7 +48,6 @@ async function main() {
       { contextId: demoUser.id, userId: demoUser.id, patternId: 21 },
       { contextId: demoUser.id, userId: demoUser.id, patternId: 22 },
     ],
-    skipDuplicates: true,
   });
 
   console.log("✓ Демо-пользователь (demo@goose.ru / password123) создан");
@@ -96,34 +94,6 @@ async function main() {
   });
 
   // 4. Таблица doll_categories и dolls с наполнением данными
-  await prisma.$executeRawUnsafe(`DROP TABLE IF EXISTS "dolls" CASCADE;`);
-  await prisma.$executeRawUnsafe(`DROP TABLE IF EXISTS "doll_categories" CASCADE;`);
-
-  await prisma.$executeRawUnsafe(`
-    CREATE TABLE "doll_categories" (
-      "id" SERIAL NOT NULL,
-      "slug" TEXT NOT NULL,
-      "name" TEXT NOT NULL,
-      "order" INTEGER NOT NULL DEFAULT 0,
-      CONSTRAINT "doll_categories_pkey" PRIMARY KEY ("id")
-    );
-  `);
-  await prisma.$executeRawUnsafe(`CREATE UNIQUE INDEX "doll_categories_slug_key" ON "doll_categories"("slug");`);
-
-  await prisma.$executeRawUnsafe(`
-    CREATE TABLE "dolls" (
-      "id" SERIAL NOT NULL,
-      "fileName" TEXT NOT NULL,
-      "nameEn" TEXT NOT NULL,
-      "nameRu" TEXT NOT NULL,
-      "height" DOUBLE PRECISION NOT NULL,
-      "measurementsFileName" TEXT,
-      "categoryId" INTEGER NOT NULL,
-      CONSTRAINT "dolls_pkey" PRIMARY KEY ("id"),
-      CONSTRAINT "dolls_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "doll_categories"("id") ON DELETE RESTRICT ON UPDATE CASCADE
-    );
-  `);
-
   const DOLL_CATEGORIES = [
     { id: 1, name: "Для девушек 1/6", slug: "girls-1-6", order: 1 },
     { id: 2, name: "Для девушек 1/4", slug: "girls-1-4", order: 2 },
@@ -133,22 +103,21 @@ async function main() {
 
   console.log("Добавление категорий в doll_categories...");
   for (const cat of DOLL_CATEGORIES) {
-    await prisma.$executeRawUnsafe(
-      `INSERT INTO "doll_categories" ("id", "slug", "name", "order")
-       VALUES ($1, $2, $3, $4)
-       ON CONFLICT ("id") DO UPDATE SET
-         "slug" = EXCLUDED."slug",
-         "name" = EXCLUDED."name",
-         "order" = EXCLUDED."order";`,
-      cat.id,
-      cat.slug,
-      cat.name,
-      cat.order
-    );
+    await prisma.dollCategory.upsert({
+      where: { id: cat.id },
+      update: {
+        slug: cat.slug,
+        name: cat.name,
+        order: cat.order,
+      },
+      create: {
+        id: cat.id,
+        slug: cat.slug,
+        name: cat.name,
+        order: cat.order,
+      },
+    });
   }
-  await prisma.$executeRawUnsafe(
-    `SELECT setval(pg_get_serial_sequence('doll_categories', 'id'), coalesce(max(id), 1)) FROM "doll_categories";`
-  );
   console.log(`✓ Категории кукол добавлены (${DOLL_CATEGORIES.length} категории)`);
 
   const DOLLS_DATA = [
@@ -372,29 +341,27 @@ async function main() {
 
   console.log("Добавление кукол в таблицу dolls...");
   for (const doll of DOLLS_DATA) {
-    await prisma.$executeRawUnsafe(
-      `INSERT INTO "dolls" ("id", "fileName", "nameEn", "nameRu", "height", "categoryId", "measurementsFileName")
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
-       ON CONFLICT ("id") DO UPDATE SET
-         "fileName" = EXCLUDED."fileName",
-         "nameEn" = EXCLUDED."nameEn",
-         "nameRu" = EXCLUDED."nameRu",
-         "height" = EXCLUDED."height",
-         "categoryId" = EXCLUDED."categoryId",
-         "measurementsFileName" = EXCLUDED."measurementsFileName";`,
-      doll.id,
-      doll.fileName,
-      doll.nameEn,
-      doll.nameRu,
-      doll.height,
-      doll.categoryId,
-      doll.measurementsFileName || null
-    );
+    await prisma.doll.upsert({
+      where: { id: doll.id },
+      update: {
+        fileName: doll.fileName,
+        nameEn: doll.nameEn,
+        nameRu: doll.nameRu,
+        height: doll.height,
+        categoryId: doll.categoryId,
+        measurementsFileName: doll.measurementsFileName || null,
+      },
+      create: {
+        id: doll.id,
+        fileName: doll.fileName,
+        nameEn: doll.nameEn,
+        nameRu: doll.nameRu,
+        height: doll.height,
+        categoryId: doll.categoryId,
+        measurementsFileName: doll.measurementsFileName || null,
+      },
+    });
   }
-
-  await prisma.$executeRawUnsafe(
-    `SELECT setval(pg_get_serial_sequence('dolls', 'id'), coalesce(max(id), 1)) FROM "dolls";`
-  );
   console.log(`✓ Таблица dolls заполнена (${DOLLS_DATA.length} кукол)`);
 
   console.log("Добавление выкроек в patterns и связей со связанными куклами...");
@@ -463,9 +430,6 @@ async function main() {
     });
   }
 
-  await prisma.$executeRawUnsafe(
-    `SELECT setval(pg_get_serial_sequence('patterns', 'id'), coalesce(max(id), 1)) FROM "patterns";`
-  );
   console.log(`✓ Таблица patterns заполнена (${PATTERNS_DATA.length} выкроек со связями)`);
 
   console.log("🎉 База данных goose успешно наполнена!");
