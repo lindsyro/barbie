@@ -1,9 +1,12 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
   fetchWishlist,
   toggleWishlist as apiToggleWishlist,
   removeFromWishlist as apiRemoveFromWishlist,
   getGuestWishlist,
+  setGuestWishlist,
+  getRemovedGuestWishlist,
+  clearRemovedGuestWishlist,
   toggleGuestWishlist,
   removeFromGuestWishlist,
   syncGuestWishlistWithDatabase,
@@ -29,6 +32,7 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({
     return currentUser ? [] : getGuestWishlist();
   });
   const [isWishlistLoading, setIsWishlistLoading] = useState(false);
+  const prevUserRef = useRef(currentUser);
 
   const refreshWishlist = useCallback(async () => {
     try {
@@ -42,15 +46,25 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({
     }
   }, []);
 
-  // Синхронизация избранного при изменении состояния авторизации
+  // 1. При выходе из аккаунта (был currentUser, стал null) сохраняем текущее избранное в гостевой список
+  useEffect(() => {
+    if (prevUserRef.current && !currentUser) {
+      setGuestWishlist(wishlist);
+      clearRemovedGuestWishlist();
+    }
+    prevUserRef.current = currentUser;
+  }, [currentUser, wishlist]);
+
+  // 2. Синхронизация избранного при входе в аккаунт (добавление новых и удаление исключенных выкроек)
   useEffect(() => {
     if (!currentUser) return;
 
     let ignore = false;
     const guestItems = getGuestWishlist();
+    const removedIds = getRemovedGuestWishlist();
 
-    if (guestItems.length > 0) {
-      syncGuestWishlistWithDatabase(guestItems)
+    if (guestItems.length > 0 || removedIds.length > 0) {
+      syncGuestWishlistWithDatabase(guestItems, removedIds)
         .then((synced) => {
           if (!ignore) {
             setWishlist(synced.items || []);

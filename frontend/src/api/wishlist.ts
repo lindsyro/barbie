@@ -63,6 +63,7 @@ const API_BASE =
 
 const BASE = import.meta.env.BASE_URL;
 const GUEST_WISHLIST_KEY = "goose_guest_wishlist";
+const REMOVED_GUEST_WISHLIST_KEY = "goose_guest_removed_wishlist";
 
 function isStaticHosting(): boolean {
   if (typeof window === "undefined") return false;
@@ -200,6 +201,66 @@ export function clearGuestWishlist(): void {
 }
 
 /**
+ * Получить список ID выкроек, удаленных пользователем в гостевой сессии
+ */
+export function getRemovedGuestWishlist(): number[] {
+  try {
+    const raw = localStorage.getItem(REMOVED_GUEST_WISHLIST_KEY);
+    if (!raw) return [];
+    const items = JSON.parse(raw);
+    return Array.isArray(items)
+      ? items.map(Number).filter((id) => !isNaN(id) && id > 0)
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Зафиксировать удаление выкройки в гостевой сессии
+ */
+export function addRemovedGuestWishlist(patternId: number): void {
+  try {
+    const current = getRemovedGuestWishlist();
+    if (!current.includes(patternId)) {
+      localStorage.setItem(
+        REMOVED_GUEST_WISHLIST_KEY,
+        JSON.stringify([...current, patternId])
+      );
+    }
+  } catch {
+    // ignore
+  }
+}
+
+/**
+ * Убрать выкройку из списка удаленных (если пользователь снова поставил лайк)
+ */
+export function removeRemovedGuestWishlist(patternId: number): void {
+  try {
+    const current = getRemovedGuestWishlist();
+    const updated = current.filter((id) => id !== patternId);
+    localStorage.setItem(
+      REMOVED_GUEST_WISHLIST_KEY,
+      JSON.stringify(updated)
+    );
+  } catch {
+    // ignore
+  }
+}
+
+/**
+ * Очистить список удаленных выкроек гостя
+ */
+export function clearRemovedGuestWishlist(): void {
+  try {
+    localStorage.removeItem(REMOVED_GUEST_WISHLIST_KEY);
+  } catch {
+    // ignore
+  }
+}
+
+/**
  * Переключить выкройку в гостевом избранном (добавить / удалить)
  */
 export function toggleGuestWishlist(pattern: WishlistPattern): {
@@ -212,7 +273,9 @@ export function toggleGuestWishlist(pattern: WishlistPattern): {
 
   if (exists) {
     updated = current.filter((it) => it.id !== pattern.id);
+    addRemovedGuestWishlist(pattern.id);
   } else {
+    removeRemovedGuestWishlist(pattern.id);
     const normalized: WishlistPattern = {
       ...pattern,
       image: normalizePatternImage(pattern.image),
@@ -234,6 +297,7 @@ export function removeFromGuestWishlist(patternId: number): WishlistPattern[] {
   const current = getGuestWishlist();
   const updated = current.filter((it) => it.id !== patternId);
   setGuestWishlist(updated);
+  addRemovedGuestWishlist(patternId);
   return updated;
 }
 
@@ -243,9 +307,11 @@ export function removeFromGuestWishlist(patternId: number): WishlistPattern[] {
 
 /**
  * Синхронизировать (объединить) гостевое избранное с базой данных пользователя
+ * с поддержкой удаления выкроек, исключённых в гостевой сессии
  */
 export async function syncGuestWishlistWithDatabase(
-  guestItems: WishlistPattern[]
+  guestItems: WishlistPattern[],
+  removedPatternIds: number[] = getRemovedGuestWishlist()
 ): Promise<WishlistResponse> {
   const token = getStoredToken();
   const user = getStoredUser();
@@ -254,20 +320,20 @@ export async function syncGuestWishlistWithDatabase(
     return { total: guestItems.length, items: guestItems };
   }
 
-  if (guestItems.length === 0) {
+  const patternIds = guestItems.map((it) => it.id);
+
+  if (patternIds.length === 0 && removedPatternIds.length === 0) {
     return fetchWishlist();
   }
-
-  const patternIds = guestItems.map((it) => it.id);
 
   if (isStaticHosting() && !import.meta.env.VITE_API_URL) {
     // В статической среде объединяем в локальном хранилище пользователя
     const current = getFallbackWishlist(user.id);
-    const existingIds = new Set(current.items.map((it) => it.id));
-    const merged = [...current.items];
+    const merged = current.items.filter((it) => !removedPatternIds.includes(it.id));
+    const existingIds = new Set(merged.map((it) => it.id));
 
     for (const g of guestItems) {
-      if (!existingIds.has(g.id)) {
+      if (!existingIds.has(g.id) && !removedPatternIds.includes(g.id)) {
         merged.push(g);
         existingIds.add(g.id);
       }
@@ -275,6 +341,7 @@ export async function syncGuestWishlistWithDatabase(
 
     setFallbackWishlist(merged, user.id);
     clearGuestWishlist();
+    clearRemovedGuestWishlist();
     return { total: merged.length, items: merged };
   }
 
@@ -285,17 +352,17 @@ export async function syncGuestWishlistWithDatabase(
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ patternIds }),
+      body: JSON.stringify({ patternIds, removedPatternIds }),
     });
 
     if (response.status === 405 || !response.ok) {
       // Fallback
       const current = getFallbackWishlist(user.id);
-      const existingIds = new Set(current.items.map((it) => it.id));
-      const merged = [...current.items];
+      const merged = current.items.filter((it) => !removedPatternIds.includes(it.id));
+      const existingIds = new Set(merged.map((it) => it.id));
 
       for (const g of guestItems) {
-        if (!existingIds.has(g.id)) {
+        if (!existingIds.has(g.id) && !removedPatternIds.includes(g.id)) {
           merged.push(g);
           existingIds.add(g.id);
         }
@@ -303,11 +370,13 @@ export async function syncGuestWishlistWithDatabase(
 
       setFallbackWishlist(merged, user.id);
       clearGuestWishlist();
+      clearRemovedGuestWishlist();
       return { total: merged.length, items: merged };
     }
 
     const data: { wishlist: WishlistResponse } = await response.json();
     clearGuestWishlist();
+    clearRemovedGuestWishlist();
 
     return {
       total: data.wishlist.total,
@@ -315,11 +384,11 @@ export async function syncGuestWishlistWithDatabase(
     };
   } catch {
     const current = getFallbackWishlist(user.id);
-    const existingIds = new Set(current.items.map((it) => it.id));
-    const merged = [...current.items];
+    const merged = current.items.filter((it) => !removedPatternIds.includes(it.id));
+    const existingIds = new Set(merged.map((it) => it.id));
 
     for (const g of guestItems) {
-      if (!existingIds.has(g.id)) {
+      if (!existingIds.has(g.id) && !removedPatternIds.includes(g.id)) {
         merged.push(g);
         existingIds.add(g.id);
       }
@@ -327,6 +396,7 @@ export async function syncGuestWishlistWithDatabase(
 
     setFallbackWishlist(merged, user.id);
     clearGuestWishlist();
+    clearRemovedGuestWishlist();
     return { total: merged.length, items: merged };
   }
 }

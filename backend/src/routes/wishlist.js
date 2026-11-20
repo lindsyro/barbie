@@ -106,6 +106,7 @@ router.post("/toggle", async (req, res, next) => {
 /**
  * POST /api/wishlist/sync
  * Объединение гостевого списка избранного из localStorage с базой данных пользователя
+ * с поддержкой удаления выкроек, убранных из избранного в гостевой сессии
  */
 router.post("/sync", async (req, res, next) => {
   try {
@@ -117,12 +118,27 @@ router.post("/sync", async (req, res, next) => {
       });
     }
 
-    const { patternIds = [] } = req.body || {};
+    const { patternIds = [], removedPatternIds = [] } = req.body || {};
     const validIds = Array.isArray(patternIds)
       ? patternIds.map(Number).filter((id) => !isNaN(id) && id > 0)
       : [];
+    const validRemovedIds = Array.isArray(removedPatternIds)
+      ? removedPatternIds.map(Number).filter((id) => !isNaN(id) && id > 0)
+      : [];
 
-    for (const patternId of validIds) {
+    // 1. Удаляем выкройки, которые пользователь убрал из избранного (в том числе будучи гостем)
+    if (validRemovedIds.length > 0) {
+      await prisma.wishlistItem.deleteMany({
+        where: {
+          patternId: { in: validRemovedIds },
+          OR: [{ userId: req.user.id }, { contextId: req.user.id }],
+        },
+      });
+    }
+
+    // 2. Добавляем / обновляем оставшиеся выкройки
+    const idsToUpsert = validIds.filter((id) => !validRemovedIds.includes(id));
+    for (const patternId of idsToUpsert) {
       await prisma.wishlistItem.upsert({
         where: {
           contextId_patternId: {
