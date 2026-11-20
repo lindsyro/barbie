@@ -33,7 +33,6 @@ export const SearchInput: React.FC<SearchInputProps> = ({
           type="button"
           className="search-input__clear"
           onClick={() => onChange("")}
-          title="Очистить поиск"
           aria-label="Очистить поиск"
         >
           ×

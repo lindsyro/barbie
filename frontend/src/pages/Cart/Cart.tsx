@@ -95,7 +95,7 @@ export const Cart: React.FC<CartProps> = ({
                     type="button"
                     onClick={onClearCart}
                     className="cart-card__clear-btn"
-                    title="Очистить всю корзину"
+                    aria-label="Очистить всю корзину"
                   >
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                       <polyline points="3 6 5 6 21 6" />
@@ -140,7 +140,6 @@ export const Cart: React.FC<CartProps> = ({
                       className="cart-item__remove-btn"
                       onClick={() => onRemoveItem(item.id)}
                       aria-label={`Удалить ${item.title}`}
-                      title="Удалить из корзины"
                     >
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                         <line x1="18" y1="6" x2="6" y2="18" />
@@ -180,7 +179,7 @@ export const Cart: React.FC<CartProps> = ({
                     type="button"
                     onClick={handleRemovePromo}
                     className="cart-promo__remove-btn"
-                    title="Удалить промокод"
+                    aria-label="Удалить промокод"
                   >
                     ×
                   </button>

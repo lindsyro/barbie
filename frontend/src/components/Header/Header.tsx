@@ -166,7 +166,6 @@ export const Header: React.FC<HeaderProps> = ({
                     className="header__auth-btn"
                     onClick={onAuthClick}
                     aria-label={`Личный кабинет: ${userName || "Профиль"}`}
-                    title="Перейти в личный кабинет"
                   >
                     <svg
                       className="header__auth-icon"
@@ -190,7 +189,6 @@ export const Header: React.FC<HeaderProps> = ({
                       onLogout?.();
                     }}
                     aria-label="Выйти из аккаунта"
-                    title="Выйти из аккаунта"
                   >
                     <svg
                       width="18"

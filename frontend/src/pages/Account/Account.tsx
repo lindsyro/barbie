@@ -122,7 +122,7 @@ export const Account: React.FC<AccountProps> = ({
                   type="button"
                   onClick={onLogout}
                   className="account-logout-btn"
-                  title="Выйти из аккаунта"
+                  aria-label="Выйти из аккаунта"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -238,7 +238,7 @@ export const Account: React.FC<AccountProps> = ({
                         type="button"
                         onClick={() => handleDownload(item)}
                         className="purchased-card__download-btn"
-                        title={`Скачать файл выкройки «${item.title}»`}
+                        aria-label={`Скачать выкройку «${item.title}»`}
                       >
                         <svg
                           width="16"

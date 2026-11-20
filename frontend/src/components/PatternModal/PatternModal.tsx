@@ -98,7 +98,6 @@ const PatternModalContent: React.FC<PatternModalContentProps> = ({
               type="button"
               className={`catalog-modal__thumb ${idx === activeImageIndex ? "catalog-modal__thumb--active" : ""}`}
               onClick={() => setActiveImageIndex(idx)}
-              title={`Фото ${idx + 1}`}
               aria-label={`Переключить на фото ${idx + 1}`}
             >
               <img src={imgSrc} alt="" loading="lazy" />

@@ -53,7 +53,6 @@ export const DollCard: React.FC<DollCardProps> = React.memo(({
             type="button"
             className="doll-card__btn-details"
             onClick={() => onOpenMeasurements(doll)}
-            title="Мерки куклы"
           >
             Мерки
           </button>

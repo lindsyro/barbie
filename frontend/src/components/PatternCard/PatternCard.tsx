@@ -46,8 +46,7 @@ export const PatternCard: React.FC<PatternCardProps> = React.memo(
     const cleanImg = rawImg.includes("/barbie/barbie/")
       ? rawImg.replace(/^(\/?barbie\/)+/i, "/barbie/")
       : rawImg;
-    const imageSrc =
-      cleanImg || autoImages[0] || `${import.meta.env.BASE_URL}patterns/27/1.png`;
+    const imageSrc = cleanImg || autoImages[0] || "";
 
     return (
       <article className="catalog-card">
@@ -55,7 +54,6 @@ export const PatternCard: React.FC<PatternCardProps> = React.memo(
         <div
           className="catalog-card__img-box"
           onClick={handleOpen}
-          title="Нажмите для быстрого просмотра"
         >
           <img
             src={imageSrc}
@@ -71,10 +69,7 @@ export const PatternCard: React.FC<PatternCardProps> = React.memo(
 
           {/* Счетчик дополнительных фото */}
           {photosCount > 1 && (
-            <span
-              className="catalog-card__photos-count"
-              title={`Всего ${photosCount} фото`}
-            >
+            <span className="catalog-card__photos-count">
               <ImageIcon size={12} />
               <span>{photosCount}</span>
             </span>
@@ -93,7 +88,6 @@ export const PatternCard: React.FC<PatternCardProps> = React.memo(
                 ? `Удалить ${pattern.title} из избранного`
                 : `Добавить ${pattern.title} в избранное`
             }
-            title={isLiked ? "В избранном" : "Добавить в избранное"}
           >
             <HeartIcon size={18} filled={isLiked} />
           </button>
@@ -105,7 +99,6 @@ export const PatternCard: React.FC<PatternCardProps> = React.memo(
           <h3
             className="catalog-card__title"
             onClick={handleOpen}
-            title={pattern.title}
           >
             {pattern.title}
           </h3>
@@ -118,7 +111,6 @@ export const PatternCard: React.FC<PatternCardProps> = React.memo(
               type="button"
               className={`catalog-card__btn-cart ${isInCart ? "catalog-card__btn-cart--added" : ""}`}
               onClick={() => onAddToCart?.(pattern.title)}
-              title={isInCart ? "Убрать из корзины" : "Добавить в корзину"}
               aria-label={
                 isInCart
                   ? `Убрать из корзины: ${pattern.title}`
