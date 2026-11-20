@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useCallback } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Breadcrumbs,
   PageHeader,
@@ -25,25 +25,19 @@ export const Wishlist: React.FC = React.memo(() => {
 
   const [searchQuery, setSearchQuery] = useState("");
 
-  const handleResetSearch = useCallback(
-    (e?: React.MouseEvent<HTMLAnchorElement>) => {
-      e?.preventDefault();
-      setSearchQuery("");
-    },
-    [],
-  );
+  const handleResetSearch = (e?: React.MouseEvent<HTMLAnchorElement>) => {
+    e?.preventDefault();
+    setSearchQuery("");
+  };
 
-  const handleBackToMain = useCallback(
-    (e?: React.MouseEvent<HTMLAnchorElement>) => {
-      e?.preventDefault();
-      navigateTo("main");
-    },
-    [navigateTo],
-  );
+  const handleBackToMain = (e?: React.MouseEvent<HTMLAnchorElement>) => {
+    e?.preventDefault();
+    navigateTo("main");
+  };
 
-  const handleOpenLogin = useCallback(() => {
+  const handleOpenLogin = () => {
     openLogin("wishlist");
-  }, [openLogin]);
+  };
 
   const filteredItems = useMemo(
     () => searchPatterns(items, searchQuery),
@@ -120,7 +114,7 @@ export const Wishlist: React.FC = React.memo(() => {
                 isLiked={true}
                 isInCart={isInCart(item.title)}
                 onToggleWishlist={removeFromWishlist}
-                onAddToCart={(title) => addToCart(title)}
+                onAddToCart={addToCart}
               />
             ))}
           </div>
