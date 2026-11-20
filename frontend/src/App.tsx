@@ -263,7 +263,7 @@ function App() {
     setTimeout(() => setNotification(null), 3000);
   };
 
-  const handleAddToCart = (title: string) => {
+  const handleAddToCart = useCallback((title: string) => {
     const alreadyInCart = cart.some((it) => it.title === title);
     if (alreadyInCart) {
       setCart((prev) => prev.filter((it) => it.title !== title));
@@ -297,7 +297,7 @@ function App() {
 
     setCart((prev) => [...prev, newItem]);
     showNotification(`Выкройка «${title}» добавлена в корзину`);
-  };
+  }, [cart, patterns]);
 
   const handleRemoveFromCart = (id: number) => {
     setCart((prev) => prev.filter((it) => it.id !== id));
@@ -373,7 +373,7 @@ function App() {
     }
   };
 
-  const handleRemoveFromWishlist = async (patternId: number) => {
+  const handleRemoveFromWishlist = useCallback(async (patternId: number) => {
     // 1. Если пользователь гость — удаляем из localStorage
     if (!currentUser) {
       const updated = removeFromGuestWishlist(patternId);
@@ -390,9 +390,9 @@ function App() {
     } catch {
       showNotification("Не удалось удалить выкройку из избранного");
     }
-  };
+  }, [currentUser]);
 
-  const handleAddAllWishlistToCart = () => {
+  const handleAddAllWishlistToCart = useCallback(() => {
     if (wishlist.length === 0) return;
     let added = 0;
     setCart((prev) => {
@@ -422,7 +422,16 @@ function App() {
     } else {
       showNotification("Все выкройки из избранного уже в вашей корзине");
     }
-  };
+  }, [wishlist]);
+
+  const handleBackToMain = useCallback(() => {
+    navigateTo("main");
+  }, []);
+
+  const handleOpenLoginForWishlist = useCallback(() => {
+    setPendingAction("wishlist");
+    setAuthModal("login");
+  }, []);
 
   const handleCartClick = () => {
     navigateTo("cart");
@@ -575,12 +584,9 @@ function App() {
             onRemoveFromWishlist={handleRemoveFromWishlist}
             onAddToCart={handleAddToCart}
             onAddAllToCart={handleAddAllWishlistToCart}
-            onBackToMain={() => navigateTo("main")}
+            onBackToMain={handleBackToMain}
             cartItems={cart}
-            onOpenLogin={() => {
-              setPendingAction("wishlist");
-              setAuthModal("login");
-            }}
+            onOpenLogin={handleOpenLoginForWishlist}
           />
         );
       case "main":

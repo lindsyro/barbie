@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useCallback } from "react";
 import { Breadcrumbs } from "../../components/Breadcrumbs/Breadcrumbs.tsx";
 import { PageHeader } from "../../components/PageHeader/PageHeader.tsx";
 import { SearchInput } from "../../components/SearchInput";
@@ -10,7 +10,7 @@ import { PatternCard } from "../../components/PatternCard";
 import "./wishlist.css";
 import "../pages.css";
 
-export const Wishlist: React.FC<WishlistProps> = ({
+export const Wishlist: React.FC<WishlistProps> = React.memo(({
   items,
   isLoading = false,
   isLoggedIn = false,
@@ -21,6 +21,16 @@ export const Wishlist: React.FC<WishlistProps> = ({
   cartItems = [],
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
+
+  const handleResetSearch = useCallback((e?: React.MouseEvent<HTMLAnchorElement>) => {
+    e?.preventDefault();
+    setSearchQuery("");
+  }, []);
+
+  const handleBackToMainClick = useCallback((e?: React.MouseEvent<HTMLAnchorElement>) => {
+    e?.preventDefault();
+    onBackToMain?.();
+  }, [onBackToMain]);
 
   const filteredItems = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -77,10 +87,7 @@ export const Wishlist: React.FC<WishlistProps> = ({
           }`}
           buttonText="← Перейти к популярным выкройкам"
           buttonHref="#catalog"
-          onButtonClick={(e) => {
-            e.preventDefault();
-            onBackToMain?.();
-          }}
+          onButtonClick={handleBackToMainClick}
         >
           {!isLoggedIn && onOpenLogin && (
             <button
@@ -100,10 +107,7 @@ export const Wishlist: React.FC<WishlistProps> = ({
           description={`По запросу «${searchQuery}» ничего не найдено в избранном`}
           buttonText="Сбросить поиск"
           buttonHref="#clear-search"
-          onButtonClick={(e) => {
-            e.preventDefault();
-            setSearchQuery("");
-          }}
+          onButtonClick={handleResetSearch}
         />
       ) : (
         /* Список карточек избранного */
@@ -127,6 +131,6 @@ export const Wishlist: React.FC<WishlistProps> = ({
       )}
     </div>
   );
-};
+});
 
 export default Wishlist;
