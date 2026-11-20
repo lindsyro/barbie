@@ -8,18 +8,18 @@ datasource db {
 }
 
 model User {
-  id      String         @id @default(uuid())
-  email        String         @unique
+  id           String   @id @default(uuid())
+  email        String   @unique
   name         String
   passwordHash String
   salt         String
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  sessions     Session[]
-  cartItems    CartItem[]
-  wishlist     WishlistItem[]
-  orders       Order[]
+  sessions  Session[]
+  cartItems CartItem[]
+  wishlist  WishlistItem[]
+  orders    Order[]
 
   @@map("users")
 }
@@ -40,6 +40,7 @@ model CartItem {
   userId    String?
   user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   patternId Int
+  pattern   Pattern  @relation(fields: [patternId], references: [id], onDelete: Cascade)
   addedAt   DateTime @default(now())
 
   @@unique([contextId, patternId])
@@ -52,6 +53,7 @@ model WishlistItem {
   userId    String?
   user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   patternId Int
+  pattern   Pattern  @relation(fields: [patternId], references: [id], onDelete: Cascade)
   addedAt   DateTime @default(now())
 
   @@unique([contextId, patternId])
@@ -59,27 +61,28 @@ model WishlistItem {
 }
 
 model Order {
-  id            String      @id
+  id            String   @id
   userId        String?
-  user          User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   userEmail     String
   userName      String
-  status        String      @default("paid")
-  paymentMethod String      @default("card")
+  status        String   @default("paid")
+  paymentMethod String   @default("card")
   totalAmount   Int
-  currency      String      @default("RUB")
-  createdAt     DateTime    @default(now())
+  currency      String   @default("RUB")
+  createdAt     DateTime @default(now())
 
-  items         OrderItem[]
+  items OrderItem[]
 
   @@map("orders")
 }
 
 model OrderItem {
-  id          String   @id @default(uuid())
+  id          String  @id @default(uuid())
   orderId     String
-  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   patternId   Int
+  pattern     Pattern @relation(fields: [patternId], references: [id], onDelete: Restrict)
   title       String
   doll        String
   price       Int
@@ -123,26 +126,30 @@ model DollCategory {
 }
 
 model Doll {
-  id                   Int          @id @default(autoincrement())
+  id                   Int     @id @default(autoincrement())
   fileName             String
   nameEn               String
   nameRu               String
   height               Float
   measurementsFileName String?
 
-  categoryId           Int
-  category             DollCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  patterns             Pattern[]    @relation("DollPatterns")
+  categoryId Int
+  category   DollCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  patterns   Pattern[]    @relation("DollPatterns")
 
   @@map("dolls")
 }
 
 model Pattern {
-  id        Int      @id @default(autoincrement())
-  title     String
-  price     Int
+  id    Int    @id @default(autoincrement())
+  title String
+  price Int
 
-  dolls     Doll[]   @relation("DollPatterns")
+  dolls         Doll[]         @relation("DollPatterns")
+  cartItems     CartItem[]
+  wishlistItems WishlistItem[]
+  orderItems    OrderItem[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
