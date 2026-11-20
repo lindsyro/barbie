@@ -1,13 +1,16 @@
-import { useState, useEffect, useCallback } from "react";
-import Header from "./components/Header/Header.tsx";
-import Footer from "./components/Footer/Footer.tsx";
-import { LoginModal, RegisterModal } from "./components/index.ts";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import {
+  Header,
+  Footer,
+  LoginModal,
+  RegisterModal,
+} from "@/components/index.ts";
 import {
   type User,
   getStoredUser,
   fetchCurrentUser,
   logoutUser,
-} from "./api/auth.ts";
+} from "@/api/auth.ts";
 import {
   fetchWishlist,
   toggleWishlist,
@@ -17,14 +20,14 @@ import {
   removeFromGuestWishlist,
   syncGuestWishlistWithDatabase,
   type WishlistPattern,
-} from "./api/wishlist.ts";
-import { getPatternImages } from "@/utils/patternImages.ts";
+} from "@/api/wishlist.ts";
 import {
   fetchPatterns,
   findCachedPatternById,
   findCachedPatternByTitle,
-} from "./api/patterns.ts";
-import { useAsyncData } from "./hooks/index.ts";
+} from "@/api/patterns.ts";
+import { getPatternImages } from "@/utils/patternImages.ts";
+import { useAsyncData } from "@/hooks/index.ts";
 import {
   Main,
   Catalog,
@@ -41,45 +44,13 @@ import {
   Cart,
   type CartItemType,
   Wishlist,
-} from "./pages/index.ts";
+} from "@/pages/index.ts";
 import "./App.css";
 
 const KNOWN_PAGES: Record<string, string> = {
   main: "main",
   catalog: "catalog",
   "all-patterns": "catalog",
-  // 1/6
-  "girls-1-6": "girls-1-6",
-  barbie: "girls-1-6",
-  "barbie-standard": "girls-1-6",
-  "barbie-curvy": "girls-1-6",
-  "barbie-petite": "girls-1-6",
-  "barbie-tall": "girls-1-6",
-  "barbie-90s": "girls-1-6",
-  "poppy-parker": "girls-1-6",
-  blythe: "girls-1-6",
-  // 1/4
-  "girls-1-4": "girls-1-4",
-  barbie2: "girls-1-4",
-  "girls-1": "girls-1-4",
-  "girls-2": "girls-1-4",
-  "girls-3": "girls-1-4",
-  // Guys
-  guys: "guys",
-  ken: "guys",
-  "ken-standard": "guys",
-  "ken-broad": "guys",
-  "adonis-2-0": "guys",
-  "it-homme": "guys",
-  "minifee-boy": "guys",
-  "guys-outerwear": "guys",
-  // Kids
-  kids: "kids",
-  children: "kids",
-  chelsea: "kids",
-  "lati-yellow": "kids",
-  "middie-obitsu": "kids",
-  // Other pages
   tutorials: "tutorials",
   courses: "courses",
   free: "free",
@@ -93,6 +64,7 @@ const KNOWN_PAGES: Record<string, string> = {
   "a4-print": "measurements",
   "shopping-terms": "shopping-terms",
   faq: "shopping-terms",
+  delivery: "shopping-terms",
   reviews: "reviews",
   cart: "cart",
   basket: "cart",
@@ -100,32 +72,21 @@ const KNOWN_PAGES: Record<string, string> = {
   favorites: "wishlist",
 };
 
-const BASE = import.meta.env.BASE_URL;
+const CART_STORAGE_KEY = "goose_cart";
 
-const INITIAL_CART: CartItemType[] = [
-  {
-    id: 27,
-    title: "Водолазка-боди для Барби стандарт",
-    doll: "Barbie Standard (Барби стандарт)",
-    price: 450,
-    priceFormatted: "450 ₽",
-    image: `${BASE}patterns/27/1.png`,
-    tag: "Топы и боди",
-    format: "PDF + видеоурок",
-  },
-  {
-    id: 19,
-    title: "Боди-бюстье «Афродита»",
-    doll: "Barbie Made to Move Curvy (Барби МТМ пышка)",
-    price: 590,
-    priceFormatted: "590 ₽",
-    image: `${BASE}patterns/19/2.png`,
-    tag: "Боди",
-    format: "PDF + видеоурок",
-  },
-];
+function getStoredCart(): CartItemType[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(CART_STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as CartItemType[]) : [];
+  } catch {
+    return [];
+  }
+}
 
-function parseCatalogRoute(hash: string): { category: string; dollId: number | null } | null {
+function parseCatalogRoute(
+  hash: string,
+): { category: string; dollId: number | null } | null {
   const raw = hash.replace("#", "").trim();
   if (!raw) return null;
 
@@ -135,7 +96,8 @@ function parseCatalogRoute(hash: string): { category: string; dollId: number | n
   const searchParams = new URLSearchParams(queryPart || "");
   const dollParam = searchParams.get("doll");
   const parsedDollId = dollParam ? parseInt(dollParam, 10) : null;
-  const dollId = parsedDollId !== null && !isNaN(parsedDollId) ? parsedDollId : null;
+  const dollId =
+    parsedDollId !== null && !isNaN(parsedDollId) ? parsedDollId : null;
 
   if (cleanPath === "catalog" || cleanPath === "all-patterns") {
     return { category: "all", dollId };
@@ -154,24 +116,50 @@ function App() {
   const [catalogCategory, setCatalogCategory] = useState<string>("all");
   const [catalogDollId, setCatalogDollId] = useState<number | null>(null);
 
-  // Загрузка всех выкроек из базы данных PostgreSQL
-  const { data: patterns = [], isLoading: isPatternsLoading } = useAsyncData(fetchPatterns, {
-    initialData: [],
-  });
+  // Загрузка всех выкроек из базы данных
+  const { data: patterns = [], isLoading: isPatternsLoading } = useAsyncData(
+    fetchPatterns,
+    {
+      initialData: [],
+    },
+  );
 
-  const [cart, setCart] = useState<CartItemType[]>(INITIAL_CART);
+  const [cart, setCart] = useState<CartItemType[]>(() => getStoredCart());
   const cartCount = cart.length;
-  const [currentUser, setCurrentUser] = useState<User | null>(() => getStoredUser());
+  const [currentUser, setCurrentUser] = useState<User | null>(() =>
+    getStoredUser(),
+  );
   const [wishlist, setWishlist] = useState<WishlistPattern[]>(() => {
     const user = getStoredUser();
     return user ? [] : getGuestWishlist();
   });
   const [isWishlistLoading, setIsWishlistLoading] = useState(false);
   const wishlistCount = wishlist.length;
-  const wishlistIds = wishlist.map((it) => it.id);
+  const wishlistIds = useMemo(() => wishlist.map((it) => it.id), [wishlist]);
   const [notification, setNotification] = useState<string | null>(null);
+  const notificationTimeoutRef = useRef<number | null>(null);
   const [authModal, setAuthModal] = useState<"login" | "register" | null>(null);
-  const [pendingAction, setPendingAction] = useState<"cart" | "wishlist" | null>(null);
+  const [pendingAction, setPendingAction] = useState<
+    "cart" | "wishlist" | null
+  >(null);
+
+  // Сохранение состояния корзины в localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+    } catch (err) {
+      console.error("Ошибка сохранения корзины в localStorage:", err);
+    }
+  }, [cart]);
+
+  // Очистка таймера уведомлений при размонтировании
+  useEffect(() => {
+    return () => {
+      if (notificationTimeoutRef.current) {
+        window.clearTimeout(notificationTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const refreshWishlist = useCallback(async () => {
     try {
@@ -185,8 +173,24 @@ function App() {
     }
   }, []);
 
+  const showNotification = useCallback((msg: string) => {
+    setNotification(msg);
+    if (notificationTimeoutRef.current) {
+      window.clearTimeout(notificationTimeoutRef.current);
+    }
+    notificationTimeoutRef.current = window.setTimeout(() => {
+      setNotification(null);
+    }, 3000);
+  }, []);
+
+  const navigateTo = useCallback((page: string) => {
+    window.location.hash = page;
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
   useEffect(() => {
-    // Проверка актуальности токена сессии в PostgreSQL
+    // Проверка актуальности токена сессии в базе данных
     fetchCurrentUser().then((verifiedUser) => {
       setCurrentUser(verifiedUser);
     });
@@ -207,7 +211,7 @@ function App() {
         return;
       }
 
-      const pageKey = KNOWN_PAGES[rawHash] || (rawHash.startsWith("barbie") || rawHash.startsWith("ken") || rawHash.startsWith("girls") ? "catalog" : rawHash);
+      const pageKey = KNOWN_PAGES[rawHash] || rawHash;
       setCurrentPage(pageKey);
       window.scrollTo({ top: 0, behavior: "smooth" });
     };
@@ -252,64 +256,65 @@ function App() {
     };
   }, [currentUser]);
 
-  const navigateTo = (page: string) => {
-    window.location.hash = page;
-    setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  const handleAddToCart = useCallback(
+    (title: string) => {
+      const alreadyInCart = cart.some((it) => it.title === title);
+      if (alreadyInCart) {
+        setCart((prev) => prev.filter((it) => it.title !== title));
+        showNotification(`Выкройка «${title}» удалена из корзины`);
+        return;
+      }
 
-  const showNotification = (msg: string) => {
-    setNotification(msg);
-    setTimeout(() => setNotification(null), 3000);
-  };
+      const found =
+        patterns.find((p) => p.title === title) ||
+        findCachedPatternByTitle(title);
 
-  const handleAddToCart = useCallback((title: string) => {
-    const alreadyInCart = cart.some((it) => it.title === title);
-    if (alreadyInCart) {
-      setCart((prev) => prev.filter((it) => it.title !== title));
-      showNotification(`Выкройка «${title}» удалена из корзины`);
-      return;
-    }
+      const numPrice = found
+        ? typeof found.price === "number"
+          ? found.price
+          : parseInt(String(found.price).replace(/\D/g, ""), 10) || 490
+        : 490;
 
-    const found =
-      patterns.find((p) => p.title === title) ||
-      findCachedPatternByTitle(title);
+      const newItem: CartItemType = {
+        id: found ? found.id : Date.now(),
+        title,
+        doll: found ? found.doll : "Барби",
+        price: numPrice,
+        priceFormatted: `${numPrice} ₽`,
+        image:
+          found?.image ||
+          (found?.id ? getPatternImages(found.id)[0] : "") ||
+          "",
+        tag:
+          found && "tag" in found && typeof found.tag === "string"
+            ? found.tag
+            : "Выкройка",
+        format:
+          found && "format" in found && typeof found.format === "string"
+            ? found.format
+            : "PDF (А4 + инструкции)",
+      };
 
-    const numPrice = found
-      ? typeof found.price === "number"
-        ? found.price
-        : parseInt(String(found.price).replace(/\D/g, ""), 10) || 490
-      : 490;
+      setCart((prev) => [...prev, newItem]);
+      showNotification(`Выкройка «${title}» добавлена в корзину`);
+    },
+    [cart, patterns, showNotification],
+  );
 
-    const newItem: CartItemType = {
-      id: found ? found.id : Date.now(),
-      title,
-      doll: found ? found.doll : "Барби",
-      price: numPrice,
-      priceFormatted: `${numPrice} ₽`,
-      image:
-        found?.image ||
-        (found?.id ? getPatternImages(found.id)[0] : "") ||
-        `${BASE}patterns/27/1.png`,
-      tag: found && "tag" in found && typeof found.tag === "string" ? found.tag : "Выкройка",
-      format: found && "format" in found && typeof found.format === "string" ? found.format : "PDF (А4 + инструкции)",
-    };
+  const handleRemoveFromCart = useCallback(
+    (id: number) => {
+      setCart((prev) => prev.filter((it) => it.id !== id));
+      showNotification("Выкройка удалена из корзины");
+    },
+    [showNotification],
+  );
 
-    setCart((prev) => [...prev, newItem]);
-    showNotification(`Выкройка «${title}» добавлена в корзину`);
-  }, [cart, patterns]);
-
-  const handleRemoveFromCart = (id: number) => {
-    setCart((prev) => prev.filter((it) => it.id !== id));
-    showNotification("Выкройка удалена из корзины");
-  };
-
-  const handleClearCart = () => {
+  const handleClearCart = useCallback(() => {
     setCart([]);
     showNotification("Корзина очищена");
-  };
+  }, [showNotification]);
 
-  const handleCheckout = () => {
+  const handleCheckout = useCallback(() => {
     if (!currentUser) {
       setPendingAction("cart");
       showNotification("Для оформления заказа необходимо войти в аккаунт");
@@ -318,79 +323,96 @@ function App() {
     }
     const orderNum = `ORD-${Date.now().toString().slice(-6)}`;
     setCart([]);
-    showNotification(`Заказ #${orderNum} успешно оформлен! Ссылки на PDF отправлены на email.`);
+    showNotification(
+      `Заказ #${orderNum} успешно оформлен! Ссылки на PDF отправлены на email.`,
+    );
     navigateTo("account");
-  };
+  }, [currentUser, navigateTo, showNotification]);
 
-  const handleSelectCategory = (categoryId: string) => {
-    setCatalogCategory(categoryId);
-    setCatalogDollId(null);
-    navigateTo(categoryId === "all" ? "catalog" : categoryId);
-  };
+  const handleSelectCategory = useCallback(
+    (categoryId: string) => {
+      setCatalogCategory(categoryId);
+      setCatalogDollId(null);
+      navigateTo(categoryId === "all" ? "catalog" : categoryId);
+    },
+    [navigateTo],
+  );
 
-  const handleToggleWishlist = async (patternId: number) => {
-    const found =
-      patterns.find((p) => p.id === patternId) ||
-      findCachedPatternById(patternId);
-    const numPrice = found
-      ? typeof found.price === "number"
-        ? found.price
-        : parseInt(String(found.price).replace(/\D/g, ""), 10) || 490
-      : 490;
-    const payload: WishlistPattern = {
-      id: patternId,
-      title: found ? found.title : `Выкройка #${patternId}`,
-      doll: found ? found.doll : "Барби",
-      price: numPrice,
-      tag: found && "tag" in found && typeof found.tag === "string" ? found.tag : "Выкройка",
-      image:
-        found?.image ||
-        getPatternImages(patternId)[0] ||
-        `${BASE}patterns/27/1.png`,
-      format: found && "format" in found && typeof found.format === "string" ? found.format : "PDF (А4 + инструкции)",
-    };
+  const handleToggleWishlist = useCallback(
+    async (patternId: number) => {
+      const found =
+        patterns.find((p) => p.id === patternId) ||
+        findCachedPatternById(patternId);
+      const numPrice = found
+        ? typeof found.price === "number"
+          ? found.price
+          : parseInt(String(found.price).replace(/\D/g, ""), 10) || 490
+        : 490;
+      const payload: WishlistPattern = {
+        id: patternId,
+        title: found ? found.title : `Выкройка #${patternId}`,
+        doll: found ? found.doll : "Барби",
+        price: numPrice,
+        tag:
+          found && "tag" in found && typeof found.tag === "string"
+            ? found.tag
+            : "Выкройка",
+        image: found?.image || getPatternImages(patternId)[0] || "",
+        format:
+          found && "format" in found && typeof found.format === "string"
+            ? found.format
+            : "PDF (А4 + инструкции)",
+      };
 
-    // 1. Для неавторизованного пользователя — сохраняем в localStorage с мягким уведомлением
-    if (!currentUser) {
-      const res = toggleGuestWishlist(payload);
-      setWishlist(res.items);
-      if (res.inWishlist) {
-        showNotification("Выкройка добавлена в избранное. Войдите в аккаунт, чтобы не потерять подборку.");
-      } else {
-        showNotification("Выкройка удалена из избранного");
+      // 1. Для неавторизованного пользователя — сохраняем в localStorage с мягким уведомлением
+      if (!currentUser) {
+        const res = toggleGuestWishlist(payload);
+        setWishlist(res.items);
+        if (res.inWishlist) {
+          showNotification(
+            "Выкройка добавлена в избранное. Войдите в аккаунт, чтобы не потерять подборку.",
+          );
+        } else {
+          showNotification("Выкройка удалена из избранного");
+        }
+        return;
       }
-      return;
-    }
 
-    // 2. Для авторизованного пользователя — сохраняем в PostgreSQL
-    try {
-      const res = await toggleWishlist(patternId, payload);
-      setWishlist(res.wishlist.items);
-      showNotification(res.message);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Не удалось обновить избранное";
-      showNotification(msg);
-    }
-  };
+      // 2. Для авторизованного пользователя — сохраняем в базе данных
+      try {
+        const res = await toggleWishlist(patternId, payload);
+        setWishlist(res.wishlist.items);
+        showNotification(res.message);
+      } catch (err) {
+        const msg =
+          err instanceof Error ? err.message : "Не удалось обновить избранное";
+        showNotification(msg);
+      }
+    },
+    [currentUser, patterns, showNotification],
+  );
 
-  const handleRemoveFromWishlist = useCallback(async (patternId: number) => {
-    // 1. Если пользователь гость — удаляем из localStorage
-    if (!currentUser) {
-      const updated = removeFromGuestWishlist(patternId);
-      setWishlist(updated);
-      showNotification("Выкройка удалена из избранного");
-      return;
-    }
+  const handleRemoveFromWishlist = useCallback(
+    async (patternId: number) => {
+      // 1. Если пользователь гость — удаляем из localStorage
+      if (!currentUser) {
+        const updated = removeFromGuestWishlist(patternId);
+        setWishlist(updated);
+        showNotification("Выкройка удалена из избранного");
+        return;
+      }
 
-    // 2. Для авторизованного пользователя — удаляем из базы данных
-    try {
-      const res = await removeFromWishlist(patternId);
-      setWishlist(res.items);
-      showNotification("Выкройка удалена из избранного");
-    } catch {
-      showNotification("Не удалось удалить выкройку из избранного");
-    }
-  }, [currentUser]);
+      // 2. Для авторизованного пользователя — удаляем из базы данных
+      try {
+        const res = await removeFromWishlist(patternId);
+        setWishlist(res.items);
+        showNotification("Выкройка удалена из избранного");
+      } catch {
+        showNotification("Не удалось удалить выкройку из избранного");
+      }
+    },
+    [currentUser, showNotification],
+  );
 
   const handleAddAllWishlistToCart = useCallback(() => {
     if (wishlist.length === 0) return;
@@ -422,100 +444,113 @@ function App() {
     } else {
       showNotification("Все выкройки из избранного уже в вашей корзине");
     }
-  }, [wishlist]);
+  }, [wishlist, showNotification]);
 
   const handleBackToMain = useCallback(() => {
     navigateTo("main");
-  }, []);
+  }, [navigateTo]);
 
   const handleOpenLoginForWishlist = useCallback(() => {
     setPendingAction("wishlist");
     setAuthModal("login");
   }, []);
 
-  const handleCartClick = () => {
+  const handleCartClick = useCallback(() => {
     navigateTo("cart");
-  };
+  }, [navigateTo]);
 
-  const handleWishlistClick = () => {
+  const handleWishlistClick = useCallback(() => {
     navigateTo("wishlist");
-  };
+  }, [navigateTo]);
 
-  const handleAuthClick = () => {
+  const handleAuthClick = useCallback(() => {
     if (currentUser) {
       navigateTo("account");
     } else {
       setAuthModal("login");
     }
-  };
+  }, [currentUser, navigateTo]);
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     await logoutUser();
     setCurrentUser(null);
     setWishlist(getGuestWishlist());
     showNotification("Вы успешно вышли из аккаунта");
     navigateTo("main");
-  };
+  }, [navigateTo, showNotification]);
 
-  // Синхронизация и слияние гостевого избранного из localStorage с PostgreSQL
-  const syncWishlistOnAuth = async (user: User) => {
-    const guestItems = getGuestWishlist();
-    if (guestItems.length > 0) {
-      try {
-        const synced = await syncGuestWishlistWithDatabase(guestItems);
-        setWishlist(synced.items || []);
-        showNotification(`Добро пожаловать, ${user.name}! Избранное синхронизировано с вашим аккаунтом.`);
-        return;
-      } catch (err) {
-        console.error("Ошибка объединения избранного:", err);
+  // Синхронизация и слияние гостевого избранного из localStorage с базой данных
+  const syncWishlistOnAuth = useCallback(
+    async (user: User) => {
+      const guestItems = getGuestWishlist();
+      if (guestItems.length > 0) {
+        try {
+          const synced = await syncGuestWishlistWithDatabase(guestItems);
+          setWishlist(synced.items || []);
+          showNotification(
+            `Добро пожаловать, ${user.name}! Избранное синхронизировано с вашим аккаунтом.`,
+          );
+          return;
+        } catch (err) {
+          console.error("Ошибка объединения избранного:", err);
+        }
       }
-    }
-    await refreshWishlist();
-  };
+      await refreshWishlist();
+    },
+    [refreshWishlist, showNotification],
+  );
 
-  const handleLoginSuccess = async (user: User) => {
-    setCurrentUser(user);
-    await syncWishlistOnAuth(user);
+  const handleLoginSuccess = useCallback(
+    async (user: User) => {
+      setCurrentUser(user);
+      await syncWishlistOnAuth(user);
 
-    if (pendingAction === "cart") {
-      showNotification(`Добро пожаловать, ${user.name}! Переходим в корзину.`);
-      setPendingAction(null);
-      navigateTo("cart");
-    } else if (pendingAction === "wishlist") {
-      showNotification(`Добро пожаловать, ${user.name}! Переходим в избранное.`);
-      setPendingAction(null);
-      navigateTo("wishlist");
-    } else {
-      showNotification(`Добро пожаловать в личный кабинет, ${user.name}!`);
-      navigateTo("account");
-    }
-  };
+      if (pendingAction === "cart") {
+        showNotification(
+          `Добро пожаловать, ${user.name}! Переходим в корзину.`,
+        );
+        setPendingAction(null);
+        navigateTo("cart");
+      } else if (pendingAction === "wishlist") {
+        showNotification(
+          `Добро пожаловать, ${user.name}! Переходим в избранное.`,
+        );
+        setPendingAction(null);
+        navigateTo("wishlist");
+      } else {
+        showNotification(`Добро пожаловать в личный кабинет, ${user.name}!`);
+        navigateTo("account");
+      }
+    },
+    [navigateTo, pendingAction, showNotification, syncWishlistOnAuth],
+  );
 
-  const handleRegisterSuccess = async (user: User) => {
-    setCurrentUser(user);
-    await syncWishlistOnAuth(user);
+  const handleRegisterSuccess = useCallback(
+    async (user: User) => {
+      setCurrentUser(user);
+      await syncWishlistOnAuth(user);
 
-    if (pendingAction === "cart") {
-      showNotification(`Регистрация успешна! Переходим в корзину.`);
-      setPendingAction(null);
-      navigateTo("cart");
-    } else if (pendingAction === "wishlist") {
-      showNotification(`Регистрация успешна! Переходим в избранное.`);
-      setPendingAction(null);
-      navigateTo("wishlist");
-    } else {
-      showNotification(`Регистрация успешна! Добро пожаловать, ${user.name}!`);
-      navigateTo("account");
-    }
-  };
+      if (pendingAction === "cart") {
+        showNotification("Регистрация успешна! Переходим в корзину.");
+        setPendingAction(null);
+        navigateTo("cart");
+      } else if (pendingAction === "wishlist") {
+        showNotification("Регистрация успешна! Переходим в избранное.");
+        setPendingAction(null);
+        navigateTo("wishlist");
+      } else {
+        showNotification(
+          `Регистрация успешна! Добро пожаловать, ${user.name}!`,
+        );
+        navigateTo("account");
+      }
+    },
+    [navigateTo, pendingAction, showNotification, syncWishlistOnAuth],
+  );
 
   const renderCurrentPage = () => {
     switch (currentPage) {
       case "catalog":
-      case "girls-1-6":
-      case "girls-1-4":
-      case "guys":
-      case "kids":
         return (
           <Catalog
             key={`${catalogCategory}_${catalogDollId ?? "all"}`}
@@ -523,7 +558,7 @@ function App() {
             isLoading={isPatternsLoading}
             initialCategory={catalogCategory}
             initialDollId={catalogDollId}
-            onBackToMain={() => navigateTo("main")}
+            onBackToMain={handleBackToMain}
             onAddToCart={handleAddToCart}
             onToggleWishlist={handleToggleWishlist}
             wishlistIds={wishlistIds}
@@ -531,20 +566,20 @@ function App() {
           />
         );
       case "tutorials":
-        return <Tutorials onBackToMain={() => navigateTo("main")} />;
+        return <Tutorials onBackToMain={handleBackToMain} />;
       case "courses":
-        return <Courses onBackToMain={() => navigateTo("main")} />;
+        return <Courses onBackToMain={handleBackToMain} />;
       case "free":
-        return <Free onBackToMain={() => navigateTo("main")} />;
+        return <Free onBackToMain={handleBackToMain} />;
       case "useful":
-        return <Useful onBackToMain={() => navigateTo("main")} />;
+        return <Useful onBackToMain={handleBackToMain} />;
       case "about":
-        return <About onBackToMain={() => navigateTo("main")} />;
+        return <About onBackToMain={handleBackToMain} />;
       case "account":
         return (
           <Account
             user={currentUser}
-            onBackToMain={() => navigateTo("main")}
+            onBackToMain={handleBackToMain}
             onLogout={handleLogout}
             onOpenLogin={() => setAuthModal("login")}
             onNavigateToCatalog={() => navigateTo("catalog")}
@@ -553,16 +588,16 @@ function App() {
       case "choose-doll":
         return (
           <ChooseDoll
-            onBackToMain={() => navigateTo("main")}
+            onBackToMain={handleBackToMain}
             onNavigateToCatalog={(hash) => navigateTo(hash || "catalog")}
           />
         );
       case "measurements":
-        return <Measurements onBackToMain={() => navigateTo("main")} />;
+        return <Measurements onBackToMain={handleBackToMain} />;
       case "shopping-terms":
-        return <ShoppingTerms onBackToMain={() => navigateTo("main")} />;
+        return <ShoppingTerms onBackToMain={handleBackToMain} />;
       case "reviews":
-        return <Reviews onBackToMain={() => navigateTo("main")} />;
+        return <Reviews onBackToMain={handleBackToMain} />;
       case "cart":
         return (
           <Cart
@@ -571,7 +606,7 @@ function App() {
             onClearCart={handleClearCart}
             onCheckout={handleCheckout}
             onContinueShopping={() => navigateTo("catalog")}
-            onBackToMain={() => navigateTo("main")}
+            onBackToMain={handleBackToMain}
             isLoggedIn={Boolean(currentUser)}
           />
         );
@@ -653,7 +688,9 @@ function App() {
       {/* Подвал сайта */}
       <Footer
         onSubscribe={(email) =>
-          showNotification(`Подписка оформлена для ${email}! Скидка активирована.`)
+          showNotification(
+            `Подписка оформлена для ${email}! Скидка активирована.`,
+          )
         }
       />
     </div>
