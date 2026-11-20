@@ -1,6 +1,7 @@
 import type { CatalogPatternItem } from "./types.ts";
 import type { DollItem } from "../ChooseDoll/types.ts";
 import type { BreadcrumbItem } from "@/components/Breadcrumbs/Breadcrumbs.tsx";
+import { matchesPatternSearch } from "../../utils/patternSearch.ts";
 
 export interface FilterPatternsOptions {
   activeCategory: string;
@@ -71,10 +72,7 @@ export function filterPatterns(
 
     // 3. Поиск по названию или кукле
     if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase().trim();
-      const inTitle = item.title.toLowerCase().includes(q);
-      const inDoll = item.doll.toLowerCase().includes(q);
-      return inTitle || inDoll;
+      return matchesPatternSearch(item, searchQuery);
     }
     return true;
   });

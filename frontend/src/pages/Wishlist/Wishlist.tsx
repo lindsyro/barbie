@@ -6,6 +6,7 @@ import { PagePlaceholder } from "../../components/PagePlaceholder/PagePlaceholde
 import { WishlistGuestBanner } from "../../components/WishlistGuestBanner/WishlistGuestBanner.tsx";
 import { HeartIcon } from "@/components/icons/index.ts";
 import type { WishlistProps } from "./types.ts";
+import { searchPatterns } from "../../utils/patternSearch.ts";
 import { PatternCard } from "../../components/PatternCard";
 import "./wishlist.css";
 import "../pages.css";
@@ -32,22 +33,10 @@ export const Wishlist: React.FC<WishlistProps> = React.memo(({
     onBackToMain?.();
   }, [onBackToMain]);
 
-  const filteredItems = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return items;
-    return items.filter((item) => {
-      const matchTitle = item.title?.toLowerCase().includes(q);
-      const matchDoll =
-        typeof item.doll === "string" && item.doll.toLowerCase().includes(q);
-      const matchDolls =
-        "dolls" in item && Array.isArray(item.dolls)
-          ? item.dolls.some((d) =>
-              (d.nameRu || d.nameEn || "").toLowerCase().includes(q),
-            )
-          : false;
-      return matchTitle || matchDoll || matchDolls;
-    });
-  }, [items, searchQuery]);
+  const filteredItems = useMemo(
+    () => searchPatterns(items, searchQuery),
+    [items, searchQuery],
+  );
 
   const cartTitlesSet = useMemo(
     () => new Set(cartItems.map((c) => c.title)),
