@@ -7,8 +7,9 @@ export interface PagePlaceholderProps {
   description: string;
   buttonText?: string;
   buttonHref?: string;
-  onButtonClick?: () => void;
+  onButtonClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
   className?: string;
+  children?: React.ReactNode;
 }
 
 export const PagePlaceholder: React.FC<PagePlaceholderProps> = ({
@@ -19,19 +20,33 @@ export const PagePlaceholder: React.FC<PagePlaceholderProps> = ({
   buttonHref = "#main",
   onButtonClick,
   className = "",
+  children,
 }) => {
+  const hasActions = Boolean(buttonText) || Boolean(children);
+
   return (
-    <div className={`page-placeholder ${className}`}>
-      {icon && <div className="page-placeholder__icon">{icon}</div>}
+    <div className={`page-placeholder ${className}`.trim()}>
+      {icon && (
+        <div className="page-placeholder__icon" aria-hidden="true">
+          {icon}
+        </div>
+      )}
       <h2 className="page-placeholder__title">{title}</h2>
-      <p className="page-placeholder__desc">{description}</p>
-      <a
-        href={buttonHref}
-        onClick={onButtonClick}
-        className="page-placeholder__btn"
-      >
-        {buttonText}
-      </a>
+      {description && <p className="page-placeholder__desc">{description}</p>}
+      {hasActions && (
+        <div className="page-placeholder__actions">
+          {buttonText && (
+            <a
+              href={buttonHref}
+              onClick={onButtonClick}
+              className="page-placeholder__btn"
+            >
+              {buttonText}
+            </a>
+          )}
+          {children}
+        </div>
+      )}
     </div>
   );
 };
