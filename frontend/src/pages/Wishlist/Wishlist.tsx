@@ -11,52 +11,50 @@ import {
 import { searchPatterns } from "@/utils/patternSearch.ts";
 import { useWishlist, useCart, useAuth } from "@/context/index.ts";
 import { useRouter } from "@/router/index.ts";
-import type { WishlistProps } from "./types.ts";
 import "./wishlist.css";
 
-export const Wishlist: React.FC<WishlistProps> = React.memo((props) => {
-  const contextWishlist = useWishlist();
-  const contextCart = useCart();
-  const contextAuth = useAuth();
-  const router = useRouter();
-
-  const items = props.items ?? contextWishlist.wishlist;
-  const isLoading = props.isLoading ?? contextWishlist.isWishlistLoading;
-  const isLoggedIn = props.isLoggedIn ?? contextAuth.isLoggedIn;
-  const onRemoveFromWishlist = props.onRemoveFromWishlist ?? contextWishlist.removeFromWishlist;
-  const onAddToCart = props.onAddToCart ?? contextCart.addToCart;
-  const onBackToMain =
-    props.onBackToMain ?? (() => router.navigateTo("main"));
-  const onOpenLogin =
-    props.onOpenLogin ?? (() => contextAuth.openLogin("wishlist"));
-  const cartItems = props.cartItems ?? contextCart.cart;
+export const Wishlist: React.FC = React.memo(() => {
+  const {
+    wishlist: items,
+    isWishlistLoading: isLoading,
+    removeFromWishlist,
+  } = useWishlist();
+  const { addToCart, isInCart } = useCart();
+  const { isLoggedIn, openLogin } = useAuth();
+  const { navigateTo } = useRouter();
 
   const [searchQuery, setSearchQuery] = useState("");
 
-  const handleResetSearch = useCallback((e?: React.MouseEvent<HTMLAnchorElement>) => {
-    e?.preventDefault();
-    setSearchQuery("");
-  }, []);
+  const handleResetSearch = useCallback(
+    (e?: React.MouseEvent<HTMLAnchorElement>) => {
+      e?.preventDefault();
+      setSearchQuery("");
+    },
+    [],
+  );
 
-  const handleBackToMainClick = useCallback((e?: React.MouseEvent<HTMLAnchorElement>) => {
-    e?.preventDefault();
-    onBackToMain?.();
-  }, [onBackToMain]);
+  const handleBackToMain = useCallback(
+    (e?: React.MouseEvent<HTMLAnchorElement>) => {
+      e?.preventDefault();
+      navigateTo("main");
+    },
+    [navigateTo],
+  );
+
+  const handleOpenLogin = useCallback(() => {
+    openLogin("wishlist");
+  }, [openLogin]);
 
   const filteredItems = useMemo(
     () => searchPatterns(items, searchQuery),
     [items, searchQuery],
   );
 
-  const cartTitlesSet = useMemo(
-    () => new Set(cartItems.map((c) => c.title)),
-    [cartItems],
-  );
   return (
     <div className="page-container wishlist-page">
       {/* Верхняя строка: хлебные крошки слева, компактный поиск справа */}
       <div className="page-top-bar">
-        <Breadcrumbs current="Избранное" onBackToMain={onBackToMain} />
+        <Breadcrumbs current="Избранное" onBackToMain={handleBackToMain} />
         <SearchInput
           value={searchQuery}
           onChange={setSearchQuery}
@@ -86,12 +84,12 @@ export const Wishlist: React.FC<WishlistProps> = React.memo((props) => {
           }`}
           buttonText="← Перейти к популярным выкройкам"
           buttonHref="#catalog"
-          onButtonClick={handleBackToMainClick}
+          onButtonClick={handleBackToMain}
         >
-          {!isLoggedIn && onOpenLogin && (
+          {!isLoggedIn && (
             <button
               type="button"
-              onClick={onOpenLogin}
+              onClick={handleOpenLogin}
               className="page-placeholder__btn"
               style={{ backgroundColor: "var(--color-chocolate)" }}
             >
@@ -112,7 +110,7 @@ export const Wishlist: React.FC<WishlistProps> = React.memo((props) => {
         /* Список карточек избранного */
         <div className="wishlist-container">
           {/* Мягкий баннер для гостей */}
-          {!isLoggedIn && <WishlistGuestBanner onOpenLogin={onOpenLogin} />}
+          {!isLoggedIn && <WishlistGuestBanner onOpenLogin={handleOpenLogin} />}
 
           <div className="wishlist-grid">
             {filteredItems.map((item) => (
@@ -120,9 +118,9 @@ export const Wishlist: React.FC<WishlistProps> = React.memo((props) => {
                 key={item.id}
                 pattern={item}
                 isLiked={true}
-                isInCart={cartTitlesSet.has(item.title)}
-                onToggleWishlist={onRemoveFromWishlist}
-                onAddToCart={onAddToCart}
+                isInCart={isInCart(item.title)}
+                onToggleWishlist={removeFromWishlist}
+                onAddToCart={(title) => addToCart(title)}
               />
             ))}
           </div>
@@ -131,5 +129,7 @@ export const Wishlist: React.FC<WishlistProps> = React.memo((props) => {
     </div>
   );
 });
+
+Wishlist.displayName = "Wishlist";
 
 export default Wishlist;
