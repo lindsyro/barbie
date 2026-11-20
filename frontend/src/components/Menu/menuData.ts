@@ -3,12 +3,10 @@ import type { DollCategory } from "../../pages/ChooseDoll/types.ts";
 
 /**
  * Преобразует категории и привязанных к ним кукол из базы данных в пункты меню.
- * При изменении названия категории или добавлении/изменении кукол в БД
- * меню автоматически перестраивается.
  */
 export function buildMenuItems(
   categories: DollCategory[],
-  baseItems: MenuItem[] = DEFAULT_MENU_ITEMS,
+  baseItems: MenuItem[] = BASE_MENU_ITEMS,
 ): MenuItem[] {
   if (!categories || categories.length === 0) {
     return baseItems;
@@ -61,18 +59,11 @@ export function buildMenuItems(
   });
 }
 
-export const DEFAULT_MENU_ITEMS: MenuItem[] = [
+export const BASE_MENU_ITEMS: MenuItem[] = [
   {
     id: "catalog",
     label: "Каталог выкроек",
     href: "#catalog",
-    children: [
-      {
-        id: "all-patterns",
-        label: "Все выкройки каталога",
-        href: "#catalog",
-      },
-    ],
   },
   {
     id: "tutorials",
@@ -101,3 +92,6 @@ export const DEFAULT_MENU_ITEMS: MenuItem[] = [
     href: "#about",
   },
 ];
+
+/** @deprecated Используйте BASE_MENU_ITEMS */
+export const DEFAULT_MENU_ITEMS = BASE_MENU_ITEMS;

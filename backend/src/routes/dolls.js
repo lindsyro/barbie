@@ -27,13 +27,23 @@ router.get("/", async (req, res, next) => {
 
 /**
  * GET /api/dolls/categories
- * Возвращает список категорий кукол с вложенными куклами (для меню и фильтров)
+ * Возвращает список категорий и кукол для меню (только те, для которых есть выкройки)
  */
 router.get("/categories", async (req, res, next) => {
   try {
     const categories = await prisma.dollCategory.findMany({
+      where: {
+        dolls: {
+          some: {
+            patterns: { some: {} },
+          },
+        },
+      },
       include: {
         dolls: {
+          where: {
+            patterns: { some: {} },
+          },
           orderBy: { id: "asc" },
         },
       },

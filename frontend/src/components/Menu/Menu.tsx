@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import type { MenuProps } from "./types.ts";
-import { DEFAULT_MENU_ITEMS } from "./menuData.ts";
+import { BASE_MENU_ITEMS } from "./menuData.ts";
 import { ChevronDownIcon } from "../icons/index.ts";
 import { getItemId, isItemActive } from "./menuUtils.ts";
 import { MegaPanel, MobileCategories, MenuDrawer } from "./components/index.ts";
@@ -10,7 +10,7 @@ export const Menu: React.FC<MenuProps> = ({
   variant = "horizontal",
   isOpen = false,
   onClose,
-  items = DEFAULT_MENU_ITEMS,
+  items = BASE_MENU_ITEMS,
   activeHref,
   className = "",
 }) => {
