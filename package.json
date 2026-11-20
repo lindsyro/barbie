@@ -13,7 +13,10 @@
     "install:all": "npm install && npm install --prefix backend && npm install --prefix frontend",
     "db:migrate": "npm run db:migrate --prefix backend",
     "db:seed": "npm run seed --prefix backend",
-    "db:studio": "npm run db:studio --prefix backend"
+    "db:studio": "npm run db:studio --prefix backend",
+    "db:export-seed": "npm run db:export-seed --prefix backend",
+    "db:backup": "npm run db:backup --prefix backend",
+    "db:restore": "npm run db:restore --prefix backend"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

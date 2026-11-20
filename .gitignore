@@ -32,3 +32,4 @@ dist-ssr
 *.db-journal
 *.sqlite
 *.sqlite3
+backend/prisma/backups/
