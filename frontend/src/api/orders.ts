@@ -41,10 +41,8 @@ function isStaticHosting(): boolean {
 function normalizePatternImage(img: string): string {
   if (!img) return `${BASE}patterns/27/1.png`;
   if (img.startsWith("http://") || img.startsWith("https://")) return img;
-  if (img.startsWith("/")) {
-    return `${BASE}${img.slice(1)}`;
-  }
-  return `${BASE}${img}`;
+  const clean = img.replace(/^(\/?barbie\/)+/i, "").replace(/^\/+/, "");
+  return `${BASE}${clean}`;
 }
 
 // Демо-данные для пользователя 'user' в статическом режиме/fallback

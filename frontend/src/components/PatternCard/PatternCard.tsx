@@ -7,6 +7,7 @@ import {
 } from "@/components/icons/index.ts";
 import type { CatalogPatternItem } from "@/pages/Catalog/types.ts";
 import type { WishlistPattern } from "@/api/wishlist.ts";
+import { getPatternImages } from "@/utils/patternImages.ts";
 import "./patternCard.css";
 
 export interface PatternCardProps {
@@ -33,10 +34,20 @@ export const PatternCard: React.FC<PatternCardProps> = React.memo(
       }
     };
 
+    const autoImages = getPatternImages(pattern.id);
     const photosCount =
       "images" in pattern && pattern.images?.length
         ? pattern.images.length
-        : 1;
+        : autoImages.length > 0
+          ? autoImages.length
+          : 1;
+
+    const rawImg = pattern.image || "";
+    const cleanImg = rawImg.includes("/barbie/barbie/")
+      ? rawImg.replace(/^(\/?barbie\/)+/i, "/barbie/")
+      : rawImg;
+    const imageSrc =
+      cleanImg || autoImages[0] || `${import.meta.env.BASE_URL}patterns/27/1.png`;
 
     return (
       <article className="catalog-card">
@@ -47,10 +58,15 @@ export const PatternCard: React.FC<PatternCardProps> = React.memo(
           title="Нажмите для быстрого просмотра"
         >
           <img
-            src={pattern.image}
+            src={imageSrc}
             alt={pattern.title}
             className="catalog-card__img"
             loading="lazy"
+            onError={(e) => {
+              if (autoImages[0] && e.currentTarget.src !== autoImages[0]) {
+                e.currentTarget.src = autoImages[0];
+              }
+            }}
           />
 
           {/* Счетчик дополнительных фото */}

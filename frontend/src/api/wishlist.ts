@@ -5,6 +5,7 @@
 
 import { getStoredToken, getStoredUser } from "./auth.ts";
 import { findCachedPatternById } from "./patterns.ts";
+import { getPatternImages } from "../utils/patternImages.ts";
 
 export interface WishlistPattern {
   id: number;
@@ -18,6 +19,9 @@ export interface WishlistPattern {
 
 export function enrichWishlistItem(it: Partial<WishlistPattern> & { id: number }): WishlistPattern {
   const cat = findCachedPatternById(it.id);
+  const autoImgs = getPatternImages(it.id);
+  const mainImage = cat?.image || autoImgs[0] || normalizePatternImage(it.image || "", it.id);
+
   if (cat) {
     return {
       id: cat.id,
@@ -25,7 +29,7 @@ export function enrichWishlistItem(it: Partial<WishlistPattern> & { id: number }
       doll: cat.doll,
       price: cat.price,
       tag: "Выкройка",
-      image: cat.image,
+      image: mainImage,
       format: "PDF (А4 + инструкции)",
     };
   }
@@ -35,7 +39,7 @@ export function enrichWishlistItem(it: Partial<WishlistPattern> & { id: number }
     doll: it.doll || "Барби",
     price: it.price || 450,
     tag: it.tag || "Выкройка",
-    image: normalizePatternImage(it.image || ""),
+    image: mainImage,
     format: it.format || "PDF (А4 + инструкции)",
   };
 }
@@ -129,15 +133,28 @@ function setFallbackWishlist(items: WishlistPattern[], userId: string): void {
 }
 
 /**
- * Нормализация пути к изображению
+ * Нормализация пути к изображению с защитой от дублирования /barbie/ и автопоиском по ID
  */
-export function normalizePatternImage(img: string): string {
+export function normalizePatternImage(img: string, patternId?: number): string {
+  if (patternId) {
+    const autoImgs = getPatternImages(patternId);
+    if (autoImgs.length > 0) return autoImgs[0];
+  }
   if (!img) return `${BASE}patterns/27/1.png`;
   if (img.startsWith("http://") || img.startsWith("https://")) return img;
-  if (img.startsWith("/")) {
-    return `${BASE}${img.slice(1)}`;
+
+  // Очистка от повторяющихся префиксов /barbie/ и ведущих слэшей
+  const clean = img.replace(/^(\/?barbie\/)+/i, "").replace(/^\/+/, "");
+
+  // Проверяем, есть ли patterns/<id> в пути
+  const match = clean.match(/^patterns\/(\d+)/);
+  if (match) {
+    const folderId = parseInt(match[1], 10);
+    const autoImgs = getPatternImages(folderId);
+    if (autoImgs.length > 0) return autoImgs[0];
   }
-  return `${BASE}${img}`;
+
+  return `${BASE}${clean}`;
 }
 
 /* ==========================================================================

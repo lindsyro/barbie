@@ -18,6 +18,7 @@ import {
   syncGuestWishlistWithDatabase,
   type WishlistPattern,
 } from "./api/wishlist.ts";
+import { getPatternImages } from "@/utils/patternImages.ts";
 import {
   fetchPatterns,
   findCachedPatternById,
@@ -286,7 +287,10 @@ function App() {
       doll: found ? found.doll : "Барби",
       price: numPrice,
       priceFormatted: `${numPrice} ₽`,
-      image: found ? found.image : `${BASE}patterns/27/1.png`,
+      image:
+        found?.image ||
+        (found?.id ? getPatternImages(found.id)[0] : "") ||
+        `${BASE}patterns/27/1.png`,
       tag: found && "tag" in found && typeof found.tag === "string" ? found.tag : "Выкройка",
       format: found && "format" in found && typeof found.format === "string" ? found.format : "PDF (А4 + инструкции)",
     };
@@ -339,7 +343,10 @@ function App() {
       doll: found ? found.doll : "Барби",
       price: numPrice,
       tag: found && "tag" in found && typeof found.tag === "string" ? found.tag : "Выкройка",
-      image: found?.image || `${BASE}patterns/27/1.png`,
+      image:
+        found?.image ||
+        getPatternImages(patternId)[0] ||
+        `${BASE}patterns/27/1.png`,
       format: found && "format" in found && typeof found.format === "string" ? found.format : "PDF (А4 + инструкции)",
     };
 
