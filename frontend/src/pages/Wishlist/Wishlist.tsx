@@ -1,6 +1,7 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Breadcrumbs } from "../../components/Breadcrumbs/Breadcrumbs.tsx";
 import { PageHeader } from "../../components/PageHeader/PageHeader.tsx";
+import { SearchInput } from "../../components/SearchInput";
 import type { WishlistProps } from "./types.ts";
 import { PatternCard } from "../../components/PatternCard";
 import "./wishlist.css";
@@ -16,14 +17,40 @@ export const Wishlist: React.FC<WishlistProps> = ({
   onOpenLogin,
   cartItems = [],
 }) => {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredItems = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return items;
+    return items.filter((item) => {
+      const matchTitle = item.title?.toLowerCase().includes(q);
+      const matchDoll =
+        typeof item.doll === "string" && item.doll.toLowerCase().includes(q);
+      const matchDolls =
+        "dolls" in item && Array.isArray(item.dolls)
+          ? item.dolls.some((d) =>
+              (d.nameRu || d.nameEn || "").toLowerCase().includes(q),
+            )
+          : false;
+      return matchTitle || matchDoll || matchDolls;
+    });
+  }, [items, searchQuery]);
+
   const cartTitlesSet = useMemo(
     () => new Set(cartItems.map((c) => c.title)),
     [cartItems],
   );
   return (
-    <div className="page-container">
-      {/* Хлебные крошки */}
-      <Breadcrumbs current="Избранное" onBackToMain={onBackToMain} />
+    <div className="page-container wishlist-page">
+      {/* Верхняя строка: хлебные крошки слева, компактный поиск справа */}
+      <div className="page-top-bar">
+        <Breadcrumbs current="Избранное" onBackToMain={onBackToMain} />
+        <SearchInput
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Поиск по избранному..."
+        />
+      </div>
 
       {/* Заголовок страницы */}
       <PageHeader title="Избранные выкройки" />
@@ -68,16 +95,6 @@ export const Wishlist: React.FC<WishlistProps> = ({
               flexWrap: "wrap",
             }}
           >
-            <a
-              href="#catalog"
-              onClick={(e) => {
-                e.preventDefault();
-                onBackToMain?.();
-              }}
-              className="wishlist-empty__btn"
-            >
-              ← Перейти к популярным выкройкам
-            </a>
             {!isLoggedIn && onOpenLogin && (
               <button
                 type="button"
@@ -90,6 +107,21 @@ export const Wishlist: React.FC<WishlistProps> = ({
             )}
           </div>
         </div>
+      ) : filteredItems.length === 0 ? (
+        /* Ничего не найдено по поисковому запросу */
+        <div className="wishlist-empty">
+          <h2 className="wishlist-empty__title">Выкройки не найдены</h2>
+          <p className="wishlist-empty__desc">
+            По запросу «{searchQuery}» ничего не найдено в избранном
+          </p>
+          <button
+            type="button"
+            onClick={() => setSearchQuery("")}
+            className="wishlist-empty__btn"
+          >
+            Сбросить поиск
+          </button>
+        </div>
       ) : (
         /* Список карточек избранного */
         <div className="wishlist-container">
@@ -98,8 +130,8 @@ export const Wishlist: React.FC<WishlistProps> = ({
             <div className="wishlist-guest-banner">
               <div className="wishlist-guest-banner__content">
                 <svg
-                  width="20"
-                  height="20"
+                  width="16"
+                  height="16"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -110,9 +142,7 @@ export const Wishlist: React.FC<WishlistProps> = ({
                   <line x1="12" y1="16" x2="12.01" y2="16" />
                 </svg>
                 <span>
-                  Вы просматриваете избранное на этом устройстве.{" "}
-                  <strong>Войдите в аккаунт</strong>, чтобы сохранить выкройки
-                  навсегда и синхронизировать их на всех устройствах.
+                  Войдите в аккаунт, чтобы сохранить избранное на всех устройствах
                 </span>
               </div>
               {onOpenLogin && (
@@ -121,14 +151,14 @@ export const Wishlist: React.FC<WishlistProps> = ({
                   onClick={onOpenLogin}
                   className="wishlist-guest-banner__btn"
                 >
-                  Войти и сохранить
+                  Войти
                 </button>
               )}
             </div>
           )}
 
           <div className="wishlist-grid">
-            {items.map((item) => (
+            {filteredItems.map((item) => (
               <PatternCard
                 key={item.id}
                 pattern={item}
