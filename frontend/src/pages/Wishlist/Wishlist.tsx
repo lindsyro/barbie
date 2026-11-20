@@ -3,6 +3,7 @@ import { Breadcrumbs } from "../../components/Breadcrumbs/Breadcrumbs.tsx";
 import { PageHeader } from "../../components/PageHeader/PageHeader.tsx";
 import { SearchInput } from "../../components/SearchInput";
 import { PagePlaceholder } from "../../components/PagePlaceholder/PagePlaceholder.tsx";
+import { WishlistGuestBanner } from "../../components/WishlistGuestBanner/WishlistGuestBanner.tsx";
 import { HeartIcon } from "@/components/icons/index.ts";
 import type { WishlistProps } from "./types.ts";
 import { PatternCard } from "../../components/PatternCard";
@@ -108,36 +109,7 @@ export const Wishlist: React.FC<WishlistProps> = ({
         /* Список карточек избранного */
         <div className="wishlist-container">
           {/* Мягкий баннер для гостей */}
-          {!isLoggedIn && (
-            <div className="wishlist-guest-banner">
-              <div className="wishlist-guest-banner__content">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="12" y1="8" x2="12" y2="12" />
-                  <line x1="12" y1="16" x2="12.01" y2="16" />
-                </svg>
-                <span>
-                  Войдите в аккаунт, чтобы сохранить избранное на всех устройствах
-                </span>
-              </div>
-              {onOpenLogin && (
-                <button
-                  type="button"
-                  onClick={onOpenLogin}
-                  className="wishlist-guest-banner__btn"
-                >
-                  Войти
-                </button>
-              )}
-            </div>
-          )}
+          {!isLoggedIn && <WishlistGuestBanner onOpenLogin={onOpenLogin} />}
 
           <div className="wishlist-grid">
             {filteredItems.map((item) => (

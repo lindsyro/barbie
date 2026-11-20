@@ -41,6 +41,9 @@ export type { DollCardProps } from "./DollCard/index.ts";
 export { DollMeasurementsModal } from "./DollMeasurementsModal/index.ts";
 export type { DollMeasurementsModalProps } from "./DollMeasurementsModal/index.ts";
 
+export { WishlistGuestBanner } from "./WishlistGuestBanner/index.ts";
+export type { WishlistGuestBannerProps } from "./WishlistGuestBanner/index.ts";
+
 export {
   SearchIcon,
   ArrowRightIcon,
@@ -52,5 +55,6 @@ export {
   UserIcon,
   ChevronDownIcon,
   ChevronRightIcon,
+  ExclamationIcon,
 } from "./icons/index.ts";
 export type { IconProps, HeartIconProps } from "./icons/index.ts";
