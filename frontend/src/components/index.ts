@@ -44,6 +44,9 @@ export type { DollMeasurementsModalProps } from "./DollMeasurementsModal/index.t
 export { WishlistGuestBanner } from "./WishlistGuestBanner/index.ts";
 export type { WishlistGuestBannerProps } from "./WishlistGuestBanner/index.ts";
 
+export { Layout } from "./Layout/index.ts";
+export type { LayoutProps } from "./Layout/index.ts";
+
 export {
   SearchIcon,
   ArrowRightIcon,

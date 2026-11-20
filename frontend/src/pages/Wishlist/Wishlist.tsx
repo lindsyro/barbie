@@ -9,19 +9,28 @@ import {
   HeartIcon,
 } from "@/components/index.ts";
 import { searchPatterns } from "@/utils/patternSearch.ts";
+import { useWishlist, useCart, useAuth } from "@/context/index.ts";
+import { useRouter } from "@/router/index.ts";
 import type { WishlistProps } from "./types.ts";
 import "./wishlist.css";
 
-export const Wishlist: React.FC<WishlistProps> = React.memo(({
-  items,
-  isLoading = false,
-  isLoggedIn = false,
-  onRemoveFromWishlist,
-  onAddToCart,
-  onBackToMain,
-  onOpenLogin,
-  cartItems = [],
-}) => {
+export const Wishlist: React.FC<WishlistProps> = React.memo((props) => {
+  const contextWishlist = useWishlist();
+  const contextCart = useCart();
+  const contextAuth = useAuth();
+  const router = useRouter();
+
+  const items = props.items ?? contextWishlist.wishlist;
+  const isLoading = props.isLoading ?? contextWishlist.isWishlistLoading;
+  const isLoggedIn = props.isLoggedIn ?? contextAuth.isLoggedIn;
+  const onRemoveFromWishlist = props.onRemoveFromWishlist ?? contextWishlist.removeFromWishlist;
+  const onAddToCart = props.onAddToCart ?? contextCart.addToCart;
+  const onBackToMain =
+    props.onBackToMain ?? (() => router.navigateTo("main"));
+  const onOpenLogin =
+    props.onOpenLogin ?? (() => contextAuth.openLogin("wishlist"));
+  const cartItems = props.cartItems ?? contextCart.cart;
+
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleResetSearch = useCallback((e?: React.MouseEvent<HTMLAnchorElement>) => {

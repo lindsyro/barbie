@@ -4,11 +4,11 @@ import type { CartItemType } from "../Cart/types.ts";
 export type { WishlistPattern };
 
 export interface WishlistProps {
-  items: WishlistPattern[];
+  items?: WishlistPattern[];
   isLoading?: boolean;
   isLoggedIn?: boolean;
-  onRemoveFromWishlist: (id: number) => void;
-  onAddToCart: (title: string) => void;
+  onRemoveFromWishlist?: (id: number) => void;
+  onAddToCart?: (title: string) => void;
   onAddAllToCart?: () => void;
   onBackToMain?: () => void;
   onOpenLogin?: () => void;
