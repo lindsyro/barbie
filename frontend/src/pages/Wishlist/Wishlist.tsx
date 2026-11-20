@@ -1,15 +1,16 @@
 import React, { useMemo, useState, useCallback } from "react";
-import { Breadcrumbs } from "../../components/Breadcrumbs/Breadcrumbs.tsx";
-import { PageHeader } from "../../components/PageHeader/PageHeader.tsx";
-import { SearchInput } from "../../components/SearchInput";
-import { PagePlaceholder } from "../../components/PagePlaceholder/PagePlaceholder.tsx";
-import { WishlistGuestBanner } from "../../components/WishlistGuestBanner/WishlistGuestBanner.tsx";
-import { HeartIcon } from "@/components/icons/index.ts";
+import {
+  Breadcrumbs,
+  PageHeader,
+  SearchInput,
+  PagePlaceholder,
+  WishlistGuestBanner,
+  PatternCard,
+  HeartIcon,
+} from "@/components/index.ts";
+import { searchPatterns } from "@/utils/patternSearch.ts";
 import type { WishlistProps } from "./types.ts";
-import { searchPatterns } from "../../utils/patternSearch.ts";
-import { PatternCard } from "../../components/PatternCard";
 import "./wishlist.css";
-import "../pages.css";
 
 export const Wishlist: React.FC<WishlistProps> = React.memo(({
   items,
