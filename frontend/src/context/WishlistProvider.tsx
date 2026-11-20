@@ -1,11 +1,4 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-  useMemo,
-} from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   fetchWishlist,
   toggleWishlist as apiToggleWishlist,
@@ -18,27 +11,15 @@ import {
 } from "@/api/wishlist.ts";
 import { findCachedPatternById } from "@/api/patterns.ts";
 import { getPatternImages } from "@/utils/patternImages.ts";
-import { useAuth } from "./AuthContext.tsx";
-import { useNotification } from "./NotificationContext.tsx";
+import { WishlistContext } from "./WishlistContext.ts";
+import { useAuth } from "./AuthContext.ts";
+import { useNotification } from "./NotificationContext.ts";
 
-export interface WishlistContextType {
-  wishlist: WishlistPattern[];
-  wishlistCount: number;
-  wishlistIds: number[];
-  wishlistIdsSet: Set<number>;
-  isWishlistLoading: boolean;
-  isFavorite: (id: number) => boolean;
-  refreshWishlist: () => Promise<void>;
-  toggleWishlist: (
-    patternId: number,
-    customPayload?: Partial<WishlistPattern>,
-  ) => Promise<void>;
-  removeFromWishlist: (patternId: number) => Promise<void>;
+export interface WishlistProviderProps {
+  children: React.ReactNode;
 }
 
-export const WishlistContext = createContext<WishlistContextType | null>(null);
-
-export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({
+export const WishlistProvider: React.FC<WishlistProviderProps> = ({
   children,
 }) => {
   const { currentUser } = useAuth();
@@ -63,10 +44,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Синхронизация избранного при изменении состояния авторизации
   useEffect(() => {
-    if (!currentUser) {
-      setWishlist(getGuestWishlist());
-      return;
-    }
+    if (!currentUser) return;
 
     let ignore = false;
     const guestItems = getGuestWishlist();
@@ -201,11 +179,3 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({
     </WishlistContext.Provider>
   );
 };
-
-export function useWishlist(): WishlistContextType {
-  const context = useContext(WishlistContext);
-  if (!context) {
-    throw new Error("useWishlist must be used within a WishlistProvider");
-  }
-  return context;
-}

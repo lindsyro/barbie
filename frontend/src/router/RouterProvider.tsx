@@ -1,24 +1,12 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-} from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import { RouterContext } from "./RouterContext.ts";
 import { KNOWN_PAGES, parseCatalogRoute } from "./routes.ts";
 
-export interface RouterContextType {
-  currentPage: string;
-  catalogCategory: string;
-  catalogDollId: number | null;
-  navigateTo: (page: string) => void;
+export interface RouterProviderProps {
+  children: React.ReactNode;
 }
 
-export const RouterContext = createContext<RouterContextType | null>(null);
-
-export const RouterProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const RouterProvider: React.FC<RouterProviderProps> = ({ children }) => {
   const [currentPage, setCurrentPage] = useState<string>("main");
   const [catalogCategory, setCatalogCategory] = useState<string>("all");
   const [catalogDollId, setCatalogDollId] = useState<number | null>(null);
@@ -69,11 +57,3 @@ export const RouterProvider: React.FC<{ children: React.ReactNode }> = ({
     </RouterContext.Provider>
   );
 };
-
-export function useRouter(): RouterContextType {
-  const context = useContext(RouterContext);
-  if (!context) {
-    throw new Error("useRouter must be used within a RouterProvider");
-  }
-  return context;
-}

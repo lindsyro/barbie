@@ -1,15 +1,12 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-  useMemo,
-} from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import type { CartItemType } from "@/pages/Cart/types.ts";
 import { findCachedPatternByTitle } from "@/api/patterns.ts";
 import { getPatternImages } from "@/utils/patternImages.ts";
-import { useNotification } from "./NotificationContext.tsx";
+import {
+  CartContext,
+  type AddToCartPayload,
+} from "./CartContext.ts";
+import { useNotification } from "./NotificationContext.ts";
 
 const CART_STORAGE_KEY = "goose_cart";
 
@@ -23,36 +20,14 @@ function getStoredCart(): CartItemType[] {
   }
 }
 
-export interface AddToCartPayload {
-  id?: number;
-  title: string;
-  doll?: string;
-  price?: number;
-  image?: string;
-  tag?: string;
-  format?: string;
+export interface CartProviderProps {
+  children: React.ReactNode;
 }
 
-export interface CartContextType {
-  cart: CartItemType[];
-  cartCount: number;
-  cartTitlesSet: Set<string>;
-  isInCart: (title: string) => boolean;
-  addToCart: (itemOrTitle: string | AddToCartPayload) => void;
-  removeFromCart: (id: number) => void;
-  clearCart: () => void;
-  addAllToCart: (items: AddToCartPayload[]) => number;
-}
-
-export const CartContext = createContext<CartContextType | null>(null);
-
-export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [cart, setCart] = useState<CartItemType[]>(() => getStoredCart());
   const { showNotification } = useNotification();
 
-  // Сохранение корзины в localStorage
   useEffect(() => {
     try {
       localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
@@ -87,11 +62,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
         typeof itemOrTitle === "object" ? itemOrTitle : undefined;
       const cached = findCachedPatternByTitle(title);
 
-      const price =
-        explicitItem?.price ??
-        cached?.price ??
-        490;
-      const numPrice = typeof price === "number" ? price : parseInt(String(price), 10) || 490;
+      const price = explicitItem?.price ?? cached?.price ?? 490;
+      const numPrice =
+        typeof price === "number"
+          ? price
+          : parseInt(String(price), 10) || 490;
 
       const id = explicitItem?.id ?? cached?.id ?? Date.now();
       const doll = explicitItem?.doll ?? cached?.doll ?? "Барби";
@@ -152,7 +127,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
               doll: item.doll || "Барби",
               price: numPrice,
               priceFormatted: `${numPrice} ₽`,
-              image: item.image || (item.id ? getPatternImages(item.id)[0] : "") || "",
+              image:
+                item.image ||
+                (item.id ? getPatternImages(item.id)[0] : "") ||
+                "",
               tag: item.tag || "Выкройка",
               format: item.format || "PDF (А4 + инструкции)",
             });
@@ -189,11 +167,3 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     </CartContext.Provider>
   );
 };
-
-export function useCart(): CartContextType {
-  const context = useContext(CartContext);
-  if (!context) {
-    throw new Error("useCart must be used within a CartProvider");
-  }
-  return context;
-}

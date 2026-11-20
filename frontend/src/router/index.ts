@@ -1,10 +1,13 @@
 export { AppRouter } from "./AppRouter.tsx";
 export {
-  RouterProvider,
-  useRouter,
   RouterContext,
+  useRouter,
   type RouterContextType,
-} from "./RouterContext.tsx";
+} from "./RouterContext.ts";
+export {
+  RouterProvider,
+  type RouterProviderProps,
+} from "./RouterProvider.tsx";
 export {
   KNOWN_PAGES,
   parseCatalogRoute,

@@ -1,8 +1,8 @@
 import React from "react";
-import { NotificationProvider } from "./NotificationContext.tsx";
-import { AuthProvider } from "./AuthContext.tsx";
-import { CartProvider } from "./CartContext.tsx";
-import { WishlistProvider } from "./WishlistContext.tsx";
+import { NotificationProvider } from "./NotificationProvider.tsx";
+import { AuthProvider } from "./AuthProvider.tsx";
+import { CartProvider } from "./CartProvider.tsx";
+import { WishlistProvider } from "./WishlistProvider.tsx";
 import { RouterProvider } from "@/router/index.ts";
 
 export interface AppProvidersProps {

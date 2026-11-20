@@ -17,7 +17,7 @@ import {
   Cart,
   Wishlist,
 } from "@/pages/index.ts";
-import { useRouter } from "./RouterContext.tsx";
+import { useRouter } from "./RouterContext.ts";
 import { useCart, useWishlist, useAuth, useNotification } from "@/context/index.ts";
 
 export const AppRouter: React.FC = () => {

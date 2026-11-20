@@ -1,37 +1,18 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-} from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   type User,
   getStoredUser,
   fetchCurrentUser,
   logoutUser,
 } from "@/api/auth.ts";
-import { useNotification } from "./NotificationContext.tsx";
+import { AuthContext } from "./AuthContext.ts";
+import { useNotification } from "./NotificationContext.ts";
 
-export interface AuthContextType {
-  currentUser: User | null;
-  isLoggedIn: boolean;
-  authModal: "login" | "register" | null;
-  pendingAction: "cart" | "wishlist" | null;
-  openLogin: (action?: "cart" | "wishlist") => void;
-  openRegister: (action?: "cart" | "wishlist") => void;
-  closeAuthModal: () => void;
-  setPendingAction: (action: "cart" | "wishlist" | null) => void;
-  logout: () => Promise<void>;
-  handleLoginSuccess: (user: User) => void;
-  handleRegisterSuccess: (user: User) => void;
+export interface AuthProviderProps {
+  children: React.ReactNode;
 }
 
-export const AuthContext = createContext<AuthContextType | null>(null);
-
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(() =>
     getStoredUser(),
   );
@@ -72,19 +53,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     showNotification("Вы успешно вышли из аккаунта");
   }, [showNotification]);
 
-  const handleLoginSuccess = useCallback(
-    (user: User) => {
-      setCurrentUser(user);
-    },
-    [],
-  );
+  const handleLoginSuccess = useCallback((user: User) => {
+    setCurrentUser(user);
+  }, []);
 
-  const handleRegisterSuccess = useCallback(
-    (user: User) => {
-      setCurrentUser(user);
-    },
-    [],
-  );
+  const handleRegisterSuccess = useCallback((user: User) => {
+    setCurrentUser(user);
+  }, []);
 
   return (
     <AuthContext.Provider
@@ -106,11 +81,3 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     </AuthContext.Provider>
   );
 };
-
-export function useAuth(): AuthContextType {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
-}
