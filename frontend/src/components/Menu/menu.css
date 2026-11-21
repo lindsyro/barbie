@@ -263,19 +263,22 @@
 
 .mega__sub-list {
   list-style: none;
-  margin: 0; padding: 0.4rem 0;
+  margin: 0;
+  padding: 0;
   max-height: 420px;
   overflow-y: auto;
+  width: 100%;
 }
 
 .mega__sub-item {
   position: relative;
+  width: 100%;
 }
 
 .mega__sub-item--all {
+  width: 100%;
   border-bottom: 1px solid var(--color-ivory);
   margin-bottom: 0.25rem;
-  padding-bottom: 0.25rem;
   background: rgba(166, 129, 66, 0.04);
 }
 
@@ -291,6 +294,8 @@
 .mega__sub-link {
   display: flex;
   flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
   padding: 0.55rem 1rem;
   text-decoration: none;
   color: var(--text-primary);
@@ -303,6 +308,28 @@
 
 .mega__sub-link:hover .mega__sub-label {
   color: var(--color-gold-site);
+}
+
+/* Строка «Все выкройки раздела» — строго горизонтальный flex на всю ширину: текст слева, бейдж справа */
+.mega__sub-link--all,
+.mega__sub-link.mega__sub-link--all {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 0.75rem 1rem !important;
+}
+
+.mega__sub-link--all .mega__sub-label {
+  flex: 1 !important;
+  text-align: left !important;
+}
+
+.mega__sub-link--all .mega__right-count {
+  margin-left: auto !important;
+  flex-shrink: 0 !important;
 }
 
 .mega__sub-label {
@@ -445,9 +472,25 @@
 .mobile-cats__sub-link:hover { color: var(--color-gold-site); }
 
 .mobile-cats__sub-link--all {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
   font-weight: 600;
   color: var(--color-chocolate);
   border-bottom: 1px dashed var(--color-ivory);
   margin-bottom: 0.25rem;
   padding-bottom: 0.45rem;
+}
+
+.mobile-cats__sub-link--all span:first-child {
+  flex: 1 !important;
+  text-align: left !important;
+}
+
+.mobile-cats__sub-link--all .mega__right-count {
+  margin-left: auto !important;
+  flex-shrink: 0 !important;
 }

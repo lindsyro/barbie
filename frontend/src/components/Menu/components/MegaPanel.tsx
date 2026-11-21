@@ -64,16 +64,15 @@ export const MegaPanel: React.FC<MegaPanelProps> = ({
       {/* Правая колонка: появляется сбоку ТОЛЬКО при клике на категорию */}
       {selectedCat && selectedCat.children && (
         <div className="mega__right">
-          <div className="mega__right-header">
-            <span className="mega__right-title">{selectedCat.label}</span>
-            <span className="mega__right-count">
-              {selectedCat.children.filter((s) => !getItemId(s).endsWith("-all")).length} кукол
-            </span>
-          </div>
           <ul className="mega__sub-list">
             {selectedCat.children.map((sub) => {
               const subId = getItemId(sub);
               const isAllLink = subId.endsWith("-all");
+              const dollCount =
+                selectedCat.children?.filter(
+                  (s) => !getItemId(s).endsWith("-all"),
+                ).length ?? 0;
+
               return (
                 <li
                   key={subId}
@@ -85,6 +84,9 @@ export const MegaPanel: React.FC<MegaPanelProps> = ({
                     onClick={onClose}
                   >
                     <span className="mega__sub-label">{sub.label}</span>
+                    {isAllLink && (
+                      <span className="mega__right-count">{dollCount}</span>
+                    )}
                     {sub.description && (
                       <span className="mega__sub-desc">
                         {sub.description}

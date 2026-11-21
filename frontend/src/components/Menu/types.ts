@@ -5,6 +5,8 @@ export interface MenuItem {
   badge?: string;
   description?: string;
   children?: MenuItem[];
+  target?: string;
+  isDynamic?: boolean;
 }
 
 export interface MenuProps {

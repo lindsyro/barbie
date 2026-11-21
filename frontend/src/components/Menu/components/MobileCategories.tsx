@@ -50,6 +50,11 @@ export const MobileCategories: React.FC<MobileCategoriesProps> = ({
                 {cat.children.map((sub) => {
                   const subId = getItemId(sub);
                   const isAllLink = subId.endsWith("-all");
+                  const dollCount =
+                    cat.children?.filter(
+                      (s) => !getItemId(s).endsWith("-all"),
+                    ).length ?? 0;
+
                   return (
                     <li key={subId} className={isAllLink ? "mobile-cats__sub-item--all" : ""}>
                       <a
@@ -57,7 +62,10 @@ export const MobileCategories: React.FC<MobileCategoriesProps> = ({
                         className={`mobile-cats__sub-link ${isAllLink ? "mobile-cats__sub-link--all" : ""}`}
                         onClick={onClose}
                       >
-                        {sub.label}
+                        <span>{sub.label}</span>
+                        {isAllLink && (
+                          <span className="mega__right-count">{dollCount}</span>
+                        )}
                       </a>
                     </li>
                   );

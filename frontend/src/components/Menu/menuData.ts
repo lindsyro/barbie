@@ -49,7 +49,7 @@ export function buildMenuItems(
   const catalogChildren: MenuItem[] = [allPatternsItem, ...categoryItems];
 
   return baseItems.map((item) => {
-    if (item.id === "catalog") {
+    if (item.isDynamic || item.id === "catalog" || item.href === "#catalog") {
       return {
         ...item,
         children: catalogChildren,
@@ -64,6 +64,7 @@ export const BASE_MENU_ITEMS: MenuItem[] = [
     id: "catalog",
     label: "Каталог выкроек",
     href: "#catalog",
+    isDynamic: true,
   },
   {
     id: "tutorials",
@@ -79,7 +80,6 @@ export const BASE_MENU_ITEMS: MenuItem[] = [
     id: "free",
     label: "Бесплатно",
     href: "#free",
-    badge: "Free",
   },
   {
     id: "useful",

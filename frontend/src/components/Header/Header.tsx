@@ -4,6 +4,7 @@ import { buildMenuItems } from "../Menu/menuData.ts";
 import type { MenuItem } from "../Menu/types.ts";
 import { useAsyncData } from "../../hooks/index.ts";
 import { fetchDollCategories } from "../../api/dolls.ts";
+import { fetchMenuItems } from "../../api/menu.ts";
 import "./header.css";
 
 export interface HeaderProps {
@@ -37,15 +38,21 @@ export const Header: React.FC<HeaderProps> = ({
   isLoggedIn = false,
   userName = "",
 }) => {
-  // Динамическая загрузка категорий кукол со связанными куклами из базы данных PostgreSQL
+  // Динамическая загрузка категорий кукол со связанными куклами из базы данных
   const { data: categories = [] } = useAsyncData(fetchDollCategories, {
+    initialData: [],
+  });
+
+  // Динамическая загрузка структуры пунктов меню из базы данных
+  const { data: dbMenuItems = [] } = useAsyncData(fetchMenuItems, {
     initialData: [],
   });
 
   const menuItems = useMemo(() => {
     if (customMenuItems) return customMenuItems;
-    return buildMenuItems(categories);
-  }, [customMenuItems, categories]);
+    const baseItems = dbMenuItems.length > 0 ? dbMenuItems : undefined;
+    return buildMenuItems(categories, baseItems);
+  }, [customMenuItems, categories, dbMenuItems]);
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);

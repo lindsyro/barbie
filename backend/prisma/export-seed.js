@@ -34,6 +34,10 @@ async function exportSeed() {
     orderBy: { id: "asc" },
   });
 
+  const menuItems = await prisma.menuItem.findMany({
+    orderBy: { order: "asc" },
+  });
+
   // Получаем корзину и избранное демо-пользователя (если есть)
   const demoUser = await prisma.user.findUnique({
     where: { email: "demo@goose.ru" },
@@ -65,6 +69,27 @@ async function exportSeed() {
     rating: r.rating,
     text: r.text,
   }));
+
+  const defaultMenuItems = [
+    { id: 1, title: "Каталог выкроек", url: "#catalog", order: 1, target: "_self", isVisible: true, isDynamic: true },
+    { id: 2, title: "Видеоуроки", url: "#tutorials", order: 2, target: "_self", isVisible: true, isDynamic: false },
+    { id: 3, title: "Курсы", url: "#courses", order: 3, target: "_self", isVisible: true, isDynamic: false },
+    { id: 4, title: "Бесплатно", url: "#free", order: 4, target: "_self", isVisible: true, isDynamic: false },
+    { id: 5, title: "Полезное", url: "#useful", order: 5, target: "_self", isVisible: true, isDynamic: false },
+    { id: 6, title: "О нас", url: "#about", order: 6, target: "_self", isVisible: true, isDynamic: false },
+  ];
+
+  const transformedMenuItems = menuItems.length > 0
+    ? menuItems.map((m) => ({
+        id: m.id,
+        title: m.title,
+        url: m.url,
+        order: m.order,
+        target: m.target,
+        isVisible: m.isVisible,
+        isDynamic: m.isDynamic,
+      }))
+    : defaultMenuItems;
 
   const content = `import { PrismaClient } from "@prisma/client";
 import crypto from "node:crypto";
@@ -244,6 +269,34 @@ async function main() {
   }
   console.log(\`✓ Таблица patterns заполнена (\${PATTERNS_DATA.length} выкроек со связями)\`);
 
+  // 7. Таблица menu_items
+  console.log("Добавление пунктов меню в menu_items...");
+  const MENU_ITEMS_DATA = \${JSON.stringify(transformedMenuItems, null, 4)};
+
+  for (const item of MENU_ITEMS_DATA) {
+    await prisma.menuItem.upsert({
+      where: { id: item.id },
+      update: {
+        title: item.title,
+        url: item.url,
+        order: item.order,
+        target: item.target,
+        isVisible: item.isVisible,
+        isDynamic: item.isDynamic,
+      },
+      create: {
+        id: item.id,
+        title: item.title,
+        url: item.url,
+        order: item.order,
+        target: item.target,
+        isVisible: item.isVisible,
+        isDynamic: item.isDynamic,
+      },
+    });
+  }
+  console.log(\`✓ Таблица menu_items заполнена (\${MENU_ITEMS_DATA.length} пунктов меню)\`);
+
   console.log("🎉 База данных goose успешно наполнена!");
 }
 
@@ -264,6 +317,7 @@ main()
   console.log(`   - Кукол: ${dolls.length}`);
   console.log(`   - Выкроек: ${patterns.length}`);
   console.log(`   - Отзывов: ${reviews.length}`);
+  console.log(`   - Пунктов меню: ${transformedMenuItems.length}`);
 }
 
 exportSeed()

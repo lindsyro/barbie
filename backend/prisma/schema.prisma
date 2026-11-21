@@ -155,3 +155,17 @@ model Pattern {
 
   @@map("patterns")
 }
+
+model MenuItem {
+  id        Int      @id @default(autoincrement())
+  title     String
+  url       String
+  order     Int      @default(0)
+  target    String   @default("_self")
+  isVisible Boolean  @default(true)
+  isDynamic Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("menu_items")
+}

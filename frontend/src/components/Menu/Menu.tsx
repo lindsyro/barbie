@@ -102,6 +102,8 @@ export const Menu: React.FC<MenuProps> = ({
               <div className="menu__link-wrapper">
                 <a
                   href={item.href}
+                  target={item.target && item.target !== "_self" ? item.target : undefined}
+                  rel={item.target === "_blank" ? "noopener noreferrer" : undefined}
                   className="menu__link"
                   onClick={(e) => {
                     if (hasChildren) {

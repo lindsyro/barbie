@@ -787,6 +787,34 @@ async function main() {
   }
   console.log(`✓ Таблица patterns заполнена (${PATTERNS_DATA.length} выкроек со связями)`);
 
+  // 7. Таблица menu_items
+  console.log("Добавление пунктов меню в menu_items...");
+  const MENU_ITEMS_DATA = ${JSON.stringify(transformedMenuItems, null, 4)};
+
+  for (const item of MENU_ITEMS_DATA) {
+    await prisma.menuItem.upsert({
+      where: { id: item.id },
+      update: {
+        title: item.title,
+        url: item.url,
+        order: item.order,
+        target: item.target,
+        isVisible: item.isVisible,
+        isDynamic: item.isDynamic,
+      },
+      create: {
+        id: item.id,
+        title: item.title,
+        url: item.url,
+        order: item.order,
+        target: item.target,
+        isVisible: item.isVisible,
+        isDynamic: item.isDynamic,
+      },
+    });
+  }
+  console.log(`✓ Таблица menu_items заполнена (${MENU_ITEMS_DATA.length} пунктов меню)`);
+
   console.log("🎉 База данных goose успешно наполнена!");
 }
 
