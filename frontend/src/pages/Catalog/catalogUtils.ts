@@ -122,7 +122,7 @@ export function buildCatalogBreadcrumbs(
   }
 
   trail.push({
-    label: "Каталог",
+    label: "Каталог выкроек",
     href: "#catalog",
     onClick: onResetToCatalog,
   });
@@ -146,13 +146,12 @@ export function buildCatalogBreadcrumbs(
 }
 
 /**
- * Формирует заголовок для страницы каталога с опциональным счетчиком
+ * Формирует заголовок для страницы каталога
  */
 export function getCatalogTitle(
   activeCategory: string,
   selectedDoll: DollItem | null,
   categoryName: string,
-  count?: number,
 ): string {
   const baseTitle = selectedDoll
     ? (selectedDoll.nameRu || selectedDoll.nameEn
@@ -162,5 +161,5 @@ export function getCatalogTitle(
       ? "Каталог выкроек"
       : categoryName;
 
-  return typeof count === "number" ? `${baseTitle} (${count})` : baseTitle;
+  return baseTitle;
 }

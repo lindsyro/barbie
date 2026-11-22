@@ -137,9 +137,8 @@ export function useCatalog(props: CatalogProps) {
         activeCategory,
         selectedDoll,
         currentCategoryName,
-        filteredPatterns.length,
       ),
-    [activeCategory, selectedDoll, currentCategoryName, filteredPatterns.length],
+    [activeCategory, selectedDoll, currentCategoryName],
   );
 
   return {
