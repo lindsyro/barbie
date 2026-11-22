@@ -1,52 +1,14 @@
 /**
- * API взаимодействия с избранным (Wishlist) в PostgreSQL для конкретного пользователя
- * + Поддержка гостевого избранного в localStorage и слияния при авторизации
+ * API взаимодействия с избранным (Wishlist) в базе данных и localStorage (гость / офлайн)
  */
 
 import { getStoredToken, getStoredUser } from "./auth.ts";
-import { findCachedPatternById } from "./patterns.ts";
+import { findCachedPatternById, type CatalogPatternItem } from "./patterns.ts";
 import { getPatternImages } from "../utils/patternImages.ts";
-
-export interface WishlistPattern {
-  id: number;
-  title: string;
-  doll: string;
-  price: number;
-  tag: string;
-  image: string;
-  format?: string;
-}
-
-export function enrichWishlistItem(it: Partial<WishlistPattern> & { id: number }): WishlistPattern {
-  const cat = findCachedPatternById(it.id);
-  const autoImgs = getPatternImages(it.id);
-  const mainImage = cat?.image || autoImgs[0] || normalizePatternImage(it.image || "", it.id);
-
-  if (cat) {
-    return {
-      id: cat.id,
-      title: cat.title,
-      doll: cat.doll,
-      price: cat.price,
-      tag: "Выкройка",
-      image: mainImage,
-      format: "PDF (А4 + инструкции)",
-    };
-  }
-  return {
-    id: it.id,
-    title: it.title || `Выкройка #${it.id}`,
-    doll: it.doll || "Барби",
-    price: it.price || 450,
-    tag: it.tag || "Выкройка",
-    image: mainImage,
-    format: it.format || "PDF (А4 + инструкции)",
-  };
-}
 
 export interface WishlistResponse {
   total: number;
-  items: WishlistPattern[];
+  items: CatalogPatternItem[];
 }
 
 export interface ToggleWishlistResponse {
@@ -63,350 +25,203 @@ const API_BASE =
 
 const BASE = import.meta.env.BASE_URL;
 const GUEST_WISHLIST_KEY = "goose_guest_wishlist";
-const REMOVED_GUEST_WISHLIST_KEY = "goose_guest_removed_wishlist";
+const REMOVED_GUEST_KEY = "goose_guest_removed_wishlist";
+const getUserStorageKey = (userId: string) => `goose_wishlist_${userId}`;
 
 function isStaticHosting(): boolean {
   if (typeof window === "undefined") return false;
   return window.location.hostname.endsWith("github.io") || window.location.protocol === "file:";
 }
 
-// Начальные данные для демо-пользователя в офлайн/статическом режиме
-const DEMO_FALLBACK_PATTERNS: WishlistPattern[] = [
-  {
-    id: 27,
-    title: "Водолазка-боди для Барби стандарт",
-    doll: "Barbie Standard (Барби стандарт)",
-    price: 450,
-    tag: "Топы и боди",
-    image: `${BASE}patterns/27/1.png`,
-  },
-  {
-    id: 21,
-    title: "Кофточка и брюки клёш для MiniFee",
-    doll: "MiniFee (Минифи)",
-    price: 790,
-    tag: "Костюмы",
-    image: `${BASE}patterns/21/3.png`,
-  },
-  {
-    id: 22,
-    title: "Водолазка-боди для Ken",
-    doll: "Ken (качок, Made to Move) / Ken MTM Standard",
-    price: 450,
-    tag: "Базовый гардероб",
-    image: `${BASE}patterns/22/4.png`,
-  },
-];
+/* ==========================================================================
+   Универсальные хелперы localStorage
+   ========================================================================== */
 
-function getUserStorageKey(userId: string): string {
-  return `goose_wishlist_${userId}`;
-}
-
-function getFallbackWishlist(userId?: string): WishlistResponse {
-  if (!userId) {
-    const guestItems = getGuestWishlist();
-    return { total: guestItems.length, items: guestItems };
-  }
-
+function readStorage<T>(key: string, fallback: T): T {
   try {
-    const raw = localStorage.getItem(getUserStorageKey(userId));
-    if (raw) {
-      const items: WishlistPattern[] = JSON.parse(raw);
-      return { total: items.length, items };
-    }
-    const user = getStoredUser();
-    if (user?.email === "demo@goose.ru") {
-      setFallbackWishlist(DEMO_FALLBACK_PATTERNS, userId);
-      return { total: DEMO_FALLBACK_PATTERNS.length, items: DEMO_FALLBACK_PATTERNS };
-    }
+    const raw = localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : fallback;
   } catch {
-    // ignore
+    return fallback;
   }
-  return { total: 0, items: [] };
 }
 
-function setFallbackWishlist(items: WishlistPattern[], userId: string): void {
+function writeStorage<T>(key: string, value: T): void {
   try {
-    localStorage.setItem(getUserStorageKey(userId), JSON.stringify(items));
+    localStorage.setItem(key, JSON.stringify(value));
   } catch {
     // ignore
   }
 }
 
-/**
- * Нормализация пути к изображению с защитой от дублирования /barbie/ и автопоиском по ID
- */
+function removeStorage(key: string): void {
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    // ignore
+  }
+}
+
+/* ==========================================================================
+   Обогащение данных выкройки
+   ========================================================================== */
+
 export function normalizePatternImage(img: string, patternId?: number): string {
   if (patternId) {
     const autoImgs = getPatternImages(patternId);
     if (autoImgs.length > 0) return autoImgs[0];
   }
-  if (!img) return `${BASE}patterns/27/1.png`;
-  if (img.startsWith("http://") || img.startsWith("https://")) return img;
-
-  // Очистка от повторяющихся префиксов /barbie/ и ведущих слэшей
-  const clean = img.replace(/^(\/?barbie\/)+/i, "").replace(/^\/+/, "");
-
-  // Проверяем, есть ли patterns/<id> в пути
-  const match = clean.match(/^patterns\/(\d+)/);
-  if (match) {
-    const folderId = parseInt(match[1], 10);
-    const autoImgs = getPatternImages(folderId);
-    if (autoImgs.length > 0) return autoImgs[0];
-  }
-
-  return `${BASE}${clean}`;
+  return img || `${BASE}patterns/27/1.png`;
 }
 
-/* ==========================================================================
-   Управление гостевым избранным в localStorage
-   ========================================================================== */
+export function enrichWishlistItem(
+  it: Partial<CatalogPatternItem> & { id: number },
+): CatalogPatternItem {
+  const cached = findCachedPatternById(it.id);
+  if (cached) return cached;
 
-/**
- * Получить список избранного неавторизованного пользователя из localStorage
- */
-export function getGuestWishlist(): WishlistPattern[] {
-  try {
-    const raw = localStorage.getItem(GUEST_WISHLIST_KEY);
-    if (!raw) return [];
-    const items: WishlistPattern[] = JSON.parse(raw);
-    return Array.isArray(items)
-      ? items.map((it) => ({ ...it, image: normalizePatternImage(it.image) }))
-      : [];
-  } catch {
-    return [];
-  }
-}
+  const autoImgs = getPatternImages(it.id);
+  const image = it.image || autoImgs[0] || `${BASE}patterns/27/1.png`;
 
-/**
- * Сохранить список избранного неавторизованного пользователя в localStorage
- */
-export function setGuestWishlist(items: WishlistPattern[]): void {
-  try {
-    localStorage.setItem(GUEST_WISHLIST_KEY, JSON.stringify(items));
-  } catch {
-    // ignore
-  }
-}
-
-/**
- * Очистить гостевое избранное из localStorage
- */
-export function clearGuestWishlist(): void {
-  try {
-    localStorage.removeItem(GUEST_WISHLIST_KEY);
-  } catch {
-    // ignore
-  }
-}
-
-/**
- * Получить список ID выкроек, удаленных пользователем в гостевой сессии
- */
-export function getRemovedGuestWishlist(): number[] {
-  try {
-    const raw = localStorage.getItem(REMOVED_GUEST_WISHLIST_KEY);
-    if (!raw) return [];
-    const items = JSON.parse(raw);
-    return Array.isArray(items)
-      ? items.map(Number).filter((id) => !isNaN(id) && id > 0)
-      : [];
-  } catch {
-    return [];
-  }
-}
-
-/**
- * Зафиксировать удаление выкройки в гостевой сессии
- */
-export function addRemovedGuestWishlist(patternId: number): void {
-  try {
-    const current = getRemovedGuestWishlist();
-    if (!current.includes(patternId)) {
-      localStorage.setItem(
-        REMOVED_GUEST_WISHLIST_KEY,
-        JSON.stringify([...current, patternId])
-      );
-    }
-  } catch {
-    // ignore
-  }
-}
-
-/**
- * Убрать выкройку из списка удаленных (если пользователь снова поставил лайк)
- */
-export function removeRemovedGuestWishlist(patternId: number): void {
-  try {
-    const current = getRemovedGuestWishlist();
-    const updated = current.filter((id) => id !== patternId);
-    localStorage.setItem(
-      REMOVED_GUEST_WISHLIST_KEY,
-      JSON.stringify(updated)
-    );
-  } catch {
-    // ignore
-  }
-}
-
-/**
- * Очистить список удаленных выкроек гостя
- */
-export function clearRemovedGuestWishlist(): void {
-  try {
-    localStorage.removeItem(REMOVED_GUEST_WISHLIST_KEY);
-  } catch {
-    // ignore
-  }
-}
-
-/**
- * Переключить выкройку в гостевом избранном (добавить / удалить)
- */
-export function toggleGuestWishlist(pattern: WishlistPattern): {
-  inWishlist: boolean;
-  items: WishlistPattern[];
-} {
-  const current = getGuestWishlist();
-  const exists = current.some((it) => it.id === pattern.id);
-  let updated: WishlistPattern[];
-
-  if (exists) {
-    updated = current.filter((it) => it.id !== pattern.id);
-    addRemovedGuestWishlist(pattern.id);
-  } else {
-    removeRemovedGuestWishlist(pattern.id);
-    const normalized: WishlistPattern = {
-      ...pattern,
-      image: normalizePatternImage(pattern.image),
-    };
-    updated = [normalized, ...current];
-  }
-
-  setGuestWishlist(updated);
   return {
-    inWishlist: !exists,
-    items: updated,
+    id: it.id,
+    title: it.title || `Выкройка #${it.id}`,
+    doll: it.doll || "Барби",
+    price: it.price || 450,
+    image,
+    images: it.images?.length ? it.images : autoImgs.length > 0 ? autoImgs : [image],
+    dolls: it.dolls?.length ? it.dolls : [],
   };
 }
 
-/**
- * Удалить выкройку из гостевого избранного
- */
-export function removeFromGuestWishlist(patternId: number): WishlistPattern[] {
+/* ==========================================================================
+   Гостевое избранное в localStorage
+   ========================================================================== */
+
+export function getGuestWishlist(): CatalogPatternItem[] {
+  return readStorage<Array<Partial<CatalogPatternItem> & { id: number }>>(
+    GUEST_WISHLIST_KEY,
+    [],
+  ).map(enrichWishlistItem);
+}
+
+export function setGuestWishlist(items: CatalogPatternItem[]): void {
+  writeStorage(GUEST_WISHLIST_KEY, items);
+}
+
+export function clearGuestWishlist(): void {
+  removeStorage(GUEST_WISHLIST_KEY);
+}
+
+export function getRemovedGuestWishlist(): number[] {
+  return readStorage<number[]>(REMOVED_GUEST_KEY, []);
+}
+
+export function clearRemovedGuestWishlist(): void {
+  removeStorage(REMOVED_GUEST_KEY);
+}
+
+export function toggleGuestWishlist(pattern: CatalogPatternItem): {
+  inWishlist: boolean;
+  items: CatalogPatternItem[];
+} {
+  const current = getGuestWishlist();
+  const exists = current.some((it) => it.id === pattern.id);
+  const removed = new Set(getRemovedGuestWishlist());
+
+  let updated: CatalogPatternItem[];
+  if (exists) {
+    updated = current.filter((it) => it.id !== pattern.id);
+    removed.add(pattern.id);
+  } else {
+    updated = [enrichWishlistItem(pattern), ...current];
+    removed.delete(pattern.id);
+  }
+
+  setGuestWishlist(updated);
+  writeStorage(REMOVED_GUEST_KEY, Array.from(removed));
+  return { inWishlist: !exists, items: updated };
+}
+
+export function removeFromGuestWishlist(patternId: number): CatalogPatternItem[] {
   const current = getGuestWishlist();
   const updated = current.filter((it) => it.id !== patternId);
   setGuestWishlist(updated);
-  addRemovedGuestWishlist(patternId);
+
+  const removed = new Set(getRemovedGuestWishlist());
+  removed.add(patternId);
+  writeStorage(REMOVED_GUEST_KEY, Array.from(removed));
+
   return updated;
 }
 
 /* ==========================================================================
-   Синхронизация и слияние избранного
+   Резервное (офлайн/статическое) хранилище авторизованного пользователя
    ========================================================================== */
 
-/**
- * Синхронизировать (объединить) гостевое избранное с базой данных пользователя
- * с поддержкой удаления выкроек, исключённых в гостевой сессии
- */
-export async function syncGuestWishlistWithDatabase(
-  guestItems: WishlistPattern[],
-  removedPatternIds: number[] = getRemovedGuestWishlist()
-): Promise<WishlistResponse> {
-  const token = getStoredToken();
-  const user = getStoredUser();
-
-  if (!token || !user) {
-    return { total: guestItems.length, items: guestItems };
+function getFallbackWishlist(userId?: string): WishlistResponse {
+  if (!userId) {
+    const items = getGuestWishlist();
+    return { total: items.length, items };
   }
+  const items = readStorage<Array<Partial<CatalogPatternItem> & { id: number }>>(
+    getUserStorageKey(userId),
+    [],
+  ).map(enrichWishlistItem);
+  return { total: items.length, items };
+}
 
-  const patternIds = guestItems.map((it) => it.id);
+function setFallbackWishlist(items: CatalogPatternItem[], userId: string): void {
+  writeStorage(getUserStorageKey(userId), items);
+}
 
-  if (patternIds.length === 0 && removedPatternIds.length === 0) {
-    return fetchWishlist();
-  }
+function mergeWishlists(
+  existing: CatalogPatternItem[],
+  incoming: CatalogPatternItem[],
+  removedIds: number[],
+): CatalogPatternItem[] {
+  const removedSet = new Set(removedIds);
+  const filteredExisting = existing.filter((it) => !removedSet.has(it.id));
+  const seenIds = new Set(filteredExisting.map((it) => it.id));
 
-  if (isStaticHosting() && !import.meta.env.VITE_API_URL) {
-    // В статической среде объединяем в локальном хранилище пользователя
-    const current = getFallbackWishlist(user.id);
-    const merged = current.items.filter((it) => !removedPatternIds.includes(it.id));
-    const existingIds = new Set(merged.map((it) => it.id));
-
-    for (const g of guestItems) {
-      if (!existingIds.has(g.id) && !removedPatternIds.includes(g.id)) {
-        merged.push(g);
-        existingIds.add(g.id);
-      }
+  const merged = [...filteredExisting];
+  for (const item of incoming) {
+    if (!seenIds.has(item.id) && !removedSet.has(item.id)) {
+      merged.push(item);
+      seenIds.add(item.id);
     }
-
-    setFallbackWishlist(merged, user.id);
-    clearGuestWishlist();
-    clearRemovedGuestWishlist();
-    return { total: merged.length, items: merged };
   }
-
-  try {
-    const response = await fetch(`${API_BASE}/api/wishlist/sync`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ patternIds, removedPatternIds }),
-    });
-
-    if (response.status === 405 || !response.ok) {
-      // Fallback
-      const current = getFallbackWishlist(user.id);
-      const merged = current.items.filter((it) => !removedPatternIds.includes(it.id));
-      const existingIds = new Set(merged.map((it) => it.id));
-
-      for (const g of guestItems) {
-        if (!existingIds.has(g.id) && !removedPatternIds.includes(g.id)) {
-          merged.push(g);
-          existingIds.add(g.id);
-        }
-      }
-
-      setFallbackWishlist(merged, user.id);
-      clearGuestWishlist();
-      clearRemovedGuestWishlist();
-      return { total: merged.length, items: merged };
-    }
-
-    const data: { wishlist: WishlistResponse } = await response.json();
-    clearGuestWishlist();
-    clearRemovedGuestWishlist();
-
-    return {
-      total: data.wishlist.total,
-      items: data.wishlist.items.map(enrichWishlistItem),
-    };
-  } catch {
-    const current = getFallbackWishlist(user.id);
-    const merged = current.items.filter((it) => !removedPatternIds.includes(it.id));
-    const existingIds = new Set(merged.map((it) => it.id));
-
-    for (const g of guestItems) {
-      if (!existingIds.has(g.id) && !removedPatternIds.includes(g.id)) {
-        merged.push(g);
-        existingIds.add(g.id);
-      }
-    }
-
-    setFallbackWishlist(merged, user.id);
-    clearGuestWishlist();
-    clearRemovedGuestWishlist();
-    return { total: merged.length, items: merged };
-  }
+  return merged;
 }
 
 /* ==========================================================================
-   Основные методы для авторизованных пользователей
+   Сетевой уровень API
    ========================================================================== */
 
+async function apiRequest<T>(
+  endpoint: string,
+  options: RequestInit,
+  token: string,
+): Promise<T> {
+  const response = await fetch(`${API_BASE}${endpoint}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      ...options.headers,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || `API error: ${response.status}`);
+  }
+
+  return response.json();
+}
+
 /**
- * Получить список избранного текущего пользователя из БД PostgreSQL
+ * Получить список избранного текущего пользователя
  */
 export async function fetchWishlist(): Promise<WishlistResponse> {
   const token = getStoredToken();
@@ -417,33 +232,20 @@ export async function fetchWishlist(): Promise<WishlistResponse> {
     return { total: guestItems.length, items: guestItems };
   }
 
-  if (isStaticHosting() && !import.meta.env.VITE_API_URL) {
+  if (isStaticHosting() && !API_BASE) {
     return getFallbackWishlist(user.id);
   }
 
   try {
-    const response = await fetch(`${API_BASE}/api/wishlist`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (response.status === 405) {
-      return getFallbackWishlist(user.id);
-    }
-
-    if (!response.ok) {
-      if (response.status === 401) {
-        return { total: 0, items: [] };
-      }
-      return getFallbackWishlist(user.id);
-    }
-
-    const data: WishlistResponse = await response.json();
+    const data = await apiRequest<{ total?: number; items?: Array<{ id: number }> }>(
+      "/api/wishlist",
+      { method: "GET" },
+      token,
+    );
+    const items = (data.items || []).map(enrichWishlistItem);
     return {
-      total: data.total ?? data.items?.length ?? 0,
-      items: (data.items || []).map(enrichWishlistItem),
+      total: data.total ?? items.length,
+      items,
     };
   } catch {
     return getFallbackWishlist(user.id);
@@ -451,11 +253,65 @@ export async function fetchWishlist(): Promise<WishlistResponse> {
 }
 
 /**
- * Переключить состояние выкройки в избранном (добавить / удалить) в PostgreSQL
+ * Синхронизировать гостевое избранное с аккаунтом пользователя
+ */
+export async function syncGuestWishlistWithDatabase(
+  guestItems: CatalogPatternItem[],
+  removedPatternIds: number[] = getRemovedGuestWishlist(),
+): Promise<WishlistResponse> {
+  const token = getStoredToken();
+  const user = getStoredUser();
+
+  if (!token || !user) {
+    return { total: guestItems.length, items: guestItems };
+  }
+
+  const fallbackSync = () => {
+    const current = getFallbackWishlist(user.id).items;
+    const merged = mergeWishlists(current, guestItems, removedPatternIds);
+    setFallbackWishlist(merged, user.id);
+    clearGuestWishlist();
+    clearRemovedGuestWishlist();
+    return { total: merged.length, items: merged };
+  };
+
+  if (guestItems.length === 0 && removedPatternIds.length === 0) {
+    return fetchWishlist();
+  }
+
+  if (isStaticHosting() && !API_BASE) {
+    return fallbackSync();
+  }
+
+  try {
+    const data = await apiRequest<{
+      wishlist: { total: number; items: Array<{ id: number }> };
+    }>(
+      "/api/wishlist/sync",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          patternIds: guestItems.map((it) => it.id),
+          removedPatternIds,
+        }),
+      },
+      token,
+    );
+    clearGuestWishlist();
+    clearRemovedGuestWishlist();
+    const items = data.wishlist.items.map(enrichWishlistItem);
+    return { total: data.wishlist.total ?? items.length, items };
+  } catch {
+    return fallbackSync();
+  }
+}
+
+/**
+ * Переключить состояние выкройки в избранном (добавить / удалить)
  */
 export async function toggleWishlist(
   patternId: number,
-  patternFallback?: Partial<WishlistPattern>
+  patternFallback?: Partial<CatalogPatternItem>,
 ): Promise<ToggleWishlistResponse> {
   const token = getStoredToken();
   const user = getStoredUser();
@@ -464,74 +320,53 @@ export async function toggleWishlist(
     throw new Error("Требуется авторизация");
   }
 
-  if (isStaticHosting() && !import.meta.env.VITE_API_URL) {
-    return toggleWishlistFallback(patternId, user.id, patternFallback);
+  const fallbackToggle = () => {
+    const current = getFallbackWishlist(user.id).items;
+    const exists = current.some((it) => it.id === patternId);
+    const updated = exists
+      ? current.filter((it) => it.id !== patternId)
+      : [enrichWishlistItem({ id: patternId, ...patternFallback }), ...current];
+
+    setFallbackWishlist(updated, user.id);
+    return {
+      inWishlist: !exists,
+      message: !exists ? "Выкройка добавлена в избранное" : "Выкройка удалена из избранного",
+      wishlist: { total: updated.length, items: updated },
+    };
+  };
+
+  if (isStaticHosting() && !API_BASE) {
+    return fallbackToggle();
   }
 
   try {
-    const response = await fetch(`${API_BASE}/api/wishlist/toggle`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+    const data = await apiRequest<{
+      inWishlist: boolean;
+      message: string;
+      wishlist: { total: number; items: Array<{ id: number }> };
+    }>(
+      "/api/wishlist/toggle",
+      {
+        method: "POST",
+        body: JSON.stringify({ patternId }),
       },
-      body: JSON.stringify({ patternId }),
-    });
-
-    if (response.status === 405) {
-      return toggleWishlistFallback(patternId, user.id, patternFallback);
-    }
-
-    if (!response.ok) {
-      const errData = await response.json().catch(() => ({}));
-      throw new Error(errData.message || "Ошибка при обновлении избранного");
-    }
-
-    const data: ToggleWishlistResponse = await response.json();
+      token,
+    );
+    const items = data.wishlist.items.map(enrichWishlistItem);
     return {
       inWishlist: data.inWishlist,
       message: data.message,
       wishlist: {
-        total: data.wishlist.total,
-        items: data.wishlist.items.map(enrichWishlistItem),
+        total: data.wishlist.total ?? items.length,
+        items,
       },
     };
   } catch (err) {
     if (isStaticHosting()) {
-      return toggleWishlistFallback(patternId, user.id, patternFallback);
+      return fallbackToggle();
     }
     throw err;
   }
-}
-
-function toggleWishlistFallback(
-  patternId: number,
-  userId: string,
-  patternFallback?: Partial<WishlistPattern>
-): ToggleWishlistResponse {
-  const current = getFallbackWishlist(userId);
-  const exists = current.items.some((it) => it.id === patternId);
-  const updated = exists
-    ? current.items.filter((it) => it.id !== patternId)
-    : [
-        {
-          id: patternId,
-          title: patternFallback?.title || `Выкройка #${patternId}`,
-          doll: patternFallback?.doll || "Барби",
-          price: patternFallback?.price || 490,
-          tag: patternFallback?.tag || "Выкройка",
-          image: patternFallback?.image || `${BASE}patterns/27/1.png`,
-          format: "PDF (A4 + инструкции)",
-        },
-        ...current.items,
-      ];
-
-  setFallbackWishlist(updated, userId);
-  return {
-    inWishlist: !exists,
-    message: !exists ? "Выкройка добавлена в избранное" : "Выкройка удалена из избранного",
-    wishlist: { total: updated.length, items: updated },
-  };
 }
 
 /**
@@ -546,37 +381,31 @@ export async function removeFromWishlist(patternId: number): Promise<WishlistRes
     return { total: updated.length, items: updated };
   }
 
-  if (isStaticHosting() && !import.meta.env.VITE_API_URL) {
-    const current = getFallbackWishlist(user.id);
-    const updated = current.items.filter((it) => it.id !== patternId);
+  const fallbackRemove = () => {
+    const current = getFallbackWishlist(user.id).items;
+    const updated = current.filter((it) => it.id !== patternId);
     setFallbackWishlist(updated, user.id);
     return { total: updated.length, items: updated };
+  };
+
+  if (isStaticHosting() && !API_BASE) {
+    return fallbackRemove();
   }
 
   try {
-    const response = await fetch(`${API_BASE}/api/wishlist/${patternId}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (response.status === 405 || !response.ok) {
-      const current = getFallbackWishlist(user.id);
-      const updated = current.items.filter((it) => it.id !== patternId);
-      setFallbackWishlist(updated, user.id);
-      return { total: updated.length, items: updated };
-    }
-
-    const data: { wishlist: WishlistResponse } = await response.json();
+    const data = await apiRequest<{
+      wishlist: { total: number; items: Array<{ id: number }> };
+    }>(
+      `/api/wishlist/${patternId}`,
+      { method: "DELETE" },
+      token,
+    );
+    const items = data.wishlist.items.map(enrichWishlistItem);
     return {
-      total: data.wishlist.total,
-      items: data.wishlist.items.map(enrichWishlistItem),
+      total: data.wishlist.total ?? items.length,
+      items,
     };
   } catch {
-    const current = getFallbackWishlist(user.id);
-    const updated = current.items.filter((it) => it.id !== patternId);
-    setFallbackWishlist(updated, user.id);
-    return { total: updated.length, items: updated };
+    return fallbackRemove();
   }
 }

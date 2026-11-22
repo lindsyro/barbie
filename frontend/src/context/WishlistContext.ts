@@ -1,8 +1,8 @@
 import { createContext, useContext } from "react";
-import type { WishlistPattern } from "@/api/wishlist.ts";
+import type { CatalogPatternItem } from "@/api/patterns.ts";
 
 export interface WishlistContextType {
-  wishlist: WishlistPattern[];
+  wishlist: CatalogPatternItem[];
   wishlistCount: number;
   wishlistIds: number[];
   wishlistIdsSet: Set<number>;
@@ -11,7 +11,7 @@ export interface WishlistContextType {
   refreshWishlist: () => Promise<void>;
   toggleWishlist: (
     patternId: number,
-    customPayload?: Partial<WishlistPattern>,
+    customPayload?: Partial<CatalogPatternItem>,
   ) => Promise<void>;
   removeFromWishlist: (patternId: number) => Promise<void>;
 }

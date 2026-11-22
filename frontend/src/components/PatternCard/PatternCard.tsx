@@ -6,12 +6,11 @@ import {
   ImageIcon,
 } from "@/components/icons/index.ts";
 import type { CatalogPatternItem } from "@/api/patterns.ts";
-import type { WishlistPattern } from "@/api/wishlist.ts";
 import { getPatternImages } from "@/utils/patternImages.ts";
 import "./patternCard.css";
 
 export interface PatternCardProps {
-  pattern: CatalogPatternItem | WishlistPattern;
+  pattern: CatalogPatternItem;
   isLiked?: boolean;
   isInCart?: boolean;
   onToggleWishlist?: (patternId: number) => void;
@@ -29,18 +28,12 @@ export const PatternCard: React.FC<PatternCardProps> = React.memo(
     onOpenPattern,
   }) => {
     const handleOpen = () => {
-      if ("dolls" in pattern) {
-        onOpenPattern?.(pattern);
-      }
+      onOpenPattern?.(pattern);
     };
 
     const autoImages = getPatternImages(pattern.id);
     const photosCount =
-      "images" in pattern && pattern.images?.length
-        ? pattern.images.length
-        : autoImages.length > 0
-          ? autoImages.length
-          : 1;
+      pattern.images?.length || (autoImages.length > 0 ? autoImages.length : 1);
 
     const rawImg = pattern.image || "";
     const cleanImg = rawImg.includes("/barbie/barbie/")

@@ -6,8 +6,10 @@ import {
   PagePlaceholder,
   WishlistGuestBanner,
   PatternCard,
+  PatternModal,
   HeartIcon,
 } from "@/components/index.ts";
+import type { CatalogPatternItem } from "@/api/patterns.ts";
 import { searchPatterns } from "@/utils/patternSearch.ts";
 import { useWishlist, useCart, useAuth } from "@/context/index.ts";
 import { useRouter } from "@/router/index.ts";
@@ -24,6 +26,8 @@ export const Wishlist: React.FC = React.memo(() => {
   const { navigateTo } = useRouter();
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedPattern, setSelectedPattern] =
+    useState<CatalogPatternItem | null>(null);
 
   const handleResetSearch = (e?: React.MouseEvent<HTMLAnchorElement>) => {
     e?.preventDefault();
@@ -115,11 +119,18 @@ export const Wishlist: React.FC = React.memo(() => {
                 isInCart={isInCart(item.title)}
                 onToggleWishlist={removeFromWishlist}
                 onAddToCart={addToCart}
+                onOpenPattern={setSelectedPattern}
               />
             ))}
           </div>
         </div>
       )}
+
+      {/* Модальное окно просмотра выкройки */}
+      <PatternModal
+        pattern={selectedPattern}
+        onClose={() => setSelectedPattern(null)}
+      />
     </div>
   );
 });

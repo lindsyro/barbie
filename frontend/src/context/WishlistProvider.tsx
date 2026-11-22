@@ -10,9 +10,8 @@ import {
   toggleGuestWishlist,
   removeFromGuestWishlist,
   syncGuestWishlistWithDatabase,
-  type WishlistPattern,
 } from "@/api/wishlist.ts";
-import { findCachedPatternById } from "@/api/patterns.ts";
+import { findCachedPatternById, type CatalogPatternItem } from "@/api/patterns.ts";
 import { getPatternImages } from "@/utils/patternImages.ts";
 import { WishlistContext } from "./WishlistContext.ts";
 import { useAuth } from "./AuthContext.ts";
@@ -28,7 +27,7 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({
   const { currentUser } = useAuth();
   const { showNotification } = useNotification();
 
-  const [wishlist, setWishlist] = useState<WishlistPattern[]>(() => {
+  const [wishlist, setWishlist] = useState<CatalogPatternItem[]>(() => {
     return currentUser ? [] : getGuestWishlist();
   });
   const [isWishlistLoading, setIsWishlistLoading] = useState(false);
@@ -104,25 +103,34 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({
   );
 
   const toggleWishlist = useCallback(
-    async (patternId: number, customPayload?: Partial<WishlistPattern>) => {
+    async (patternId: number, customPayload?: Partial<CatalogPatternItem>) => {
       const cached = findCachedPatternById(patternId);
       const price = customPayload?.price ?? cached?.price ?? 490;
       const numPrice =
         typeof price === "number" ? price : parseInt(String(price), 10) || 490;
 
-      const payload: WishlistPattern = {
+      const autoImgs = getPatternImages(patternId);
+      const mainImage =
+        customPayload?.image ||
+        cached?.image ||
+        autoImgs[0] ||
+        "";
+
+      const payload: CatalogPatternItem = {
         id: patternId,
         title:
           customPayload?.title || cached?.title || `Выкройка #${patternId}`,
         doll: customPayload?.doll || cached?.doll || "Барби",
         price: numPrice,
-        tag: customPayload?.tag || "Выкройка",
-        image:
-          customPayload?.image ||
-          cached?.image ||
-          getPatternImages(patternId)[0] ||
-          "",
-        format: customPayload?.format || "PDF (А4 + инструкции)",
+        image: mainImage,
+        images:
+          customPayload?.images ||
+          cached?.images ||
+          (autoImgs.length > 0 ? autoImgs : [mainImage]),
+        dolls:
+          customPayload?.dolls ||
+          cached?.dolls ||
+          [],
       };
 
       // 1. Для гостя — сохраняем в localStorage
