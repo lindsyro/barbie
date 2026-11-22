@@ -1,10 +1,9 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useDeferredValue } from "react";
 import { useAsyncData } from "@/hooks/index.ts";
 import { fetchPatterns } from "@/api/patterns.ts";
 import type { CatalogPatternItem } from "./types.ts";
+import type { DollItem } from "../ChooseDoll/types.ts";
 import {
-  getCategoryName,
-  findDollById,
   filterPatterns,
   buildCatalogBreadcrumbs,
   getCatalogTitle,
@@ -22,23 +21,23 @@ export function useCatalog(props: CatalogProps) {
     cartItems = [],
   } = props;
 
-  // Универсальная загрузка выкроек из базы данных PostgreSQL
+  // Загрузка выкроек из базы данных (выполняется только если родительский компонент не передал propPatterns)
   const { data: fetchedPatterns = [], isLoading: internalLoading } =
     useAsyncData(fetchPatterns, {
       initialData: [],
-      enabled: !propPatterns || propPatterns.length === 0,
+      enabled: propPatterns === undefined,
     });
 
-  const patterns =
-    propPatterns && propPatterns.length > 0 ? propPatterns : fetchedPatterns;
+  const patterns = propPatterns ?? fetchedPatterns;
   const isLoading = propIsLoading ?? internalLoading;
 
-  // Состояние фильтрации
-  const [activeCategory, setActiveCategory] = useState<string>(
-    initialCategory || "all",
-  );
-  const [activeDollId, setActiveDollId] = useState<number | null>(initialDollId);
+  // Категория и кукла синхронизированы с роутером (URL hash — единый источник истины)
+  const activeCategory = initialCategory || "all";
+  const activeDollId = initialDollId ?? null;
+
+  // Локальный поисковый запрос с неблокирующей отложенной фильтрацией (React 19)
   const [searchQuery, setSearchQuery] = useState("");
+  const deferredSearchQuery = useDeferredValue(searchQuery);
 
   // Модальное окно быстрого просмотра
   const [selectedPattern, setSelectedPattern] =
@@ -58,41 +57,56 @@ export function useCatalog(props: CatalogProps) {
     [cartItems],
   );
 
-  // Вспомогательные вычисления (catalogUtils)
-  const currentCategoryName = useMemo(
-    () => getCategoryName(patterns, activeCategory),
-    [patterns, activeCategory],
-  );
+  // O(1) индексы категорий и кукол из загруженных выкроек
+  const { categoryMap, dollMap } = useMemo(() => {
+    const categoryMap = new Map<string, string>();
+    const dollMap = new Map<number, DollItem>();
 
-  const selectedDoll = useMemo(
-    () => findDollById(patterns, activeDollId),
-    [patterns, activeDollId],
-  );
+    for (const p of patterns) {
+      if (Array.isArray(p.dolls)) {
+        for (const d of p.dolls) {
+          if (d.category?.slug && d.category.name && !categoryMap.has(d.category.slug)) {
+            categoryMap.set(d.category.slug, d.category.name);
+          }
+          if (d.id && !dollMap.has(d.id)) {
+            dollMap.set(d.id, d);
+          }
+        }
+      }
+    }
+    return { categoryMap, dollMap };
+  }, [patterns]);
 
+  const currentCategoryName = useMemo(() => {
+    if (activeCategory === "all") return "Все выкройки";
+    return categoryMap.get(activeCategory) || "Каталог";
+  }, [categoryMap, activeCategory]);
+
+  const selectedDoll = useMemo(() => {
+    if (!activeDollId) return null;
+    return dollMap.get(activeDollId) || null;
+  }, [dollMap, activeDollId]);
+
+  // Фильтрация с использованием отложенного поискового запроса (не блокирует ввод)
   const filteredPatterns = useMemo(
     () =>
       filterPatterns(patterns, {
         activeCategory,
         activeDollId,
-        searchQuery,
+        searchQuery: deferredSearchQuery,
       }),
-    [patterns, activeCategory, activeDollId, searchQuery],
+    [patterns, activeCategory, activeDollId, deferredSearchQuery],
   );
 
   const handleResetToCatalog = useCallback(() => {
-    setActiveCategory("all");
-    setActiveDollId(null);
     window.location.hash = "catalog";
   }, []);
 
   const handleResetDoll = useCallback(() => {
-    setActiveDollId(null);
     window.location.hash = activeCategory;
   }, [activeCategory]);
 
   const handleResetFilters = useCallback(() => {
-    setActiveCategory("all");
-    setActiveDollId(null);
     setSearchQuery("");
     window.location.hash = "catalog";
   }, []);
@@ -118,8 +132,14 @@ export function useCatalog(props: CatalogProps) {
   );
 
   const catalogTitle = useMemo(
-    () => getCatalogTitle(activeCategory, selectedDoll, currentCategoryName),
-    [activeCategory, selectedDoll, currentCategoryName],
+    () =>
+      getCatalogTitle(
+        activeCategory,
+        selectedDoll,
+        currentCategoryName,
+        filteredPatterns.length,
+      ),
+    [activeCategory, selectedDoll, currentCategoryName, filteredPatterns.length],
   );
 
   return {

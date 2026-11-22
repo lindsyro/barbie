@@ -62,13 +62,12 @@ export const AppRouter: React.FC = () => {
     case "catalog":
       return (
         <Catalog
-          key={`${catalogCategory}_${catalogDollId ?? "all"}`}
           patterns={patterns}
           isLoading={isPatternsLoading}
           initialCategory={catalogCategory}
           initialDollId={catalogDollId}
           onBackToMain={handleBackToMain}
-          onAddToCart={(title: string) => addToCart(title)}
+          onAddToCart={addToCart}
           onToggleWishlist={toggleWishlist}
           wishlistIds={wishlistIds}
           cartItems={cart}

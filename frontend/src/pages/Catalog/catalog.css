@@ -22,7 +22,7 @@
   }
 }
 
-/* 2. Состояния загрузки и пустой выдачи */
+/* 2. Состояния пустой выдачи */
 .catalog-empty {
   text-align: center;
   padding: 4rem 1.5rem;
@@ -44,4 +44,107 @@
   font-size: 0.875rem;
   color: var(--color-taupe);
   margin: 0;
+}
+
+.catalog-empty__reset-btn {
+  margin-top: 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 1.5rem;
+  background: var(--color-chocolate);
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.catalog-empty__reset-btn:hover {
+  background: var(--color-gold-site);
+  transform: translateY(-1px);
+}
+
+/* 3. Скелетон карточек при начальной загрузке */
+.catalog-skeleton-card {
+  background: #ffffff;
+  border: 1px solid var(--color-ivory);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.catalog-skeleton-card__img {
+  aspect-ratio: 4 / 5;
+  background: linear-gradient(
+    90deg,
+    var(--bg-soft) 25%,
+    #faf6ef 50%,
+    var(--bg-soft) 75%
+  );
+  background-size: 200% 100%;
+  animation: catalogShimmer 1.5s infinite;
+}
+
+.catalog-skeleton-card__body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.catalog-skeleton-card__line {
+  height: 16px;
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--bg-soft) 25%,
+    #faf6ef 50%,
+    var(--bg-soft) 75%
+  );
+  background-size: 200% 100%;
+  animation: catalogShimmer 1.5s infinite;
+}
+
+.catalog-skeleton-card__line--title {
+  width: 80%;
+  height: 20px;
+}
+
+.catalog-skeleton-card__line--subtitle {
+  width: 50%;
+  height: 14px;
+}
+
+.catalog-skeleton-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 0.75rem;
+}
+
+.catalog-skeleton-card__line--price {
+  width: 35%;
+  height: 24px;
+}
+
+.catalog-skeleton-card__line--btn {
+  width: 85px;
+  height: 34px;
+  border-radius: 6px;
+}
+
+@keyframes catalogShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }

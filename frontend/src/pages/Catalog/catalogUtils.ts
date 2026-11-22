@@ -18,9 +18,11 @@ export function getCategoryName(
 ): string {
   if (activeCategory === "all") return "Все выкройки";
   for (const p of patterns) {
-    for (const d of p.dolls) {
-      if (d.category?.slug === activeCategory && d.category.name) {
-        return d.category.name;
+    if (Array.isArray(p.dolls)) {
+      for (const d of p.dolls) {
+        if (d.category?.slug === activeCategory && d.category.name) {
+          return d.category.name;
+        }
       }
     }
   }
@@ -36,25 +38,29 @@ export function findDollById(
 ): DollItem | null {
   if (!dollId) return null;
   for (const p of patterns) {
-    const found = p.dolls.find((d) => d.id === dollId);
-    if (found) return found;
+    if (Array.isArray(p.dolls)) {
+      const found = p.dolls.find((d) => d.id === dollId);
+      if (found) return found;
+    }
   }
   return null;
 }
 
 /**
- * Фильтрует выкройки по категории, кукле и поисковому запросу
+ * Фильтрует выкройки по категории, кукле и поисковому запросу.
+ * Строка поиска нормализуется один раз до запуска цикла фильтрации.
  */
 export function filterPatterns(
   patterns: CatalogPatternItem[],
   options: FilterPatternsOptions,
 ): CatalogPatternItem[] {
   const { activeCategory, activeDollId, searchQuery } = options;
+  const normalizedQuery = searchQuery.trim().toLowerCase();
 
   return patterns.filter((item) => {
     // 1. Фильтр по категории
     if (activeCategory !== "all") {
-      const matchesCategory = item.dolls.some(
+      const matchesCategory = item.dolls?.some(
         (d) => d.category?.slug === activeCategory,
       );
       if (!matchesCategory) {
@@ -64,15 +70,15 @@ export function filterPatterns(
 
     // 2. Фильтр по конкретной кукле
     if (activeDollId) {
-      const fitsDoll = item.dolls.some((d) => d.id === activeDollId);
+      const fitsDoll = item.dolls?.some((d) => d.id === activeDollId);
       if (!fitsDoll) {
         return false;
       }
     }
 
     // 3. Поиск по названию или кукле
-    if (searchQuery.trim()) {
-      return matchesPatternSearch(item, searchQuery);
+    if (normalizedQuery) {
+      return matchesPatternSearch(item, normalizedQuery);
     }
     return true;
   });
@@ -140,15 +146,21 @@ export function buildCatalogBreadcrumbs(
 }
 
 /**
- * Формирует заголовок для страницы каталога
+ * Формирует заголовок для страницы каталога с опциональным счетчиком
  */
 export function getCatalogTitle(
   activeCategory: string,
   selectedDoll: DollItem | null,
   categoryName: string,
+  count?: number,
 ): string {
-  if (selectedDoll) {
-    return `Выкройки`;
-  }
-  return activeCategory === "all" ? "Каталог выкроек" : categoryName;
+  const baseTitle = selectedDoll
+    ? (selectedDoll.nameRu || selectedDoll.nameEn
+        ? `Выкройки для ${selectedDoll.nameRu || selectedDoll.nameEn}`
+        : "Выкройки")
+    : activeCategory === "all"
+      ? "Каталог выкроек"
+      : categoryName;
+
+  return typeof count === "number" ? `${baseTitle} (${count})` : baseTitle;
 }

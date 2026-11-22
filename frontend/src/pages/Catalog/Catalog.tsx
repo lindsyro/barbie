@@ -36,6 +36,7 @@ export const Catalog: React.FC<CatalogProps> = (props) => {
     handleClosePattern,
     catalogTitle,
     breadcrumbsData,
+    handleResetFilters,
   } = useCatalog(props);
 
   return (
@@ -54,19 +55,45 @@ export const Catalog: React.FC<CatalogProps> = (props) => {
         />
       </div>
 
-      {/* Динамический заголовок страницы */}
+      {/* Динамический заголовок страницы со счетчиком выкроек */}
       <PageHeader title={catalogTitle} />
 
-      {/* Сетка выкроек или статус загрузки */}
+      {/* Скелетоны при начальной загрузке выкроек из базы данных */}
       {isLoading && patterns.length === 0 ? (
-        <div className="catalog-empty">
-          <p className="catalog-empty__desc">
-            Загрузка выкроек из базы данных...
-          </p>
+        <div className="catalog-grid" aria-busy="true" aria-label="Загрузка каталога">
+          {Array.from({ length: 6 }).map((_, idx) => (
+            <div key={idx} className="catalog-skeleton-card">
+              <div className="catalog-skeleton-card__img" />
+              <div className="catalog-skeleton-card__body">
+                <div className="catalog-skeleton-card__line catalog-skeleton-card__line--title" />
+                <div className="catalog-skeleton-card__line catalog-skeleton-card__line--subtitle" />
+                <div className="catalog-skeleton-card__footer">
+                  <div className="catalog-skeleton-card__line catalog-skeleton-card__line--price" />
+                  <div className="catalog-skeleton-card__line catalog-skeleton-card__line--btn" />
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       ) : filteredPatterns.length === 0 ? (
         <div className="catalog-empty">
           <h3 className="catalog-empty__title">Выкройки не найдены</h3>
+          {searchQuery ? (
+            <p className="catalog-empty__desc">
+              По запросу «{searchQuery}» ничего не найдено.
+            </p>
+          ) : (
+            <p className="catalog-empty__desc">
+              В выбранном разделе пока нет выкроек.
+            </p>
+          )}
+          <button
+            type="button"
+            className="catalog-empty__reset-btn"
+            onClick={handleResetFilters}
+          >
+            Сбросить фильтры
+          </button>
         </div>
       ) : (
         <div className="catalog-grid">
