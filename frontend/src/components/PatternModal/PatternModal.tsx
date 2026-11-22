@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Modal } from "@/components/Modal/Modal.tsx";
-import type { CatalogPatternItem } from "@/pages/Catalog/types.ts";
+import type { CatalogPatternItem } from "@/api/patterns.ts";
 import "./patternModal.css";
 
 export interface PatternModalProps {

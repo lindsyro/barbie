@@ -5,7 +5,7 @@ import {
   CheckIcon,
   ImageIcon,
 } from "@/components/icons/index.ts";
-import type { CatalogPatternItem } from "@/pages/Catalog/types.ts";
+import type { CatalogPatternItem } from "@/api/patterns.ts";
 import type { WishlistPattern } from "@/api/wishlist.ts";
 import { getPatternImages } from "@/utils/patternImages.ts";
 import "./patternCard.css";

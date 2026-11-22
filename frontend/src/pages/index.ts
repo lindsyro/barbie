@@ -3,7 +3,7 @@ export type { MainProps } from "./Main/Main.tsx";
 
 export { Catalog } from "./Catalog/Catalog.tsx";
 export type { CatalogProps } from "./Catalog/Catalog.tsx";
-export type { CatalogPatternItem } from "./Catalog/types.ts";
+export type { CatalogPatternItem } from "@/api/patterns.ts";
 
 export { Tutorials } from "./Tutorials/Tutorials.tsx";
 export type { TutorialsProps } from "./Tutorials/Tutorials.tsx";

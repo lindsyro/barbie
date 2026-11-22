@@ -1,7 +1,6 @@
 import { useState, useMemo, useCallback, useDeferredValue } from "react";
 import { useAsyncData } from "@/hooks/index.ts";
-import { fetchPatterns } from "@/api/patterns.ts";
-import type { CatalogPatternItem } from "./types.ts";
+import { fetchPatterns, type CatalogPatternItem } from "@/api/patterns.ts";
 import type { DollItem } from "../ChooseDoll/types.ts";
 import {
   filterPatterns,

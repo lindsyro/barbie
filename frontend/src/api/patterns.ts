@@ -1,10 +1,19 @@
 /**
- * API-клиент для работы с выкройками из базы данных PostgreSQL
+ * API-клиент для работы с выкройками из базы данных
  */
 
 import type { DollItem } from "../pages/ChooseDoll/types.ts";
-import type { CatalogPatternItem } from "../pages/Catalog/types.ts";
 import { getPatternImages } from "@/utils/patternImages.ts";
+
+export interface CatalogPatternItem {
+  id: number;
+  title: string;
+  doll: string;
+  price: number;
+  image: string;
+  images: string[];
+  dolls: DollItem[];
+}
 
 export interface PatternItem {
   id: number;

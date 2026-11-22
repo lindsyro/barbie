@@ -6,7 +6,7 @@ import {
   PatternCard,
   PatternModal,
 } from "@/components/index.ts";
-import type { CatalogPatternItem } from "./types.ts";
+import type { CatalogPatternItem } from "@/api/patterns.ts";
 import { useCatalog } from "./useCatalog.ts";
 import "./catalog.css";
 
